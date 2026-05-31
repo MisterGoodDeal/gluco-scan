@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "gluco-scan",
+    "name": "GlucoScan",
     "slug": "gluco-scan",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.mistergooddeal.glucoscan"
+      "bundleIdentifier": "com.mistergooddeal.glucoscan",
+      "infoPlist": {
+        "NSCameraUsageDescription": "GlucoScan a besoin de la caméra pour scanner les codes-barres alimentaires."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.mistergooddeal.glucoscan"
+      "package": "com.mistergooddeal.glucoscan",
+      "permissions": ["CAMERA"]
     },
     "web": {
       "output": "static",
@@ -30,17 +34,30 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0B0F1A",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
           }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "GlucoScan a besoin de la caméra pour scanner les codes-barres alimentaires.",
+          "barcodeScannerEnabled": true
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a5d21df7-8303-48fc-b0ca-c65c8503512f"
+      }
     }
   }
 }
