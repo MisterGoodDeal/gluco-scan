@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { DEFAULT_GRAMS } from '@/constants/api';
 import type { Product } from '@/types/product';
 import type { ScannedItem } from '@/types/scannedItem';
+import { generateId } from '@/utils/id';
 
 type ScanStore = {
   scannedItems: ScannedItem[];
@@ -19,7 +20,7 @@ export const useScanStore = create<ScanStore>((set) => ({
       scannedItems: [
         ...state.scannedItems,
         {
-          id: crypto.randomUUID(),
+          id: generateId(),
           product,
           grams,
         },
