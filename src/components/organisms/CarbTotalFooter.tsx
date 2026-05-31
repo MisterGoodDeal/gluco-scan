@@ -74,7 +74,7 @@ export const CarbTotalFooter: FC<CarbTotalFooterProps> = ({
             <Text $variant="caption" $color="textSecondary">
               Glucides totaux
             </Text>
-            <Text $variant="subtitle" $color="accent">
+            <Text $variant="title" $color="accent">
               {formatDecimal(totalCarbs)} g
             </Text>
           </TotalBlock>
