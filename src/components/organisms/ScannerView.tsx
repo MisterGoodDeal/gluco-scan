@@ -6,12 +6,7 @@ import styled, { useTheme } from 'styled-components/native';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { Text } from '@/components/atoms/Text';
-import {
-  scannerHeight,
-  scannerMinHeight,
-  scannerPermissionHeight,
-  topScreenSpace,
-} from '@/utils/screen';
+import { hp, topScreenSpace } from '@/utils/screen';
 
 type ScannerViewProps = {
   onScan: (ean: string) => void;
@@ -27,7 +22,7 @@ const ScannerWrapper = styled.View`
 `;
 
 const ScannerContainer = styled.View`
-  height: ${scannerHeight}px;
+  height: ${hp('15%')}px;
   border-bottom-left-radius: ${({ theme }) => theme.radius.lg}px;
   border-bottom-right-radius: ${({ theme }) => theme.radius.lg}px;
   overflow: hidden;
@@ -105,7 +100,7 @@ const PermissionContainer = styled.View`
   justify-content: center;
   padding: ${({ theme }) => theme.spacing.lg}px;
   gap: ${({ theme }) => theme.spacing.md}px;
-  min-height: ${scannerPermissionHeight}px;
+  min-height: ${hp('22%')}px;
 `;
 
 const PermissionButton = styled.Pressable`
@@ -136,7 +131,7 @@ export const ScannerView: FC<ScannerViewProps> = ({
   if (Platform.OS === 'web') {
     return (
       <ScannerWrapper>
-        <ScannerContainer style={{ minHeight: scannerMinHeight }}>
+        <ScannerContainer style={{ minHeight: hp('20%') }}>
           <GlassPanel padding={theme.spacing.md}>
           <WebContainer>
             <Text $variant="subtitle">Saisie manuelle EAN</Text>
@@ -181,7 +176,7 @@ export const ScannerView: FC<ScannerViewProps> = ({
   if (!permission.granted) {
     return (
       <ScannerWrapper>
-        <ScannerContainer style={{ minHeight: scannerPermissionHeight }}>
+        <ScannerContainer style={{ minHeight: hp('22%') }}>
         <PermissionContainer>
           <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
             GlucoScan a besoin de la caméra pour scanner les codes-barres.
