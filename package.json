@@ -5,10 +5,13 @@
   "dependencies": {
     "@expo/ui": "~56.0.15",
     "expo": "~56.0.8",
+    "expo-blur": "^56.0.3",
+    "expo-camera": "^56.0.7",
     "expo-constants": "~56.0.16",
     "expo-device": "~56.0.4",
     "expo-font": "~56.0.5",
     "expo-glass-effect": "~56.0.4",
+    "expo-haptics": "^56.0.3",
     "expo-image": "~56.0.9",
     "expo-linking": "~56.0.13",
     "expo-router": "~56.2.8",
@@ -20,15 +23,20 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
+    "react-native-cli-bump-version": "^1.5.1",
     "react-native-gesture-handler": "~2.31.1",
+    "react-native-mmkv": "^4.3.1",
     "react-native-reanimated": "4.3.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.2",
     "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.8.3"
+    "react-native-worklets": "0.8.3",
+    "styled-components": "^6.4.2",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "@types/styled-components-react-native": "^5.2.5",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -37,7 +45,30 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "open:ios": "open ios/glucoscan.xcworkspace",
+    "open:android": "open -a \"/Applications/Android Studio.app\" android",
+    "build:all": "eas build --platform all --non-interactive",
+    "build:ios": "eas build --platform ios --non-interactive",
+    "build:android": "eas build --platform android --non-interactive",
+    "submit:ios": "eas submit --platform ios --latest --non-interactive",
+    "submit:android": "eas submit --platform android --latest --non-interactive",
+    "submit:all": "eas submit --platform all --latest --non-interactive",
+    "git:push": "git add . && git commit -m 'feat: 🔖 Bump version' && git push",
+    "publish:ios:patch": "npx react-native bump-version --type patch && yarn git:push && yarn build:ios && yarn submit:ios",
+    "publish:ios:minor": "npx react-native bump-version --type minor && yarn git:push && yarn build:ios && yarn submit:ios",
+    "publish:ios:major": "npx react-native bump-version --type major && yarn git:push && yarn build:ios && yarn submit:ios",
+    "publish:android:patch": "npx react-native bump-version --type patch && yarn git:push && yarn build:android && yarn submit:android",
+    "publish:android:minor": "npx react-native bump-version --type minor && yarn git:push && yarn build:android && yarn submit:android",
+    "publish:android:major": "npx react-native bump-version --type major && yarn git:push && yarn build:android && yarn submit:android",
+    "publish:all": "yarn build:all && yarn submit:all",
+    "publish:all:patch": "npx react-native bump-version --type patch && yarn git:push && yarn build:all && yarn submit:all",
+    "publish:all:minor": "npx react-native bump-version --type minor && yarn git:push && yarn build:all && yarn submit:all",
+    "publish:all:major": "npx react-native bump-version --type major && yarn git:push && yarn build:all && yarn submit:all",
+    "pods:install": "if [ -d \"ios\" ]; then cd ios && pod install && cd ..; fi",
+    "pods:update": "if [ -d \"ios\" ]; then cd ios && pod update && cd ..; fi",
+    "pods:clean": "if [ -d \"ios\" ]; then cd ios && rm -rf Pods && rm -rf Podfile.lock && pod deintegrate && pod install && cd ..; fi",
+    "postinstall": "yarn pods:install"
   },
   "private": true
 }
