@@ -6,6 +6,7 @@ import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ScannedProductRow } from '@/components/molecules/ScannedProductRow';
 import { useScanStore } from '@/store/scanStore';
+import { hp } from '@/utils/screen';
 
 type ScannedListProps = {
   blurTarget?: RefObject<View | null>;
@@ -24,7 +25,7 @@ const EmptyContainer = styled.View`
 `;
 
 const Separator = styled.View`
-  height: ${({ theme }) => theme.spacing.md}px;
+  height: ${hp('2%')}px;
 `;
 
 export const ScannedList: FC<ScannedListProps> = ({ blurTarget }) => {

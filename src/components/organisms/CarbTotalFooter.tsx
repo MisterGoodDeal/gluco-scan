@@ -8,6 +8,7 @@ import { Text } from '@/components/atoms/Text';
 import { useCarbCalculator } from '@/hooks/useCarbCalculator';
 import { useScanStore } from '@/store/scanStore';
 import { formatDecimal } from '@/utils/format';
+import { footerBottomSpace } from '@/utils/screen';
 
 type CarbTotalFooterProps = {
   blurTarget?: RefObject<View | null>;
@@ -15,7 +16,8 @@ type CarbTotalFooterProps = {
 
 const Footer = styled.View<{ $bottomInset: number }>`
   padding: ${({ theme }) => theme.spacing.md}px;
-  padding-bottom: ${({ theme, $bottomInset }) => theme.spacing.md + $bottomInset}px;
+  padding-bottom: ${({ theme, $bottomInset }) =>
+    theme.spacing.md + $bottomInset + footerBottomSpace}px;
 `;
 
 const FooterContent = styled.View`

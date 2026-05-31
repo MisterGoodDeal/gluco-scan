@@ -1,11 +1,17 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { type FC, useState } from 'react';
-import { ActivityIndicator, Platform, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Platform } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { Text } from '@/components/atoms/Text';
+import {
+  scannerHeight,
+  scannerMinHeight,
+  scannerPermissionHeight,
+  topScreenSpace,
+} from '@/utils/screen';
 
 type ScannerViewProps = {
   onScan: (ean: string) => void;
@@ -16,8 +22,12 @@ type ScannerViewProps = {
   onClearError: () => void;
 };
 
-const ScannerContainer = styled.View<{ $height: number }>`
-  height: ${({ $height }) => $height}px;
+const ScannerWrapper = styled.View`
+  padding-top: ${topScreenSpace}px;
+`;
+
+const ScannerContainer = styled.View`
+  height: ${scannerHeight}px;
   border-bottom-left-radius: ${({ theme }) => theme.radius.lg}px;
   border-bottom-right-radius: ${({ theme }) => theme.radius.lg}px;
   overflow: hidden;
@@ -95,6 +105,7 @@ const PermissionContainer = styled.View`
   justify-content: center;
   padding: ${({ theme }) => theme.spacing.lg}px;
   gap: ${({ theme }) => theme.spacing.md}px;
+  min-height: ${scannerPermissionHeight}px;
 `;
 
 const PermissionButton = styled.Pressable`
@@ -112,8 +123,6 @@ export const ScannerView: FC<ScannerViewProps> = ({
   onClearError,
 }) => {
   const theme = useTheme();
-  const { height } = useWindowDimensions();
-  const scannerHeight = Math.round(height * 0.15);
   const [permission, requestPermission] = useCameraPermissions();
   const [manualEan, setManualEan] = useState('');
 
@@ -126,8 +135,9 @@ export const ScannerView: FC<ScannerViewProps> = ({
 
   if (Platform.OS === 'web') {
     return (
-      <ScannerContainer $height={Math.max(scannerHeight, 160)}>
-        <GlassPanel padding={theme.spacing.md}>
+      <ScannerWrapper>
+        <ScannerContainer style={{ minHeight: scannerMinHeight }}>
+          <GlassPanel padding={theme.spacing.md}>
           <WebContainer>
             <Text $variant="subtitle">Saisie manuelle EAN</Text>
             <WebRow>
@@ -152,22 +162,26 @@ export const ScannerView: FC<ScannerViewProps> = ({
           </ErrorBanner>
         )}
       </ScannerContainer>
+      </ScannerWrapper>
     );
   }
 
   if (!permission) {
     return (
-      <ScannerContainer $height={scannerHeight}>
+      <ScannerWrapper>
+        <ScannerContainer>
         <PermissionContainer>
           <ActivityIndicator color={theme.colors.accent} />
         </PermissionContainer>
       </ScannerContainer>
+      </ScannerWrapper>
     );
   }
 
   if (!permission.granted) {
     return (
-      <ScannerContainer $height={Math.max(scannerHeight, 180)}>
+      <ScannerWrapper>
+        <ScannerContainer style={{ minHeight: scannerPermissionHeight }}>
         <PermissionContainer>
           <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
             GlucoScan a besoin de la caméra pour scanner les codes-barres.
@@ -177,12 +191,13 @@ export const ScannerView: FC<ScannerViewProps> = ({
           </PermissionButton>
         </PermissionContainer>
       </ScannerContainer>
+      </ScannerWrapper>
     );
   }
 
   return (
-    <>
-      <ScannerContainer $height={scannerHeight}>
+    <ScannerWrapper>
+      <ScannerContainer>
         <Camera
           facing="back"
           barcodeScannerSettings={{
@@ -216,6 +231,6 @@ export const ScannerView: FC<ScannerViewProps> = ({
           </GlassPanel>
         </ErrorBanner>
       )}
-    </>
+    </ScannerWrapper>
   );
 };
