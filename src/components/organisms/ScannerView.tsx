@@ -1,10 +1,9 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { type FC, useState } from 'react';
-import { ActivityIndicator, Platform } from 'react-native';
+import { type FC } from 'react';
+import { ActivityIndicator } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import { GlassPanel } from '@/components/atoms/GlassPanel';
-import { InputNumber } from '@/components/atoms/InputNumber';
 import { Text } from '@/components/atoms/Text';
 import { hp, topScreenSpace } from '@/utils/screen';
 
@@ -74,26 +73,6 @@ const ErrorBanner = styled.View`
   padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
 `;
 
-const WebContainer = styled.View`
-  flex: 1;
-  padding: ${({ theme }) => theme.spacing.md}px;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const WebRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const AddButton = styled.Pressable<{ $disabled?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accent};
-  opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
-`;
-
 const PermissionContainer = styled.View`
   flex: 1;
   align-items: center;
@@ -119,56 +98,15 @@ export const ScannerView: FC<ScannerViewProps> = ({
 }) => {
   const theme = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
-  const [manualEan, setManualEan] = useState('');
-
-  const handleManualSubmit = () => {
-    if (manualEan.trim()) {
-      onScan(manualEan.trim());
-      setManualEan('');
-    }
-  };
-
-  if (Platform.OS === 'web') {
-    return (
-      <ScannerWrapper>
-        <ScannerContainer style={{ minHeight: hp('20%') }}>
-          <GlassPanel padding={theme.spacing.md}>
-          <WebContainer>
-            <Text $variant="subtitle">Saisie manuelle EAN</Text>
-            <WebRow>
-              <InputNumber
-                value={manualEan}
-                onChangeText={setManualEan}
-                placeholder="8076800105735"
-              />
-              <AddButton onPress={handleManualSubmit} $disabled={isLoadingProduct}>
-                <Text $color="text">Ajouter</Text>
-              </AddButton>
-            </WebRow>
-          </WebContainer>
-        </GlassPanel>
-        {scanError && (
-          <ErrorBanner>
-            <GlassPanel padding={theme.spacing.sm}>
-              <Text $variant="caption" $color="error">
-                {scanError}
-              </Text>
-            </GlassPanel>
-          </ErrorBanner>
-        )}
-      </ScannerContainer>
-      </ScannerWrapper>
-    );
-  }
 
   if (!permission) {
     return (
       <ScannerWrapper>
         <ScannerContainer>
-        <PermissionContainer>
-          <ActivityIndicator color={theme.colors.accent} />
-        </PermissionContainer>
-      </ScannerContainer>
+          <PermissionContainer>
+            <ActivityIndicator color={theme.colors.accent} />
+          </PermissionContainer>
+        </ScannerContainer>
       </ScannerWrapper>
     );
   }
@@ -177,15 +115,15 @@ export const ScannerView: FC<ScannerViewProps> = ({
     return (
       <ScannerWrapper>
         <ScannerContainer style={{ minHeight: hp('22%') }}>
-        <PermissionContainer>
-          <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
-            GlucoScan a besoin de la caméra pour scanner les codes-barres.
-          </Text>
-          <PermissionButton onPress={requestPermission}>
-            <Text>Autoriser la caméra</Text>
-          </PermissionButton>
-        </PermissionContainer>
-      </ScannerContainer>
+          <PermissionContainer>
+            <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
+              GlucoScan a besoin de la caméra pour scanner les codes-barres.
+            </Text>
+            <PermissionButton onPress={requestPermission}>
+              <Text>Autoriser la caméra</Text>
+            </PermissionButton>
+          </PermissionContainer>
+        </ScannerContainer>
       </ScannerWrapper>
     );
   }

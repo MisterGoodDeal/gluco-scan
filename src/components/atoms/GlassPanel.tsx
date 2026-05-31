@@ -1,6 +1,6 @@
 import { BlurView, type BlurViewProps } from 'expo-blur';
 import { type FC, type ReactNode, type RefObject } from 'react';
-import { Platform, View, type ViewProps } from 'react-native';
+import { View, type ViewProps } from 'react-native';
 import { useTheme } from 'styled-components/native';
 
 type GlassPanelProps = {
@@ -36,19 +36,6 @@ export const GlassPanel: FC<GlassPanelProps> = ({
     padding: resolvedPadding,
     ...theme.shadows.glass,
   };
-
-  if (Platform.OS === 'web') {
-    return (
-      <View
-        style={[
-          containerStyle,
-          { backgroundColor: theme.colors.glass.background },
-          style,
-        ]}>
-        {children}
-      </View>
-    );
-  }
 
   return (
     <BlurView

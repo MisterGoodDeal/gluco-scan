@@ -1,21 +1,12 @@
-import { Platform } from 'react-native';
+import { createMMKV, type MMKV } from 'react-native-mmkv';
 
 import { fetchProductByEAN } from '@/services/openFoodFacts.service';
 import type { Product } from '@/types/product';
 
-type MmkvStorage = {
-  getString: (key: string) => string | undefined;
-  set: (key: string, value: string) => void;
-};
+let storage: MMKV | null = null;
 
-const memoryCache = new Map<string, Product>();
-
-let storage: MmkvStorage | null = null;
-
-const getStorage = (): MmkvStorage | null => {
-  if (Platform.OS === 'web') return null;
+const getStorage = (): MMKV => {
   if (!storage) {
-    const { createMMKV } = require('react-native-mmkv') as typeof import('react-native-mmkv');
     storage = createMMKV({ id: 'glucoscan-products' });
   }
   return storage;
@@ -24,26 +15,17 @@ const getStorage = (): MmkvStorage | null => {
 const cacheKey = (ean: string) => `product:${ean}`;
 
 export const getCachedProduct = (ean: string): Product | null => {
-  const mmkv = getStorage();
-  if (mmkv) {
-    const raw = mmkv.getString(cacheKey(ean));
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw) as Product;
-    } catch {
-      return null;
-    }
+  const raw = getStorage().getString(cacheKey(ean));
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as Product;
+  } catch {
+    return null;
   }
-  return memoryCache.get(ean) ?? null;
 };
 
 export const setCachedProduct = (product: Product): void => {
-  const mmkv = getStorage();
-  if (mmkv) {
-    mmkv.set(cacheKey(product.ean), JSON.stringify(product));
-    return;
-  }
-  memoryCache.set(product.ean, product);
+  getStorage().set(cacheKey(product.ean), JSON.stringify(product));
 };
 
 export const getProduct = async (ean: string): Promise<Product> => {
