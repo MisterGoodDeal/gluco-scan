@@ -16,12 +16,8 @@ type ScannerViewProps = {
   onClearError: () => void;
 };
 
-const ScannerWrapper = styled.View`
-  padding-top: ${topScreenSpace}px;
-`;
-
 const ScannerContainer = styled.View`
-  height: ${hp('15%')}px;
+  height: ${hp('22%')}px;
   border-bottom-left-radius: ${({ theme }) => theme.radius.lg}px;
   border-bottom-right-radius: ${({ theme }) => theme.radius.lg}px;
   overflow: hidden;
@@ -38,7 +34,8 @@ const Overlay = styled.View`
   bottom: 0;
   left: 0;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-top: ${topScreenSpace}px;
 `;
 
 const ScanFrame = styled.View`
@@ -76,8 +73,9 @@ const ErrorBanner = styled.View`
 const PermissionContainer = styled.View`
   flex: 1;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: ${({ theme }) => theme.spacing.lg}px;
+  padding-top: ${topScreenSpace}px;
   gap: ${({ theme }) => theme.spacing.md}px;
   min-height: ${hp('22%')}px;
 `;
@@ -101,19 +99,19 @@ export const ScannerView: FC<ScannerViewProps> = ({
 
   if (!permission) {
     return (
-      <ScannerWrapper>
+      <>
         <ScannerContainer>
           <PermissionContainer>
             <ActivityIndicator color={theme.colors.accent} />
           </PermissionContainer>
         </ScannerContainer>
-      </ScannerWrapper>
+      </>
     );
   }
 
   if (!permission.granted) {
     return (
-      <ScannerWrapper>
+      <>
         <ScannerContainer style={{ minHeight: hp('22%') }}>
           <PermissionContainer>
             <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
@@ -124,12 +122,12 @@ export const ScannerView: FC<ScannerViewProps> = ({
             </PermissionButton>
           </PermissionContainer>
         </ScannerContainer>
-      </ScannerWrapper>
+      </>
     );
   }
 
   return (
-    <ScannerWrapper>
+    <>
       <ScannerContainer>
         <Camera
           facing="back"
@@ -164,6 +162,6 @@ export const ScannerView: FC<ScannerViewProps> = ({
           </GlassPanel>
         </ErrorBanner>
       )}
-    </ScannerWrapper>
+    </>
   );
 };
