@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, useState } from 'react';
 import styled from 'styled-components/native';
 
 import { CarbValue } from '@/components/atoms/CarbValue';
@@ -21,19 +21,53 @@ const Label = styled(Text)`
   flex: 1;
 `;
 
+const formatGramsForInput = (grams: number): string =>
+  grams > 0 ? String(grams).replace('.', ',') : '';
+
+const isValidPartialDecimal = (text: string): boolean => /^\d*[,.]?\d*$/.test(text);
+
+const parseGramsInput = (text: string): number => {
+  const normalized = text.replace(',', '.');
+  const parsed = parseFloat(normalized);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
 export const CarbInputGroup: FC<CarbInputGroupProps> = ({
   grams,
   carbs,
   onGramsChange,
 }) => {
-  const handleChange = (text: string) => {
-    const normalized = text.replace(',', '.');
-    const parsed = parseFloat(normalized);
-    if (!Number.isNaN(parsed) && parsed >= 0) {
-      onGramsChange(parsed);
-    } else if (text === '' || text === '0') {
+  const [text, setText] = useState(() => formatGramsForInput(grams));
+
+  const handleChange = (input: string) => {
+    if (input === '') {
+      setText('');
       onGramsChange(0);
+      return;
     }
+
+    if (!isValidPartialDecimal(input)) return;
+
+    setText(input);
+
+    if (/[,.]$/.test(input)) {
+      onGramsChange(parseGramsInput(input.slice(0, -1)));
+      return;
+    }
+
+    onGramsChange(parseGramsInput(input));
+  };
+
+  const handleBlur = () => {
+    if (text === '' || text === ',' || text === '.') {
+      setText('');
+      onGramsChange(0);
+      return;
+    }
+
+    const parsed = parseGramsInput(text);
+    setText(formatGramsForInput(parsed));
+    onGramsChange(parsed);
   };
 
   return (
@@ -41,7 +75,11 @@ export const CarbInputGroup: FC<CarbInputGroupProps> = ({
       <Label $variant="caption" $color="textSecondary">
         Grammes
       </Label>
-      <InputNumber value={grams > 0 ? String(grams) : ''} onChangeText={handleChange} />
+      <InputNumber
+        value={text}
+        onChangeText={handleChange}
+        onBlur={handleBlur}
+      />
       <CarbValue grams={carbs} />
     </Row>
   );

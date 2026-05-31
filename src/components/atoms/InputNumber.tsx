@@ -4,6 +4,7 @@ import styled from 'styled-components/native';
 type InputNumberProps = {
   value: string;
   onChangeText: (text: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
 };
 
@@ -23,11 +24,13 @@ const StyledInput = styled.TextInput`
 export const InputNumber: FC<InputNumberProps> = ({
   value,
   onChangeText,
+  onBlur,
   placeholder = '100',
 }) => (
   <StyledInput
     value={value}
     onChangeText={onChangeText}
+    onBlur={onBlur}
     placeholder={placeholder}
     placeholderTextColor="#9AA3B5"
     keyboardType="decimal-pad"
