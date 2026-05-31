@@ -10,6 +10,7 @@ import { hp } from '@/utils/screen';
 
 type ScannedListProps = {
   blurTarget?: RefObject<View | null>;
+  bottomInset?: number;
 };
 
 const ListContainer = styled.View`
@@ -28,15 +29,17 @@ const Separator = styled.View`
   height: ${hp('2%')}px;
 `;
 
-export const ScannedList: FC<ScannedListProps> = ({ blurTarget }) => {
+export const ScannedList: FC<ScannedListProps> = ({ blurTarget, bottomInset = 0 }) => {
   const scannedItems = useScanStore((state) => state.scannedItems);
   const updateGrams = useScanStore((state) => state.updateGrams);
   const removeItem = useScanStore((state) => state.removeItem);
 
+  const listBottomPadding = bottomInset > 0 ? bottomInset : hp('14%');
+
   if (scannedItems.length === 0) {
     return (
       <ListContainer>
-        <EmptyContainer>
+        <EmptyContainer style={{ paddingBottom: listBottomPadding }}>
           <GlassPanel blurTarget={blurTarget}>
             <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
               Scannez un produit pour commencer
@@ -62,7 +65,7 @@ export const ScannedList: FC<ScannedListProps> = ({ blurTarget }) => {
         )}
         ItemSeparatorComponent={Separator}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 16 }}
+        contentContainerStyle={{ paddingBottom: listBottomPadding }}
       />
     </ListContainer>
   );
