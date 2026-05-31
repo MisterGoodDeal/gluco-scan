@@ -1,7 +1,7 @@
 export interface AppTheme {
   colors: {
     background: string;
-    backgroundGradient: readonly [string, string];
+    backgroundGradient: readonly [string, string, string];
     text: string;
     textSecondary: string;
     accent: string;
@@ -51,8 +51,8 @@ export interface AppTheme {
 
 export const theme: AppTheme = {
   colors: {
-    background: '#0B0F1A',
-    backgroundGradient: ['#0B0F1A', '#141B2D'],
+    background: '#05070F',
+    backgroundGradient: ['#05070F', '#1A3A6B', '#2D1B69'],
     text: '#F4F6FB',
     textSecondary: '#9AA3B5',
     accent: '#5B8CFF',

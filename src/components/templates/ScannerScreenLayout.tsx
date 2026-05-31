@@ -8,7 +8,8 @@ import { CarbTotalFooter } from '@/components/organisms/CarbTotalFooter';
 import { ScannedList } from '@/components/organisms/ScannedList';
 import { ScannerView } from '@/components/organisms/ScannerView';
 import { useScanner } from '@/hooks/useScanner';
-import { BackgroundLayer, BackgroundLayerBottom, Screen } from '@/styles/global';
+import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
+import { Screen } from '@/styles/global';
 
 const Main = styled.View`
   flex: 1;
@@ -35,8 +36,7 @@ export const ScannerScreenLayout: FC = () => {
     <Screen>
       <StatusBar style="light" />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
-        <BackgroundLayer />
-        <BackgroundLayerBottom />
+        <BackgroundGradient />
         <Main>
           <Content>
             <ScannerView
