@@ -1,5 +1,5 @@
-import { BlurView } from 'expo-blur';
-import { type FC, useEffect, useState } from 'react';
+import { BlurView } from "expo-blur";
+import { type FC, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -8,17 +8,17 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import styled, { useTheme } from 'styled-components/native';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styled, { useTheme } from "styled-components/native";
 
-import { GlassPanel } from '@/components/atoms/GlassPanel';
-import { InputNumber } from '@/components/atoms/InputNumber';
-import { SearchInput } from '@/components/atoms/SearchInput';
-import { Text } from '@/components/atoms/Text';
-import { EanScanField } from '@/components/molecules/EanScanField';
-import type { Product } from '@/types/product';
-import { isValidEan, parseManualCarbs } from '@/utils/ean';
+import { GlassPanel } from "@/components/atoms/GlassPanel";
+import { InputNumber } from "@/components/atoms/InputNumber";
+import { SearchInput } from "@/components/atoms/SearchInput";
+import { Text } from "@/components/atoms/Text";
+import { EanScanField } from "@/components/molecules/EanScanField";
+import type { Product } from "@/types/product";
+import { isValidEan, parseManualCarbs } from "@/utils/ean";
 
 export type ManualProductInitial = {
   ean: string;
@@ -48,7 +48,7 @@ const KeyboardAvoid = styled(KeyboardAvoidingView)`
 `;
 
 const ModalScrollView = styled(ScrollView).attrs({
-  keyboardShouldPersistTaps: 'handled',
+  keyboardShouldPersistTaps: "handled",
   showsVerticalScrollIndicator: false,
   bounces: false,
 })`
@@ -81,8 +81,12 @@ const Actions = styled.View`
   margin-top: ${({ theme }) => theme.spacing.md}px;
 `;
 
-const ActionButton = styled.Pressable<{ $primary?: boolean; $disabled?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
+const ActionButton = styled.Pressable<{
+  $primary?: boolean;
+  $disabled?: boolean;
+}>`
+  padding: ${({ theme }) => theme.spacing.sm}px
+    ${({ theme }) => theme.spacing.lg}px;
   border-radius: ${({ theme }) => theme.radius.sm}px;
   background-color: ${({ theme, $primary }) =>
     $primary ? theme.colors.accent : theme.colors.glass.background};
@@ -95,7 +99,7 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
   visible,
   initial,
   subtitle,
-  submitLabel = 'Enregistrer',
+  submitLabel = "Enregistrer",
   isLookupLoading = false,
   onClose,
   onLookup,
@@ -103,17 +107,19 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [ean, setEan] = useState('');
-  const [name, setName] = useState('');
-  const [carbsText, setCarbsText] = useState('');
+  const [ean, setEan] = useState("");
+  const [name, setName] = useState("");
+  const [carbsText, setCarbsText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!visible || !initial) return;
     setEan(initial.ean);
-    setName(initial.name ?? '');
+    setName(initial.name ?? "");
     setCarbsText(
-      initial.carbsPer100g !== undefined ? String(initial.carbsPer100g).replace('.', ',') : '',
+      initial.carbsPer100g !== undefined
+        ? String(initial.carbsPer100g).replace(".", ",")
+        : "",
     );
     setError(null);
   }, [visible, initial]);
@@ -133,7 +139,7 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
 
   const handleLookup = async () => {
     if (!onLookup || !isValidEan(ean)) {
-      setError('Code EAN invalide');
+      setError("Code EAN invalide");
       return;
     }
     setError(null);
@@ -146,15 +152,15 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
     const carbsPer100g = parseManualCarbs(carbsText);
 
     if (!isValidEan(trimmedEan)) {
-      setError('Code EAN invalide');
+      setError("Code EAN invalide");
       return;
     }
     if (!trimmedName) {
-      setError('Le nom du produit est requis');
+      setError("Le nom du produit est requis");
       return;
     }
     if (carbsPer100g === null) {
-      setError('Glucides / 100g invalides');
+      setError("Glucides / 100g invalides");
       return;
     }
 
@@ -168,21 +174,29 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
   if (!initial) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={handleClose}
+    >
       <BlurView
         intensity={50}
         tint={theme.blur.tint}
         blurMethod={theme.blur.androidMethod}
-        style={StyleSheet.absoluteFill}>
+        style={StyleSheet.absoluteFill}
+      >
         <KeyboardAvoid
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={insets.top}>
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={insets.top}
+        >
           <ModalScrollView
             contentContainerStyle={{
               flexGrow: 1,
-              justifyContent: 'center',
+              justifyContent: "center",
               padding: theme.spacing.lg,
-            }}>
+            }}
+          >
             <Overlay onPress={handleClose}>
               <Pressable onPress={(event) => event.stopPropagation()}>
                 <ModalCard>
@@ -236,11 +250,19 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
                         <Text $variant="caption">Annuler</Text>
                       </ActionButton>
                       {onLookup && (
-                        <ActionButton onPress={handleLookup} $disabled={isLookupLoading || !ean}>
+                        <ActionButton
+                          onPress={handleLookup}
+                          $disabled={isLookupLoading || !ean}
+                        >
                           {isLookupLoading ? (
-                            <ActivityIndicator color={theme.colors.text} size="small" />
+                            <ActivityIndicator
+                              color={theme.colors.text}
+                              size="small"
+                            />
                           ) : (
-                            <Text $variant="caption">Importer OFF</Text>
+                            <Text $variant="caption">
+                              Importer automatiquement
+                            </Text>
                           )}
                         </ActionButton>
                       )}
