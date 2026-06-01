@@ -7,12 +7,14 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import styled from 'styled-components/native';
 
+import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { PickerField } from '@/components/atoms/PickerField';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
+import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
 import { LanguagePickerSheet } from '@/components/organisms/LanguagePickerSheet';
@@ -24,6 +26,8 @@ import { usePreferencesStore } from '@/store/preferences.store';
 import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
+import { useTutorialStore } from '@/store/tutorial.store';
+import { TutorialStatus } from '@/types/tutorial';
 import { Screen as AppScreen } from '@/styles/global';
 import { listRowDivider } from '@/styles/listRow';
 
@@ -83,6 +87,10 @@ export const SettingsTabLayout: FC = () => {
   const setLocale = usePreferencesStore((s) => s.setLocale);
   const { formatEquivalentMass } = useMassDisplay();
   const tabBarInset = useTabBarBottomInset();
+  const tutorialStatus = useTutorialStore((s) => s.status);
+  const startTutorial = useTutorialStore((s) => s.startTutorial);
+  const isTutorialRunning = tutorialStatus === TutorialStatus.RUNNING;
+  const isTutorialBusy = tutorialStatus === TutorialStatus.STARTING;
 
   useFocusEffect(
     useCallback(() => {
@@ -114,6 +122,10 @@ export const SettingsTabLayout: FC = () => {
   };
 
   const handleExport = async () => {
+    if (isTutorialRunning) {
+      Alert.alert(t('tutorial.settings.disabledDuringTutorial'));
+      return;
+    }
     setExporting(true);
     try {
       await exportToGsFile();
@@ -126,6 +138,10 @@ export const SettingsTabLayout: FC = () => {
   };
 
   const handleImport = async () => {
+    if (isTutorialRunning) {
+      Alert.alert(t('tutorial.settings.disabledDuringTutorial'));
+      return;
+    }
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: '*/*',
@@ -136,7 +152,7 @@ export const SettingsTabLayout: FC = () => {
       const uri = result.assets[0].uri;
       const file = new File(uri);
       const bytes = await file.bytes();
-      await importFromGsBytes(bytes);
+      await importFromGsBytes(bytes, { mode: 'merge' });
       await hydrate();
       Alert.alert(t('settings.importSuccess'));
     } catch {
@@ -148,6 +164,7 @@ export const SettingsTabLayout: FC = () => {
 
   return (
     <AppScreen>
+      <TabBarHeightReporter />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
         <ScrollView
@@ -180,6 +197,20 @@ export const SettingsTabLayout: FC = () => {
             />
           </Section>
 
+          <Section>
+            <Text $variant="body">{t('tutorial.settings.title')}</Text>
+            <Text $variant="caption" $color="textSecondary">
+              {t('tutorial.settings.relaunchDescription')}
+            </Text>
+            <ActionButton
+              $primary
+              onPress={() => void startTutorial()}
+              disabled={isTutorialRunning || isTutorialBusy}>
+              <Text $variant="caption">{t('tutorial.settings.relaunch')}</Text>
+            </ActionButton>
+          </Section>
+
+          <TutorialAnchor id="tutorial-settings-units">
           <Section>
             <SectionTitleRow>
               <Text $variant="body">{t('settings.globalUnits')}</Text>
@@ -214,13 +245,15 @@ export const SettingsTabLayout: FC = () => {
               ))}
             </GlassPanel>
           </Section>
+          </TutorialAnchor>
 
+          <TutorialAnchor id="tutorial-settings-data">
           <Section>
             <Text $variant="body">{t('settings.export')}</Text>
             <Text $variant="caption" $color="textSecondary">
               {t('settings.exportDescription')}
             </Text>
-            <ActionButton $primary onPress={handleExport}>
+            <ActionButton $primary onPress={handleExport} disabled={isTutorialRunning}>
               <Text $variant="caption">{t('settings.export')}</Text>
             </ActionButton>
           </Section>
@@ -230,10 +263,11 @@ export const SettingsTabLayout: FC = () => {
             <Text $variant="caption" $color="textSecondary">
               {t('settings.importDescription')}
             </Text>
-            <ActionButton onPress={handleImport}>
+            <ActionButton onPress={handleImport} disabled={isTutorialRunning}>
               <Text $variant="caption">{t('settings.import')}</Text>
             </ActionButton>
           </Section>
+          </TutorialAnchor>
         </ScrollView>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <Text $variant="subtitle">{t('settings.title')}</Text>

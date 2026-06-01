@@ -3,9 +3,11 @@ import { router } from 'expo-router';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
+import { TutorialMealCreateBanner } from '@/components/organisms/TutorialMealCreateBanner';
 import { PickerField } from '@/components/atoms/PickerField';
 import { Text } from '@/components/atoms/Text';
 import {
@@ -19,6 +21,8 @@ import { useMealProductScan } from '@/hooks/useMealProductScan';
 import { getCurrentLocale } from '@/i18n';
 import { useSettingsStore } from '@/store/settings.store';
 import { useMealStore } from '@/store/meal.store';
+import { useTutorialStore } from '@/store/tutorial.store';
+import { TutorialStatus } from '@/types/tutorial';
 import type { Product } from '@/types/product';
 import { formatDateLabel } from '@/utils/date';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
@@ -114,9 +118,17 @@ export const MealCreateLayout: FC = () => {
   const removeDraftItem = useMealStore((s) => s.removeDraftItem);
   const addDraftItem = useMealStore((s) => s.addDraftItem);
   const saveMeal = useMealStore((s) => s.saveMeal);
+  const setMealCreateValidated = useTutorialStore((s) => s.setMealCreateValidated);
+  const tutorialStatus = useTutorialStore((s) => s.status);
+  const tutorialNextStep = useTutorialStore((s) => s.nextStep);
+  const getTutorialStepId = useTutorialStore((s) => s.getCurrentStepId);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
+  const insets = useSafeAreaInsets();
 
   const theme = useTheme();
+  const showTutorialBanner =
+    tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create';
+  const tutorialBannerInset = showTutorialBanner ? insets.bottom + 160 : 0;
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
@@ -146,6 +158,10 @@ export const MealCreateLayout: FC = () => {
       return;
     }
     await saveMeal();
+    setMealCreateValidated(true);
+    if (tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create') {
+      tutorialNextStep();
+    }
     router.back();
   };
 
@@ -168,7 +184,10 @@ export const MealCreateLayout: FC = () => {
         ))}
       </StepIndicator>
 
-      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: tutorialBannerInset }}>
         {step === 0 && (
           <>
             <Field>
@@ -287,7 +306,7 @@ export const MealCreateLayout: FC = () => {
         )}
       </ScrollView>
 
-      <NavRow>
+      <NavRow style={{ paddingBottom: showTutorialBanner ? tutorialBannerInset : 0 }}>
         {step > 0 ? (
           <ActionButton onPress={() => setStep(step - 1)}>
             <Text $variant="caption">{t('common.previous')}</Text>
@@ -322,6 +341,7 @@ export const MealCreateLayout: FC = () => {
         onClose={() => setSearchVisible(false)}
         onSelect={(product) => setPickerProduct(product)}
       />
+      <TutorialMealCreateBanner />
     </Screen>
   );
 };

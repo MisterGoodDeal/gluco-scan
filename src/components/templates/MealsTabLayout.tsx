@@ -6,9 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
+import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { Text } from '@/components/atoms/Text';
+import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { MealDetailSheet } from '@/components/organisms/MealDetailSheet';
 import { MealsDayPager } from '@/components/organisms/MealsDayPager';
@@ -95,20 +97,24 @@ export const MealsTabLayout: FC = () => {
 
   return (
     <Screen>
+      <TabBarHeightReporter />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
-        <MealsDayPager
-          centerDate={selectedDate}
-          mealsByDate={mealsByDate}
-          totalsByDate={totalsByDate}
-          headerInset={headerHeight}
-          onDateChange={handleDateChange}
-          onMealPress={setSelectedMeal}
-          onMealDelete={(id) => void handleMealDelete(id)}
-          scrollToDateKey={scrollToDateKey}
-          onScrollToDateDone={() => setScrollToDateKey(null)}
-        />
+        <TutorialAnchor id="tutorial-meals-pager">
+          <MealsDayPager
+            centerDate={selectedDate}
+            mealsByDate={mealsByDate}
+            totalsByDate={totalsByDate}
+            headerInset={headerHeight}
+            onDateChange={handleDateChange}
+            onMealPress={setSelectedMeal}
+            onMealDelete={(id) => void handleMealDelete(id)}
+            scrollToDateKey={scrollToDateKey}
+            onScrollToDateDone={() => setScrollToDateKey(null)}
+          />
+        </TutorialAnchor>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
+          <TutorialAnchor id="tutorial-meals-summary">
           <TitleRow>
             <Text $variant="subtitle">{t('meals.title')}</Text>
             <HeaderActions>
@@ -137,6 +143,7 @@ export const MealsTabLayout: FC = () => {
               </ButtonIcon>
             </HeaderActions>
           </TitleRow>
+          </TutorialAnchor>
         </BlurScreenHeader>
       </BlurTargetView>
       {selectedMeal && (

@@ -6,15 +6,21 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
+import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
+import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useProductStore } from '@/store/product.store';
+import { useTutorialStore } from '@/store/tutorial.store';
+import { TutorialStatus } from '@/types/tutorial';
+import { productRepository } from '@/repositories/product.repository';
+import { TUTORIAL_FEATURED_PRODUCT_ID } from '@/constants/tutorial';
 import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
 import { Screen } from '@/styles/global';
@@ -62,8 +68,30 @@ export const ProductsTabLayout: FC = () => {
     return s.products.filter((p) => productMatchesQuery(p, trimmed));
   });
 
+  const tutorialStatus = useTutorialStore((s) => s.status);
+  const openProductId = useTutorialStore((s) => s.openProductId);
+  const tutorialStep = useTutorialStore((s) => s.currentStep);
+
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (tutorialStatus !== TutorialStatus.RUNNING) return;
+    if (tutorialStep !== 1 || !openProductId) return;
+    void productRepository.getById(openProductId).then((product) => {
+      if (product) {
+        setEditingProduct(product);
+        setIsModalOpen(true);
+      }
+    });
+  }, [tutorialStatus, openProductId, tutorialStep]);
+
+  useEffect(() => {
+    if (tutorialStatus === TutorialStatus.RUNNING && tutorialStep !== 1 && isModalOpen) {
+      setIsModalOpen(false);
+      setEditingProduct(null);
+    }
+  }, [tutorialStatus, tutorialStep, isModalOpen]);
 
   const loadProducts = useCallback(async () => {
     await hydrate();
@@ -96,31 +124,38 @@ export const ProductsTabLayout: FC = () => {
 
   return (
     <Screen>
+      <TabBarHeightReporter />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
-        <ProductList
-          products={filteredProducts}
-          compact={compactList}
-          blurTarget={blurTargetRef}
-          contentInsetTop={headerHeight}
-          onEdit={openEdit}
-          onDelete={(id) => void remove(id)}
-          refreshing={isLoading}
-          onRefresh={() => void loadProducts()}
-        />
+        <TutorialAnchor id="tutorial-products-list" style={{ flex: 1 }}>
+          <ProductList
+            products={filteredProducts}
+            compact={compactList}
+            blurTarget={blurTargetRef}
+            contentInsetTop={headerHeight}
+            onEdit={openEdit}
+            onDelete={(id) => void remove(id)}
+            refreshing={isLoading}
+            onRefresh={() => void loadProducts()}
+          />
+        </TutorialAnchor>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <TitleRow>
             <Text $variant="subtitle">{t('products.title')}</Text>
+            <TutorialAnchor id="tutorial-products-add">
             <AddButton onPress={openAdd} accessibilityLabel={t('common.add')}>
               <Text $variant="caption" $color="accent">
                 {t('products.addButton')}
               </Text>
             </AddButton>
+            </TutorialAnchor>
           </TitleRow>
           <SearchRow>
+            <TutorialAnchor id="tutorial-products-search">
             <SearchField>
               <SearchInput value={query} onChangeText={setQuery} flex />
             </SearchField>
+            </TutorialAnchor>
             <ButtonIcon
               onPress={toggleCompactList}
               accessibilityLabel={
