@@ -223,7 +223,7 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
                         <SearchInput
                           value={name}
                           onChangeText={setName}
-                          placeholder="Penne Rigate"
+                          placeholder="Mon produit"
                         />
                       </Field>
 
@@ -234,7 +234,7 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
                         <InputNumber
                           value={carbsText}
                           onChangeText={setCarbsText}
-                          placeholder="71"
+                          placeholder="10"
                         />
                       </Field>
                     </FormFields>
