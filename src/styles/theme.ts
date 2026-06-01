@@ -9,9 +9,13 @@ export interface AppTheme {
     text: string;
     textSecondary: string;
     accent: string;
+    onAccent: string;
     accentMuted: string;
     success: string;
     error: string;
+    sheet: {
+      background: string;
+    };
     glass: {
       background: string;
       border: string;
@@ -73,9 +77,13 @@ export const darkTheme: AppTheme = {
     text: '#F4F6FB',
     textSecondary: '#9AA3B5',
     accent: '#5B8CFF',
+    onAccent: '#FFFFFF',
     accentMuted: 'rgba(91, 140, 255, 0.15)',
     success: '#34D399',
     error: '#F87171',
+    sheet: {
+      background: '#0E1320',
+    },
     glass: {
       background: 'rgba(255, 255, 255, 0.08)',
       border: 'rgba(255, 255, 255, 0.18)',
@@ -104,15 +112,19 @@ export const lightTheme: AppTheme = {
     background: '#F3F5FA',
     backgroundGradient: ['#EEF2FF', '#E0E7FF', '#F5F3FF'],
     text: '#0F172A',
-    textSecondary: '#64748B',
+    textSecondary: '#475569',
     accent: '#3B6FE8',
+    onAccent: '#FFFFFF',
     accentMuted: 'rgba(59, 111, 232, 0.12)',
     success: '#059669',
     error: '#DC2626',
+    sheet: {
+      background: '#FFFFFF',
+    },
     glass: {
-      background: 'rgba(255, 255, 255, 0.72)',
-      border: 'rgba(15, 23, 42, 0.1)',
-      highlight: 'rgba(255, 255, 255, 0.95)',
+      background: 'rgba(255, 255, 255, 0.92)',
+      border: 'rgba(15, 23, 42, 0.14)',
+      highlight: 'rgba(15, 23, 42, 0.28)',
     },
   },
   blur: {

@@ -5,10 +5,14 @@ import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components/native';
 
 import { Text } from '@/components/atoms/Text';
-import { getBottomSheetBlurProps } from '@/components/navigation/BottomSheetBlurBackground';
+import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
 import { getLanguageLabelKey, type SupportedLocale, supportedLocales } from '@/i18n';
 import type { AppTheme } from '@/styles/theme';
-import { getPickerColors, getPickerItemStyle, getPickerStyle } from '@/utils/picker';
+import {
+  getPickerColors,
+  getPickerItemStyle,
+  getSheetPickerStyle,
+} from '@/utils/picker';
 
 type LanguagePickerSheetProps = {
   visible: boolean;
@@ -30,7 +34,7 @@ const PickerWrap = styled.View`
 const pickerProps = (theme: AppTheme) => {
   const colors = getPickerColors(theme);
   return {
-    style: getPickerStyle(theme),
+    style: getSheetPickerStyle(theme),
     itemStyle: getPickerItemStyle(theme),
     dropdownIconColor: colors.text,
     itemColor: colors.text,
@@ -64,7 +68,7 @@ export const LanguagePickerSheet: FC<LanguagePickerSheetProps> = ({
       enablePanDownToClose
       onClose={onClose}
       backdropComponent={renderBackdrop}
-      {...getBottomSheetBlurProps(theme)}>
+      {...getBottomSheetProps(theme)}>
       <BottomSheetView style={{ flex: 1 }}>
         <SheetHeader>
           <Text $variant="subtitle">{t('settings.language')}</Text>

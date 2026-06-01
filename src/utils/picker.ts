@@ -19,3 +19,8 @@ export const getPickerItemStyle = (theme: AppTheme): TextStyle | undefined =>
         fontSize: 18,
       }
     : undefined;
+
+export const getSheetPickerStyle = (theme: AppTheme): TextStyle => ({
+  color: theme.colors.text,
+  backgroundColor: theme.colors.sheet.background,
+});

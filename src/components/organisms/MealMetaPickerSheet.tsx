@@ -12,8 +12,12 @@ import type { MealDraftMeta } from '@/store/meal.store';
 import { MEAL_TYPES, MealType } from '@/types/mealType';
 import { addDays, formatDateLabel, toDateKey } from '@/utils/date';
 import { getMealTypeLabelKey } from '@/utils/mealType';
-import { getBottomSheetBlurProps } from '@/components/navigation/BottomSheetBlurBackground';
-import { getPickerColors, getPickerItemStyle, getPickerStyle } from '@/utils/picker';
+import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
+import {
+  getPickerColors,
+  getPickerItemStyle,
+  getSheetPickerStyle,
+} from '@/utils/picker';
 
 export type MealMetaPickerField = 'mealType' | 'date' | 'time';
 
@@ -39,7 +43,7 @@ const PickerWrap = styled.View`
 const pickerProps = (theme: AppTheme) => {
   const colors = getPickerColors(theme);
   return {
-    style: getPickerStyle(theme),
+    style: getSheetPickerStyle(theme),
     itemStyle: getPickerItemStyle(theme),
     dropdownIconColor: colors.text,
     itemColor: colors.text,
@@ -81,7 +85,7 @@ export const MealMetaPickerSheet: FC<MealMetaPickerSheetProps> = ({
       enablePanDownToClose
       onClose={onClose}
       backdropComponent={renderBackdrop}
-      {...getBottomSheetBlurProps(theme)}>
+      {...getBottomSheetProps(theme)}>
       <BottomSheetView style={{ flex: 1 }}>
         <SheetHeader>
           <Text $variant="subtitle">{title}</Text>

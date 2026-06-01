@@ -12,7 +12,7 @@ import { formatDecimal } from '@/utils/format';
 import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
 import { getCurrentLocale } from '@/i18n';
 import { listRowDivider } from '@/styles/listRow';
-import { getBottomSheetBlurProps } from '@/components/navigation/BottomSheetBlurBackground';
+import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 
 type MealDetailSheetProps = {
@@ -53,7 +53,7 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
       enablePanDownToClose
       onClose={onClose}
       backdropComponent={renderBackdrop}
-      {...getBottomSheetBlurProps(theme)}>
+      {...getBottomSheetProps(theme)}>
       <BottomSheetScrollView style={{ padding: theme.spacing.lg }}>
         <Text $variant="subtitle">{t(getMealTypeLabelKey(meal.type))}</Text>
         <Text $variant="caption" $color="textSecondary" style={{ marginBottom: 16 }}>

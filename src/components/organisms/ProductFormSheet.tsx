@@ -26,7 +26,7 @@ import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
-import { getBottomSheetBlurProps } from '@/components/navigation/BottomSheetBlurBackground';
+import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
 import { listRowDivider } from '@/styles/listRow';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
 
@@ -315,7 +315,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         enablePanDownToClose
         onClose={handleDismiss}
         backdropComponent={renderBackdrop}
-        {...getBottomSheetBlurProps(theme)}
+        {...getBottomSheetProps(theme)}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize">
@@ -432,9 +432,11 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             </ActionButton>
             <ActionButton $primary onPress={handleSave} disabled={isSaving}>
               {isSaving ? (
-                <ActivityIndicator color={theme.colors.text} size="small" />
+                <ActivityIndicator color={theme.colors.onAccent} size="small" />
               ) : (
-                <Text $variant="caption">{t('common.save')}</Text>
+                <Text $variant="caption" style={{ color: theme.colors.onAccent }}>
+                  {t('common.save')}
+                </Text>
               )}
             </ActionButton>
           </FooterActions>
