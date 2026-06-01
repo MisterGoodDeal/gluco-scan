@@ -26,6 +26,7 @@ export const useMealProductScan = () => {
         name: fromOff.name,
         carbsPer100g: fromOff.carbsPer100g,
         eans: [fromOff.ean],
+        imageUrl: fromOff.imageUrl,
       });
       return created;
     } catch (err) {
@@ -40,6 +41,7 @@ export const useMealProductScan = () => {
             name: partial.name,
             carbsPer100g: partial.carbsPer100g,
             eans: [ean],
+            imageUrl: partial.imageUrl,
           });
         }
       } catch {
