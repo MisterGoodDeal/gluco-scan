@@ -1,6 +1,5 @@
 import { OFF_BASE_URL, OFF_USER_AGENT } from '@/constants/api';
-import { getOffLocaleParams } from '@/i18n';
-import i18n from '@/i18n';
+import i18n, { getOffLocaleParams } from '@/i18n';
 import {
   MissingNutrimentsError,
   NetworkError,
@@ -13,6 +12,7 @@ export type OffProductResult = {
   ean: string;
   name: string;
   carbsPer100g: number;
+  imageUrl?: string;
 };
 
 type OffNutriments = {
@@ -23,6 +23,7 @@ type OffNutriments = {
 type OffProduct = {
   product_name?: string;
   nutriments?: OffNutriments;
+  image_front_small_url?: string;
 };
 
 type OffResponse = {
@@ -30,17 +31,24 @@ type OffResponse = {
   product?: OffProduct;
 };
 
+const OFF_FIELDS = 'product_name,nutriments,image_front_small_url';
+
 const parseCarbs = (nutriments?: OffNutriments): number | null => {
   const carbs = nutriments?.carbohydrates_100g ?? nutriments?.carbohydrates;
   if (carbs === undefined || carbs === null || Number.isNaN(carbs)) return null;
   return carbs;
 };
 
+const parseImageUrl = (product: OffProduct): string | undefined => {
+  const url = product.image_front_small_url?.trim();
+  return url || undefined;
+};
+
 export const fetchProductByEAN = async (ean: string): Promise<OffProductResult> => {
   consumeOffApiCall();
 
   const { cc, lc } = getOffLocaleParams();
-  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=${cc}&lc=${lc}&fields=product_name,nutriments`;
+  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=${cc}&lc=${lc}&fields=${OFF_FIELDS}`;
 
   let response: Response;
   try {
@@ -75,6 +83,7 @@ export const fetchProductByEAN = async (ean: string): Promise<OffProductResult> 
     ean,
     name: data.product.product_name?.trim() || i18n.t('products.unknownProduct'),
     carbsPer100g,
+    imageUrl: parseImageUrl(data.product),
   };
 };
 
@@ -82,13 +91,14 @@ export type PartialOffProduct = {
   ean: string;
   name?: string;
   carbsPer100g?: number;
+  imageUrl?: string;
 };
 
 export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProduct> => {
   consumeOffApiCall();
 
   const { cc, lc } = getOffLocaleParams();
-  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=${cc}&lc=${lc}&fields=product_name,nutriments`;
+  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=${cc}&lc=${lc}&fields=${OFF_FIELDS}`;
 
   try {
     const response = await fetch(url, {
@@ -107,6 +117,7 @@ export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProdu
       ean,
       name: name || undefined,
       carbsPer100g: carbsPer100g ?? undefined,
+      imageUrl: parseImageUrl(data.product),
     };
   } catch (error) {
     if (error instanceof OffRateLimitError) throw error;
