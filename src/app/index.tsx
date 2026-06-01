@@ -1,5 +1,5 @@
-import { ScannerScreenLayout } from '@/components/templates/ScannerScreenLayout';
+import { Redirect } from 'expo-router';
 
-export default function HomeScreen() {
-  return <ScannerScreenLayout />;
+export default function Index() {
+  return <Redirect href="/products" />;
 }
