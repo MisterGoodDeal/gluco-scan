@@ -19,7 +19,12 @@ type ProductStore = {
   setQuery: (query: string) => void;
   toggleCompactList: () => void;
   getFiltered: () => Product[];
-  create: (data: { name: string; carbsPer100g: number; eans?: string[] }) => Promise<Product>;
+  create: (data: {
+    name: string;
+    carbsPer100g: number;
+    eans?: string[];
+    imageUrl?: string | null;
+  }) => Promise<Product>;
   update: (product: Product) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };
