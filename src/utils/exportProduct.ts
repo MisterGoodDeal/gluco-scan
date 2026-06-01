@@ -7,5 +7,6 @@ export const normalizeExportProduct = (product: LegacyExportProduct): Product =>
   return {
     ...rest,
     eans: product.eans ?? (product.ean ? [product.ean] : []),
+    imageUrl: product.imageUrl ?? null,
   };
 };

@@ -71,11 +71,12 @@ export const importFromGsBytes = async (bytes: Uint8Array): Promise<void> => {
       const existing = await productRepository.getById(product.id);
       if (!existing) {
         await db.runAsync(
-          `INSERT INTO products (id, ean, name, carbs_per_100g, created_at)
-           VALUES (?, NULL, ?, ?, ?)`,
+          `INSERT INTO products (id, ean, name, carbs_per_100g, image_url, created_at)
+           VALUES (?, NULL, ?, ?, ?, ?)`,
           product.id,
           product.name,
           product.carbsPer100g,
+          product.imageUrl ?? null,
           new Date().toISOString(),
         );
         await productEanRepository.setForProduct(product.id, product.eans);
