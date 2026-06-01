@@ -4,7 +4,7 @@ import styled from 'styled-components/native';
 
 import { Text } from '@/components/atoms/Text';
 import type { ThemePreference } from '@/styles/theme';
-import { useThemeStore } from '@/store/theme.store';
+import { usePreferencesStore } from '@/store/preferences.store';
 
 const Row = styled.View`
   flex-direction: row;
@@ -27,8 +27,8 @@ const OPTIONS: ThemePreference[] = ['system', 'light', 'dark'];
 
 export const ThemePreferencePicker: FC = () => {
   const { t } = useTranslation();
-  const preference = useThemeStore((s) => s.preference);
-  const setPreference = useThemeStore((s) => s.setPreference);
+  const preference = usePreferencesStore((s) => s.theme);
+  const setPreference = usePreferencesStore((s) => s.setTheme);
 
   const labels: Record<ThemePreference, string> = {
     system: t('settings.themeSystem'),
@@ -42,7 +42,7 @@ export const ThemePreferencePicker: FC = () => {
         <Option
           key={option}
           $selected={preference === option}
-          onPress={() => setPreference(option)}
+          onPress={() => void setPreference(option)}
           accessibilityRole="button"
           accessibilityState={{ selected: preference === option }}
           accessibilityLabel={labels[option]}>

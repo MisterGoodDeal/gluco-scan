@@ -4,14 +4,14 @@ import { useColorScheme } from 'react-native';
 import { ThemeProvider } from 'styled-components/native';
 
 import { resolveTheme } from '@/styles/theme';
-import { useThemeStore } from '@/store/theme.store';
+import { usePreferencesStore } from '@/store/preferences.store';
 
 type AppThemeProviderProps = {
   children: ReactNode;
 };
 
 export const AppThemeProvider: FC<AppThemeProviderProps> = ({ children }) => {
-  const preference = useThemeStore((s) => s.preference);
+  const preference = usePreferencesStore((s) => s.theme);
   const systemScheme = useColorScheme();
 
   const theme = useMemo(
