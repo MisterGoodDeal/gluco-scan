@@ -1,4 +1,5 @@
 import { type FC } from 'react';
+import { type KeyboardTypeOptions } from 'react-native';
 import styled from 'styled-components/native';
 
 import { inputFieldStyles } from '@/styles/input';
@@ -10,6 +11,7 @@ type SearchInputProps = {
   editable?: boolean;
   mono?: boolean;
   flex?: boolean;
+  keyboardType?: KeyboardTypeOptions;
 };
 
 const Input = styled.TextInput<{ $mono?: boolean; $flex?: boolean }>`
@@ -28,6 +30,7 @@ export const SearchInput: FC<SearchInputProps> = ({
   editable = true,
   mono = false,
   flex = false,
+  keyboardType,
 }) => (
   <Input
     value={value}
@@ -38,6 +41,7 @@ export const SearchInput: FC<SearchInputProps> = ({
     autoCorrect={false}
     clearButtonMode="while-editing"
     editable={editable}
+    keyboardType={keyboardType}
     $mono={mono}
     $flex={flex}
   />

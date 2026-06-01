@@ -24,11 +24,13 @@ export type ManualProductInitial = {
   ean: string;
   name?: string;
   carbsPer100g?: number;
+  originalEan?: string;
 };
 
 type ProductManualEntryModalProps = {
   visible: boolean;
   initial: ManualProductInitial | null;
+  title?: string;
   subtitle?: string;
   submitLabel?: string;
   isLookupLoading?: boolean;
@@ -98,6 +100,7 @@ const ActionButton = styled.Pressable<{
 export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
   visible,
   initial,
+  title = 'Compléter le produit',
   subtitle,
   submitLabel = "Enregistrer",
   isLookupLoading = false,
@@ -201,7 +204,7 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
               <Pressable onPress={(event) => event.stopPropagation()}>
                 <ModalCard>
                   <GlassPanel padding={theme.spacing.lg}>
-                    <Text $variant="subtitle">Compléter le produit</Text>
+                    <Text $variant="subtitle">{title}</Text>
                     {subtitle && (
                       <Text $variant="caption" $color="textSecondary">
                         {subtitle}

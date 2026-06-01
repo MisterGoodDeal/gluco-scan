@@ -12,6 +12,7 @@ import { formatDecimal } from '@/utils/format';
 type CachedProductRowProps = {
   product: Product;
   blurTarget?: RefObject<View | null>;
+  onEdit: (product: Product) => void;
   onAddToMeal: (product: Product) => void;
   onDelete: (ean: string) => void;
 };
@@ -39,7 +40,7 @@ const ActionLabel = styled(Text)`
 `;
 
 export const CachedProductRow: FC<CachedProductRowProps> = memo(
-  ({ product, blurTarget, onAddToMeal, onDelete }) => {
+  ({ product, blurTarget, onEdit, onAddToMeal, onDelete }) => {
     const theme = useTheme();
 
     return (
@@ -55,6 +56,15 @@ export const CachedProductRow: FC<CachedProductRowProps> = memo(
             </Text>
           </Info>
           <Actions>
+            <ButtonIcon
+              onPress={() => onEdit(product)}
+              accessibilityLabel="Modifier le produit">
+              <SymbolView
+                name={{ ios: 'pencil', android: 'edit' }}
+                size={18}
+                tintColor={theme.colors.textSecondary}
+              />
+            </ButtonIcon>
             <ButtonIcon
               onPress={() => onAddToMeal(product)}
               accessibilityLabel="Ajouter au repas">

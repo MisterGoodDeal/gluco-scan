@@ -11,6 +11,7 @@ import { hp } from '@/utils/screen';
 type ProductLibraryListProps = {
   products: Product[];
   blurTarget?: RefObject<View | null>;
+  onEdit: (product: Product) => void;
   onAddToMeal: (product: Product) => void;
   onDelete: (ean: string) => void;
 };
@@ -34,6 +35,7 @@ const Separator = styled.View`
 export const ProductLibraryList: FC<ProductLibraryListProps> = ({
   products,
   blurTarget,
+  onEdit,
   onAddToMeal,
   onDelete,
 }) => {
@@ -60,6 +62,7 @@ export const ProductLibraryList: FC<ProductLibraryListProps> = ({
           <CachedProductRow
             product={item}
             blurTarget={blurTarget}
+            onEdit={onEdit}
             onAddToMeal={onAddToMeal}
             onDelete={onDelete}
           />

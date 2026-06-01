@@ -37,8 +37,10 @@ export const ProductLibraryLayout: FC = () => {
     setQuery,
     filteredProducts,
     manualEntry,
+    isEditing,
     isLookupLoading,
     openAddModal,
+    openEditModal,
     closeAddModal,
     lookupOffData,
     saveManualProduct,
@@ -76,6 +78,7 @@ export const ProductLibraryLayout: FC = () => {
         <ProductLibraryList
           products={filteredProducts}
           blurTarget={blurTargetRef}
+          onEdit={openEditModal}
           onAddToMeal={handleAddToMeal}
           onDelete={deleteProduct}
         />
@@ -83,7 +86,12 @@ export const ProductLibraryLayout: FC = () => {
       <ProductManualEntryModal
         visible={manualEntry !== null}
         initial={manualEntry}
-        subtitle="Scannez le code-barres puis complétez les informations."
+        title={isEditing ? 'Modifier le produit' : 'Ajouter un produit'}
+        subtitle={
+          isEditing
+            ? 'Modifiez les informations du produit.'
+            : 'Scannez le code-barres puis complétez les informations.'
+        }
         submitLabel="Enregistrer"
         isLookupLoading={isLookupLoading}
         onClose={closeAddModal}

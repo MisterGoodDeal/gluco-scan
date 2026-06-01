@@ -54,6 +54,15 @@ export const useProductLibrary = () => {
     setManualEntry(emptyManualEntry());
   }, []);
 
+  const openEditModal = useCallback((product: Product) => {
+    setManualEntry({
+      ean: product.ean,
+      name: product.name,
+      carbsPer100g: product.carbsPer100g,
+      originalEan: product.ean,
+    });
+  }, []);
+
   const closeAddModal = useCallback(() => {
     setManualEntry(null);
     setIsLookupLoading(false);
@@ -63,11 +72,12 @@ export const useProductLibrary = () => {
     setIsLookupLoading(true);
     try {
       const partial = await fetchOffPartialByEAN(ean);
-      setManualEntry({
+      setManualEntry((current) => ({
         ean: partial.ean,
         name: partial.name ?? '',
         carbsPer100g: partial.carbsPer100g,
-      });
+        originalEan: current?.originalEan,
+      }));
     } finally {
       setIsLookupLoading(false);
     }
@@ -75,11 +85,15 @@ export const useProductLibrary = () => {
 
   const saveManualProduct = useCallback(
     (product: Product) => {
+      const originalEan = manualEntry?.originalEan;
+      if (originalEan && originalEan !== product.ean) {
+        removeCachedProduct(originalEan);
+      }
       setCachedProduct(product);
       refresh();
       closeAddModal();
     },
-    [closeAddModal, refresh],
+    [closeAddModal, manualEntry?.originalEan, refresh],
   );
 
   const deleteProduct = useCallback(
@@ -90,13 +104,17 @@ export const useProductLibrary = () => {
     [refresh],
   );
 
+  const isEditing = manualEntry?.originalEan !== undefined;
+
   return {
     query,
     setQuery,
     filteredProducts,
     manualEntry,
+    isEditing,
     isLookupLoading,
     openAddModal,
+    openEditModal,
     closeAddModal,
     lookupOffData,
     saveManualProduct,
