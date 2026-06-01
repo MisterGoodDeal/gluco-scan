@@ -1,10 +1,8 @@
-import {
+import BottomSheet, {
   BottomSheetBackdrop,
-  BottomSheetModal,
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
-import { type BottomSheetModal as BottomSheetModalType } from '@gorhom/bottom-sheet';
-import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
@@ -52,13 +50,18 @@ const SectionTitleRow = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const UnitRow = styled.Pressable`
+const UnitRow = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
   border-bottom-width: 1px;
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+`;
+
+const UnitInfo = styled(Pressable)`
+  flex: 1;
+  padding-right: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const AddUnitButton = styled.Pressable`
@@ -94,7 +97,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const sheetRef = useRef<BottomSheetModalType>(null);
   const snapPoints = useMemo(() => ['88%'], []);
   const create = useProductStore((s) => s.create);
   const update = useProductStore((s) => s.update);
@@ -116,14 +118,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     ),
     [],
   );
-
-  useEffect(() => {
-    if (visible) {
-      sheetRef.current?.present();
-    } else {
-      sheetRef.current?.dismiss();
-    }
-  }, [visible]);
 
   useEffect(() => {
     if (!visible) return;
@@ -233,20 +227,21 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           await productUnitRepository.create(created.id, unit);
         }
       }
-      sheetRef.current?.dismiss();
       onClose();
     } finally {
       setIsSaving(false);
     }
   };
 
+  if (!visible) return null;
+
   return (
     <>
-      <BottomSheetModal
-        ref={sheetRef}
+      <BottomSheet
+        index={0}
         snapPoints={snapPoints}
         enablePanDownToClose
-        onDismiss={handleDismiss}
+        onClose={handleDismiss}
         backdropComponent={renderBackdrop}
         backgroundStyle={{
           backgroundColor: theme.colors.background,
@@ -311,10 +306,12 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
               </Text>
             ) : (
               units.map((unit) => (
-                <UnitRow key={unit.id} onPress={() => openEditUnit(unit)}>
-                  <Text $variant="caption" style={{ flex: 1 }}>
-                    1 {unit.abbreviation} = {unit.equivalentInGrams}g ({unit.name})
-                  </Text>
+                <UnitRow key={unit.id}>
+                  <UnitInfo onPress={() => openEditUnit(unit)}>
+                    <Text $variant="caption">
+                      1 {unit.abbreviation} = {unit.equivalentInGrams}g ({unit.name})
+                    </Text>
+                  </UnitInfo>
                   <Pressable onPress={() => removeUnit(unit.id)} hitSlop={8}>
                     <Text $color="error">×</Text>
                   </Pressable>
@@ -346,7 +343,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             </ActionButton>
           </FooterActions>
         </BottomSheetScrollView>
-      </BottomSheetModal>
+      </BottomSheet>
 
       <ProductUnitFormModal
         visible={unitModalVisible}

@@ -1,7 +1,7 @@
 import { SymbolView } from 'expo-symbols';
 import { memo, type FC, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
@@ -23,7 +23,7 @@ const Row = styled.View`
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const Info = styled.View`
+const Info = styled(Pressable)`
   flex: 1;
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
@@ -47,7 +47,10 @@ export const ProductRow: FC<ProductRowProps> = memo(
     return (
       <GlassPanel blurTarget={blurTarget}>
         <Row>
-          <Info>
+          <Info
+            onPress={() => onEdit(product)}
+            accessibilityRole="button"
+            accessibilityLabel={t('products.editA11y')}>
             <Text $variant="subtitle">{product.name}</Text>
             <Text $variant="caption" $color="textSecondary">
               {t('common.carbsPer100g', { value: formatDecimal(product.carbsPer100g) })}
@@ -60,11 +63,13 @@ export const ProductRow: FC<ProductRowProps> = memo(
             <ButtonIcon
               onPress={() => onEdit(product)}
               accessibilityLabel={t('products.editA11y')}>
-              <SymbolView
-                name={{ ios: 'pencil', android: 'edit' }}
-                size={18}
-                tintColor={theme.colors.textSecondary}
-              />
+              <View pointerEvents="none">
+                <SymbolView
+                  name={{ ios: 'pencil', android: 'edit' }}
+                  size={18}
+                  tintColor={theme.colors.textSecondary}
+                />
+              </View>
             </ButtonIcon>
             <ButtonIcon
               onPress={() => onDelete(product.id)}

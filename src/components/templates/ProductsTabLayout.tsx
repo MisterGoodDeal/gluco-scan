@@ -69,10 +69,10 @@ export const ProductsTabLayout: FC = () => {
     setIsModalOpen(true);
   };
 
-  const openEdit = (product: Product) => {
+  const openEdit = useCallback((product: Product) => {
     setEditingProduct(product);
     setIsModalOpen(true);
-  };
+  }, []);
 
   const closeModal = () => {
     setIsModalOpen(false);
