@@ -10,4 +10,7 @@ export interface ExportPayload {
   meals: Meal[];
   globalUnits: GlobalUnit[];
   preferences?: AppPreferences;
+  metadata?: {
+    tutorial?: boolean;
+  };
 }
