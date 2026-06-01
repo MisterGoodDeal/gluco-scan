@@ -3,7 +3,6 @@ import { create } from 'zustand';
 import { mealRepository } from '@/repositories/meal.repository';
 import type { Meal } from '@/types/meal';
 import type { MealItem } from '@/types/mealItem';
-import type { MealType } from '@/types/mealType';
 import { MealType } from '@/types/mealType';
 import { toDateKey } from '@/utils/date';
 
