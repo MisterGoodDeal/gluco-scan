@@ -22,8 +22,12 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
   hydrate: async () => {
     set({ isLoading: true });
-    const products = await productRepository.getAll();
-    set({ products, isLoading: false });
+    try {
+      const products = await productRepository.getAll();
+      set({ products, isLoading: false });
+    } catch {
+      set({ isLoading: false });
+    }
   },
 
   setQuery: (query) => set({ query }),

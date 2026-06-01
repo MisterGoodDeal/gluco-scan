@@ -1,6 +1,7 @@
 import { type FC, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, View } from 'react-native';
+import { FlatList, RefreshControl, View } from 'react-native';
+import { useTheme } from 'styled-components/native';
 import styled from 'styled-components/native';
 
 import { GlassPanel } from '@/components/atoms/GlassPanel';
@@ -14,6 +15,8 @@ type ProductListProps = {
   blurTarget?: RefObject<View | null>;
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 };
 
 const ListContainer = styled.View`
@@ -22,10 +25,11 @@ const ListContainer = styled.View`
 `;
 
 const EmptyContainer = styled.View`
-  flex: 1;
+  flex-grow: 1;
   align-items: center;
   justify-content: center;
   padding: ${({ theme }) => theme.spacing.xl}px;
+  min-height: ${hp('30%')}px;
 `;
 
 const Separator = styled.View`
@@ -37,22 +41,22 @@ export const ProductList: FC<ProductListProps> = ({
   blurTarget,
   onEdit,
   onDelete,
+  refreshing = false,
+  onRefresh,
 }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
 
-  if (products.length === 0) {
-    return (
-      <ListContainer>
-        <EmptyContainer>
-          <GlassPanel blurTarget={blurTarget}>
-            <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
-              {t('products.emptyList')}
-            </Text>
-          </GlassPanel>
-        </EmptyContainer>
-      </ListContainer>
-    );
-  }
+  const refreshControl =
+    onRefresh != null ? (
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        tintColor={theme.colors.accent}
+        colors={[theme.colors.accent]}
+        progressBackgroundColor={theme.colors.background}
+      />
+    ) : undefined;
 
   return (
     <ListContainer>
@@ -69,7 +73,19 @@ export const ProductList: FC<ProductListProps> = ({
         )}
         ItemSeparatorComponent={Separator}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: hp('4%') }}
+        contentContainerStyle={
+          products.length === 0 ? { flexGrow: 1 } : { paddingBottom: hp('4%') }
+        }
+        refreshControl={refreshControl}
+        ListEmptyComponent={
+          <EmptyContainer>
+            <GlassPanel blurTarget={blurTarget}>
+              <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
+                {t('products.emptyList')}
+              </Text>
+            </GlassPanel>
+          </EmptyContainer>
+        }
       />
     </ListContainer>
   );

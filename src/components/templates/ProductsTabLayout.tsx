@@ -1,6 +1,6 @@
 import { BlurTargetView } from 'expo-blur';
 import { useFocusEffect } from 'expo-router';
-import { type FC, useCallback, useRef, useState } from 'react';
+import { type FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -33,18 +33,35 @@ export const ProductsTabLayout: FC = () => {
   const { t } = useTranslation();
   const blurTargetRef = useRef<View>(null);
   const hydrate = useProductStore((s) => s.hydrate);
-  const setQuery = useProductStore((s) => s.setQuery);
+  const isLoading = useProductStore((s) => s.isLoading);
   const query = useProductStore((s) => s.query);
-  const getFiltered = useProductStore((s) => s.getFiltered);
+  const setQuery = useProductStore((s) => s.setQuery);
   const remove = useProductStore((s) => s.remove);
+  const filteredProducts = useProductStore((s) => {
+    const trimmed = s.query.trim().toLowerCase();
+    if (!trimmed) return s.products;
+    return s.products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(trimmed) ||
+        (p.ean?.includes(trimmed) ?? false),
+    );
+  });
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const loadProducts = useCallback(async () => {
+    await hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    void loadProducts();
+  }, [loadProducts]);
+
   useFocusEffect(
     useCallback(() => {
-      void hydrate();
-    }, [hydrate]),
+      void loadProducts();
+    }, [loadProducts]),
   );
 
   const openAdd = () => {
@@ -79,10 +96,12 @@ export const ProductsTabLayout: FC = () => {
           <SearchInput value={query} onChangeText={setQuery} />
         </View>
         <ProductList
-          products={getFiltered()}
+          products={filteredProducts}
           blurTarget={blurTargetRef}
           onEdit={openEdit}
           onDelete={(id) => void remove(id)}
+          refreshing={isLoading}
+          onRefresh={() => void loadProducts()}
         />
       </BlurTargetView>
       <ProductFormModal
