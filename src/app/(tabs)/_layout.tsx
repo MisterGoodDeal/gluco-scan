@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from 'styled-components/native';
 
 export const unstable_settings = {
-  initialRouteName: 'products',
+  initialRouteName: 'meals/index',
 };
 
 export default function TabsLayout() {
@@ -21,8 +21,8 @@ export default function TabsLayout() {
         tabBarActiveTintColor: theme.colors.accent,
         tabBarInactiveTintColor: theme.colors.textSecondary,
       }}>
-      <Tabs.Screen name="products" options={{ title: t('tabs.products') }} />
       <Tabs.Screen name="meals/index" options={{ title: t('tabs.meals') }} />
+      <Tabs.Screen name="products" options={{ title: t('tabs.products') }} />
       <Tabs.Screen name="settings" options={{ title: t('tabs.settings') }} />
     </Tabs>
   );
