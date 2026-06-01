@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { SCAN_COOLDOWN_MS } from '@/constants/api';
 import { fetchOffPartialByEAN, fetchProductByEAN } from '@/services/openFoodFacts.service';
 import { getCachedProduct, setCachedProduct } from '@/services/productCache';
-import { InvalidBarcodeError } from '@/services/errors';
+import { InvalidBarcodeError, OffRateLimitError } from '@/services/errors';
 import { useScanStore } from '@/store/scanStore';
 import type { Product } from '@/types/product';
 import { createScanDebouncer } from '@/utils/debounce';
@@ -17,6 +17,7 @@ export const useScanner = () => {
 
   const [isLoadingProduct, setIsLoadingProduct] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [scanWarning, setScanWarning] = useState<string | null>(null);
   const [scanSuccessFlash, setScanSuccessFlash] = useState(false);
   const [lastScannedEan, setLastScannedEan] = useState<string | null>(null);
   const [manualEntry, setManualEntry] = useState<ManualProductInitial | null>(null);
@@ -33,12 +34,19 @@ export const useScanner = () => {
   );
 
   const openManualEntry = useCallback(async (ean: string) => {
-    const partial = await fetchOffPartialByEAN(ean);
-    setManualEntry({
-      ean,
-      name: partial.name,
-      carbsPer100g: partial.carbsPer100g,
-    });
+    try {
+      const partial = await fetchOffPartialByEAN(ean);
+      setManualEntry({
+        ean,
+        name: partial.name,
+        carbsPer100g: partial.carbsPer100g,
+      });
+    } catch (error) {
+      if (error instanceof OffRateLimitError) {
+        setScanWarning(error.message);
+      }
+      setManualEntry({ ean });
+    }
     setScanError(null);
   }, []);
 
@@ -47,6 +55,7 @@ export const useScanner = () => {
       const ean = rawEan.trim();
       if (!isValidEan(ean)) {
         setScanError(new InvalidBarcodeError().message);
+        setScanWarning(null);
         return;
       }
 
@@ -55,6 +64,7 @@ export const useScanner = () => {
       debouncerRef.current.recordScan(ean);
       setIsLoadingProduct(true);
       setScanError(null);
+      setScanWarning(null);
 
       try {
         const cached = getCachedProduct(ean);
@@ -67,7 +77,12 @@ export const useScanner = () => {
           const product = await fetchProductByEAN(ean);
           setCachedProduct(product);
           completeScan(product);
-        } catch {
+        } catch (error) {
+          if (error instanceof OffRateLimitError) {
+            setScanWarning(error.message);
+            void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            return;
+          }
           await openManualEntry(ean);
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         }
@@ -89,12 +104,16 @@ export const useScanner = () => {
     [completeScan],
   );
 
-  const clearError = useCallback(() => setScanError(null), []);
+  const clearError = useCallback(() => {
+    setScanError(null);
+    setScanWarning(null);
+  }, []);
 
   return {
     handleScan,
     isLoadingProduct,
     scanError,
+    scanWarning,
     scanSuccessFlash,
     lastScannedEan,
     clearError,

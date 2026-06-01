@@ -30,6 +30,7 @@ export const ScannerScreenLayout: FC = () => {
     handleScan,
     isLoadingProduct,
     scanError,
+    scanWarning,
     scanSuccessFlash,
     isScanning,
     clearError,
@@ -49,6 +50,7 @@ export const ScannerScreenLayout: FC = () => {
               onScan={handleScan}
               isLoadingProduct={isLoadingProduct}
               scanError={scanError}
+              scanWarning={scanWarning}
               scanSuccessFlash={scanSuccessFlash}
               isScanning={isScanning && isFocused}
               enabled={isFocused}

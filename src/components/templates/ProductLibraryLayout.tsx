@@ -39,6 +39,7 @@ export const ProductLibraryLayout: FC = () => {
     manualEntry,
     isEditing,
     isLookupLoading,
+    lookupWarning,
     openAddModal,
     openEditModal,
     closeAddModal,
@@ -94,6 +95,7 @@ export const ProductLibraryLayout: FC = () => {
         }
         submitLabel="Enregistrer"
         isLookupLoading={isLookupLoading}
+        lookupWarning={lookupWarning}
         onClose={closeAddModal}
         onLookup={lookupOffData}
         onSubmit={handleSaveProduct}

@@ -11,6 +11,7 @@ type ScannerViewProps = {
   onScan: (ean: string) => void;
   isLoadingProduct: boolean;
   scanError: string | null;
+  scanWarning?: string | null;
   scanSuccessFlash: boolean;
   isScanning: boolean;
   enabled?: boolean;
@@ -71,6 +72,10 @@ const ErrorBanner = styled.View`
   padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
 `;
 
+const WarningBanner = styled.View`
+  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
+`;
+
 const PermissionContainer = styled.View`
   flex: 1;
   align-items: center;
@@ -91,6 +96,7 @@ export const ScannerView: FC<ScannerViewProps> = ({
   onScan,
   isLoadingProduct,
   scanError,
+  scanWarning = null,
   scanSuccessFlash,
   isScanning,
   enabled = true,
@@ -156,6 +162,15 @@ export const ScannerView: FC<ScannerViewProps> = ({
           </LoadingOverlay>
         )}
       </ScannerContainer>
+      {scanWarning && (
+        <WarningBanner>
+          <GlassPanel padding={theme.spacing.sm}>
+            <Text $variant="caption" $color="accent">
+              {scanWarning}
+            </Text>
+          </GlassPanel>
+        </WarningBanner>
+      )}
       {scanError && (
         <ErrorBanner>
           <GlassPanel padding={theme.spacing.sm}>

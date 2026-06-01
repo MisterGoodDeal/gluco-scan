@@ -2,8 +2,10 @@ import { OFF_BASE_URL, OFF_USER_AGENT } from '@/constants/api';
 import {
   MissingNutrimentsError,
   NetworkError,
+  OffRateLimitError,
   ProductNotFoundError,
 } from '@/services/errors';
+import { consumeOffApiCall } from '@/services/offRateLimiter';
 import type { Product } from '@/types/product';
 
 type OffNutriments = {
@@ -28,6 +30,8 @@ const parseCarbs = (nutriments?: OffNutriments): number | null => {
 };
 
 export const fetchProductByEAN = async (ean: string): Promise<Product> => {
+  consumeOffApiCall();
+
   const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=fr&lc=fr&fields=product_name,nutriments`;
 
   let response: Response;
@@ -73,6 +77,8 @@ export type PartialOffProduct = {
 };
 
 export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProduct> => {
+  consumeOffApiCall();
+
   const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=fr&lc=fr&fields=product_name,nutriments`;
 
   try {
@@ -93,7 +99,8 @@ export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProdu
       name: name || undefined,
       carbsPer100g: carbsPer100g ?? undefined,
     };
-  } catch {
+  } catch (error) {
+    if (error instanceof OffRateLimitError) throw error;
     return { ean };
   }
 };

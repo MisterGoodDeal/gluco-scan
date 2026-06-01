@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import type { ManualProductInitial } from '@/components/organisms/ProductManualEntryModal';
 import { fetchOffPartialByEAN } from '@/services/openFoodFacts.service';
+import { OffRateLimitError } from '@/services/errors';
 import {
   getAllCachedProducts,
   removeCachedProduct,
@@ -27,6 +28,7 @@ export const useProductLibrary = () => {
   const [query, setQuery] = useState('');
   const [manualEntry, setManualEntry] = useState<ManualProductInitial | null>(null);
   const [isLookupLoading, setIsLookupLoading] = useState(false);
+  const [lookupWarning, setLookupWarning] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
     setProducts(getAllCachedProducts());
@@ -66,9 +68,11 @@ export const useProductLibrary = () => {
   const closeAddModal = useCallback(() => {
     setManualEntry(null);
     setIsLookupLoading(false);
+    setLookupWarning(null);
   }, []);
 
   const lookupOffData = useCallback(async (ean: string) => {
+    setLookupWarning(null);
     setIsLookupLoading(true);
     try {
       const partial = await fetchOffPartialByEAN(ean);
@@ -78,6 +82,10 @@ export const useProductLibrary = () => {
         carbsPer100g: partial.carbsPer100g,
         originalEan: current?.originalEan,
       }));
+    } catch (error) {
+      if (error instanceof OffRateLimitError) {
+        setLookupWarning(error.message);
+      }
     } finally {
       setIsLookupLoading(false);
     }
@@ -113,6 +121,7 @@ export const useProductLibrary = () => {
     manualEntry,
     isEditing,
     isLookupLoading,
+    lookupWarning,
     openAddModal,
     openEditModal,
     closeAddModal,

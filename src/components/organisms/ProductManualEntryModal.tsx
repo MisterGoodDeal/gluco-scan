@@ -34,6 +34,7 @@ type ProductManualEntryModalProps = {
   subtitle?: string;
   submitLabel?: string;
   isLookupLoading?: boolean;
+  lookupWarning?: string | null;
   onClose: () => void;
   onLookup?: (ean: string) => Promise<void>;
   onSubmit: (product: Product) => void;
@@ -104,6 +105,7 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
   subtitle,
   submitLabel = "Enregistrer",
   isLookupLoading = false,
+  lookupWarning = null,
   onClose,
   onLookup,
   onSubmit,
@@ -241,6 +243,12 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
                         />
                       </Field>
                     </FormFields>
+
+                    {lookupWarning && (
+                      <ErrorText $variant="caption" $color="accent">
+                        {lookupWarning}
+                      </ErrorText>
+                    )}
 
                     {error && (
                       <ErrorText $variant="caption" $color="error">

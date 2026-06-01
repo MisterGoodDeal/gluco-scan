@@ -26,6 +26,18 @@ export class InvalidBarcodeError extends Error {
   }
 }
 
+export class OffRateLimitError extends Error {
+  readonly retryAfterSeconds: number;
+
+  constructor(retryAfterSeconds: number) {
+    super(
+      `Limite Open Food Facts atteinte (15/min). Attendez ${retryAfterSeconds}s avant de rescanner.`,
+    );
+    this.name = 'OffRateLimitError';
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
+
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
   return 'Une erreur est survenue';
