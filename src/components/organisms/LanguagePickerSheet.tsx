@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components/native';
 
 import { Text } from '@/components/atoms/Text';
+import { getBottomSheetBlurProps } from '@/components/navigation/BottomSheetBlurBackground';
 import { getLanguageLabelKey, type SupportedLocale, supportedLocales } from '@/i18n';
 import type { AppTheme } from '@/styles/theme';
 import { getPickerColors, getPickerItemStyle, getPickerStyle } from '@/utils/picker';
@@ -63,11 +64,7 @@ export const LanguagePickerSheet: FC<LanguagePickerSheetProps> = ({
       enablePanDownToClose
       onClose={onClose}
       backdropComponent={renderBackdrop}
-      backgroundStyle={{
-        backgroundColor: theme.colors.background,
-        borderTopWidth: 1,
-        borderColor: theme.colors.glass.border,
-      }}>
+      {...getBottomSheetBlurProps(theme)}>
       <BottomSheetView style={{ flex: 1 }}>
         <SheetHeader>
           <Text $variant="subtitle">{t('settings.language')}</Text>

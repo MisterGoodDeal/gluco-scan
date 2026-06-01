@@ -26,6 +26,7 @@ import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
+import { getBottomSheetBlurProps } from '@/components/navigation/BottomSheetBlurBackground';
 import { listRowDivider } from '@/styles/listRow';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
 
@@ -314,12 +315,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         enablePanDownToClose
         onClose={handleDismiss}
         backdropComponent={renderBackdrop}
-        backgroundStyle={{
-          backgroundColor: theme.colors.background,
-          borderTopWidth: 1,
-          borderColor: theme.colors.glass.border,
-        }}
-        handleIndicatorStyle={{ backgroundColor: theme.colors.glass.highlight }}
+        {...getBottomSheetBlurProps(theme)}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize">
