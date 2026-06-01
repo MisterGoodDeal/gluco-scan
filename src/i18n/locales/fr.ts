@@ -79,6 +79,8 @@ export type TranslationSchema = {
     collation: string;
     dinner: string;
     itemLine: string;
+    deleteA11y: string;
+    goToTodayA11y: string;
   };
   settings: {
     title: string;
@@ -202,6 +204,8 @@ export const fr: TranslationSchema = {
     collation: 'Collation',
     dinner: 'Dîner',
     itemLine: '{{name}} — {{quantity}} {{unit}} ({{carbs}} g)',
+    deleteA11y: 'Supprimer le repas',
+    goToTodayA11y: "Revenir aux repas du jour",
   },
   settings: {
     title: 'Paramètres',

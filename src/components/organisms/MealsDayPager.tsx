@@ -1,4 +1,4 @@
-import { type FC, useMemo, useRef } from 'react';
+import { type FC, useEffect, useMemo, useRef } from 'react';
 import { FlatList, useWindowDimensions, type ViewToken } from 'react-native';
 
 import { DayMealsView } from '@/components/organisms/DayMealsView';
@@ -12,6 +12,9 @@ type MealsDayPagerProps = {
   totalsByDate: Record<string, number>;
   onDateChange: (dateKey: string) => void;
   onMealPress: (meal: Meal) => void;
+  onMealDelete: (mealId: string) => void;
+  scrollToDateKey?: string | null;
+  onScrollToDateDone?: () => void;
 };
 
 export const MealsDayPager: FC<MealsDayPagerProps> = ({
@@ -21,6 +24,9 @@ export const MealsDayPager: FC<MealsDayPagerProps> = ({
   totalsByDate,
   onDateChange,
   onMealPress,
+  onMealDelete,
+  scrollToDateKey,
+  onScrollToDateDone,
 }) => {
   const { width } = useWindowDimensions();
   const todayKey = toDateKey(new Date());
@@ -53,6 +59,16 @@ export const MealsDayPager: FC<MealsDayPagerProps> = ({
     },
   ).current;
 
+  useEffect(() => {
+    if (!scrollToDateKey) return;
+    const index = dates.indexOf(scrollToDateKey);
+    if (index < 0) return;
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToIndex({ index, animated: hasAnyMeals });
+      onScrollToDateDone?.();
+    });
+  }, [scrollToDateKey, dates, hasAnyMeals, onScrollToDateDone]);
+
   return (
     <FlatList
       ref={listRef}
@@ -72,6 +88,12 @@ export const MealsDayPager: FC<MealsDayPagerProps> = ({
       keyExtractor={(item) => item}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+      onScrollToIndexFailed={({ index }) => {
+        listRef.current?.scrollToOffset({
+          offset: width * index,
+          animated: false,
+        });
+      }}
       renderItem={({ item }) => (
         <DayMealsView
           dateKey={item}
@@ -79,6 +101,7 @@ export const MealsDayPager: FC<MealsDayPagerProps> = ({
           meals={mealsByDate[item] ?? []}
           dayTotalCarbs={totalsByDate[item] ?? 0}
           onMealPress={onMealPress}
+          onMealDelete={onMealDelete}
         />
       )}
     />

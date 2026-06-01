@@ -81,6 +81,8 @@ export const en: TranslationSchema = {
     collation: 'Snack',
     dinner: 'Dinner',
     itemLine: '{{name}} — {{quantity}} {{unit}} ({{carbs}} g)',
+    deleteA11y: 'Delete meal',
+    goToTodayA11y: "Go to today's meals",
   },
   settings: {
     title: 'Settings',

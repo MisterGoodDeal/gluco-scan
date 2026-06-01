@@ -1,19 +1,21 @@
 import { BlurTargetView } from 'expo-blur';
+import { SymbolView } from 'expo-symbols';
 import { router, useFocusEffect } from 'expo-router';
 import { type FC, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
+import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { Text } from '@/components/atoms/Text';
 import { MealDetailSheet } from '@/components/organisms/MealDetailSheet';
 import { MealsDayPager } from '@/components/organisms/MealsDayPager';
 import { useMealStore } from '@/store/meal.store';
 import { mealRepository } from '@/repositories/meal.repository';
 import type { Meal } from '@/types/meal';
-import { addDays } from '@/utils/date';
+import { addDays, toDateKey } from '@/utils/date';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
 
 const Header = styled(ScreenHeaderBar)`
@@ -22,17 +24,17 @@ const Header = styled(ScreenHeaderBar)`
   justify-content: space-between;
 `;
 
-const AddButton = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accentMuted};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+const HeaderActions = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 export const MealsTabLayout: FC = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const blurTargetRef = useRef<View>(null);
+  const todayKey = toDateKey(new Date());
   const selectedDate = useMealStore((s) => s.selectedDate);
   const setSelectedDate = useMealStore((s) => s.setSelectedDate);
   const hydrateDay = useMealStore((s) => s.hydrateDay);
@@ -41,6 +43,7 @@ export const MealsTabLayout: FC = () => {
 
   const [mealsByDate, setMealsByDate] = useState<Record<string, Meal[]>>({});
   const [totalsByDate, setTotalsByDate] = useState<Record<string, number>>({});
+  const [scrollToDateKey, setScrollToDateKey] = useState<string | null>(null);
 
   const loadWindow = useCallback(async (center: string) => {
     const half = 15;
@@ -71,6 +74,23 @@ export const MealsTabLayout: FC = () => {
     void loadWindow(dateKey);
   };
 
+  const handleGoToToday = useCallback(() => {
+    setSelectedDate(todayKey);
+    void loadWindow(todayKey);
+    setScrollToDateKey(todayKey);
+  }, [loadWindow, setSelectedDate, todayKey]);
+
+  const handleMealDelete = useCallback(
+    async (mealId: string) => {
+      await mealRepository.delete(mealId);
+      if (selectedMeal?.id === mealId) {
+        setSelectedMeal(null);
+      }
+      refreshMeals();
+    },
+    [refreshMeals, selectedMeal?.id, setSelectedMeal],
+  );
+
   return (
     <Screen>
       <StatusBar style="light" />
@@ -78,15 +98,31 @@ export const MealsTabLayout: FC = () => {
         <BackgroundGradient />
         <Header>
           <Text $variant="subtitle">{t('meals.title')}</Text>
-          <AddButton
-            onPress={() => {
-              useMealStore.getState().resetDraft();
-              router.push('/meal/create');
-            }}>
-            <Text $variant="caption" $color="accent">
-              {t('meals.addMeal')}
-            </Text>
-          </AddButton>
+          <HeaderActions>
+            <ButtonIcon
+              onPress={handleGoToToday}
+              accessibilityLabel={t('meals.goToTodayA11y')}>
+              <SymbolView
+                name={{ ios: 'calendar', android: 'calendar_today' }}
+                size={20}
+                tintColor={
+                  selectedDate === todayKey ? theme.colors.accent : theme.colors.textSecondary
+                }
+              />
+            </ButtonIcon>
+            <ButtonIcon
+              onPress={() => {
+                useMealStore.getState().resetDraft();
+                router.push('/meal/create');
+              }}
+              accessibilityLabel={t('meals.addMeal')}>
+              <SymbolView
+                name={{ ios: 'plus', android: 'add' }}
+                size={22}
+                tintColor={theme.colors.accent}
+              />
+            </ButtonIcon>
+          </HeaderActions>
         </Header>
         <MealsDayPager
           centerDate={selectedDate}
@@ -94,6 +130,9 @@ export const MealsTabLayout: FC = () => {
           totalsByDate={totalsByDate}
           onDateChange={handleDateChange}
           onMealPress={setSelectedMeal}
+          onMealDelete={(id) => void handleMealDelete(id)}
+          scrollToDateKey={scrollToDateKey}
+          onScrollToDateDone={() => setScrollToDateKey(null)}
         />
       </BlurTargetView>
       {selectedMeal && (

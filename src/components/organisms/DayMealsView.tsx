@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions } from 'react-native';
 import styled from 'styled-components/native';
 
+import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { getCurrentLocale } from '@/i18n';
@@ -17,6 +18,7 @@ type DayMealsViewProps = {
   meals: Meal[];
   dayTotalCarbs: number;
   onMealPress: (meal: Meal) => void;
+  onMealDelete: (mealId: string) => void;
 };
 
 const Page = styled.View<{ $width: number }>`
@@ -25,10 +27,23 @@ const Page = styled.View<{ $width: number }>`
   flex: 1;
 `;
 
-const MealRow = styled(Pressable)`
+const MealRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
   border-bottom-width: 1px;
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+`;
+
+const MealInfo = styled(Pressable)`
+  flex: 1;
+  gap: ${({ theme }) => theme.spacing.xs}px;
+`;
+
+const DeleteLabel = styled(Text)`
+  font-size: 18px;
+  line-height: 20px;
 `;
 
 const EmptyState = styled.View`
@@ -42,6 +57,7 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   meals,
   dayTotalCarbs,
   onMealPress,
+  onMealDelete,
 }) => {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -66,13 +82,21 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
       {hasMeals ? (
         <GlassPanel>
           {sortedMeals.map((meal) => (
-            <MealRow key={meal.id} onPress={() => onMealPress(meal)}>
-              <Text $variant="body">
-                {t(getMealTypeLabelKey(meal.type))} · {formatTimeLabel(meal.createdAt, locale)}
-              </Text>
-              <Text $variant="caption" $color="accent">
-                {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
-              </Text>
+            <MealRow key={meal.id}>
+              <MealInfo onPress={() => onMealPress(meal)}>
+                <Text $variant="body">
+                  {t(getMealTypeLabelKey(meal.type))} ·{' '}
+                  {formatTimeLabel(meal.createdAt, locale)}
+                </Text>
+                <Text $variant="caption" $color="accent">
+                  {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
+                </Text>
+              </MealInfo>
+              <ButtonIcon
+                onPress={() => onMealDelete(meal.id)}
+                accessibilityLabel={t('meals.deleteA11y')}>
+                <DeleteLabel $color="error">×</DeleteLabel>
+              </ButtonIcon>
             </MealRow>
           ))}
         </GlassPanel>
