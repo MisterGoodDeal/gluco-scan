@@ -14,11 +14,9 @@ import { useMealStore } from '@/store/meal.store';
 import { mealRepository } from '@/repositories/meal.repository';
 import type { Meal } from '@/types/meal';
 import { addDays } from '@/utils/date';
-import { Screen } from '@/styles/global';
+import { Screen, ScreenHeaderBar } from '@/styles/global';
 
-const Header = styled.View`
-  padding: ${({ theme }) => theme.spacing.md}px;
-  padding-top: ${({ theme }) => theme.spacing.lg}px;
+const Header = styled(ScreenHeaderBar)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;

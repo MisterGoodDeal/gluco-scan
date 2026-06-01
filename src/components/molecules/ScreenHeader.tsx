@@ -1,9 +1,9 @@
 import { type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
 
 import { Text } from '@/components/atoms/Text';
+import { ScreenHeaderBar } from '@/styles/global';
 
 type ScreenHeaderProps = {
   title: string;
@@ -11,14 +11,10 @@ type ScreenHeaderProps = {
   rightAction?: ReactNode;
 };
 
-const Header = styled.View<{ $paddingTop: number }>`
+const Header = styled(ScreenHeaderBar)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding-top: ${({ $paddingTop }) => $paddingTop}px;
-  padding-right: ${({ theme }) => theme.spacing.md}px;
-  padding-bottom: ${({ theme }) => theme.spacing.sm}px;
-  padding-left: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const Side = styled.View`
@@ -36,12 +32,9 @@ const RightSide = styled.View`
 
 export const ScreenHeader: FC<ScreenHeaderProps> = ({ title, onBack, rightAction }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
-  const paddingTop = insets.top + theme.spacing.sm;
 
   return (
-    <Header $paddingTop={paddingTop}>
+    <Header>
       <Side>
         {onBack && (
           <BackButton onPress={onBack} accessibilityLabel={t('common.backA11y')}>

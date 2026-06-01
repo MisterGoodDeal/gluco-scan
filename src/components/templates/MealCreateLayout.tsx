@@ -17,14 +17,12 @@ import { MEAL_TYPES, MealType } from '@/types/mealType';
 import { formatDecimal } from '@/utils/format';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { addDays, toDateKey } from '@/utils/date';
-import { Screen } from '@/styles/global';
+import { Screen, ScreenHeaderBar } from '@/styles/global';
 
-const Header = styled.View`
+const Header = styled(ScreenHeaderBar)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.md}px;
-  padding-top: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const StepIndicator = styled.View`

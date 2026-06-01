@@ -7,6 +7,7 @@ import { Text } from '@/components/atoms/Text';
 import { ScannerView } from '@/components/organisms/ScannerView';
 import { useMealProductScan } from '@/hooks/useMealProductScan';
 import type { Product } from '@/types/product';
+import { ScreenHeaderBar } from '@/styles/global';
 
 type ScanMealModalProps = {
   visible: boolean;
@@ -14,12 +15,10 @@ type ScanMealModalProps = {
   onProductScanned: (product: Product) => void;
 };
 
-const Header = styled.View`
+const Header = styled(ScreenHeaderBar)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.md}px;
-  padding-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 export const ScanMealModal: FC<ScanMealModalProps> = ({

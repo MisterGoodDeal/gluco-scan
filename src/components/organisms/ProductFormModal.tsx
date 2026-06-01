@@ -10,7 +10,6 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
 import { GlassPanel } from '@/components/atoms/GlassPanel';
@@ -25,6 +24,7 @@ import type { Product } from '@/types/product';
 import type { ProductUnit } from '@/types/productUnit';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
 import { generateId } from '@/utils/id';
+import { topScreenSpace } from '@/utils/screen';
 
 type ProductFormModalProps = {
   visible: boolean;
@@ -68,7 +68,6 @@ export const ProductFormModal: FC<ProductFormModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const create = useProductStore((s) => s.create);
   const update = useProductStore((s) => s.update);
 
@@ -198,12 +197,13 @@ export const ProductFormModal: FC<ProductFormModalProps> = ({
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={insets.top}>
+          keyboardVerticalOffset={topScreenSpace}>
           <ScrollView
             contentContainerStyle={{
               flexGrow: 1,
               justifyContent: 'center',
               padding: theme.spacing.lg,
+              paddingTop: topScreenSpace,
             }}
             keyboardShouldPersistTaps="handled">
             <Overlay onPress={onClose}>

@@ -15,13 +15,10 @@ import { Text } from '@/components/atoms/Text';
 import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
-import { Screen as AppScreen } from '@/styles/global';
+import { Screen as AppScreen, ScreenHeaderBar } from '@/styles/global';
 import { parseManualCarbs } from '@/utils/ean';
 
-const Header = styled.View`
-  padding: ${({ theme }) => theme.spacing.md}px;
-  padding-top: ${({ theme }) => theme.spacing.lg}px;
-`;
+const Header = styled(ScreenHeaderBar)``;
 
 const Section = styled.View`
   padding: ${({ theme }) => theme.spacing.md}px;
