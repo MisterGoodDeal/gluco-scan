@@ -3,16 +3,18 @@ import * as Sharing from 'expo-sharing';
 import { gzipSync, gunzipSync, strToU8, strFromU8 } from 'fflate';
 
 import { getDatabase } from '@/database/client';
+import { appPreferencesRepository } from '@/repositories/appPreferences.repository';
 import { globalUnitRepository } from '@/repositories/globalUnit.repository';
 import { mealRepository } from '@/repositories/meal.repository';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import type { ExportPayload } from '@/types/exportPayload';
+import { usePreferencesStore } from '@/store/preferences.store';
 import { normalizeExportProduct } from '@/utils/exportProduct';
 
-const EXPORT_VERSION = 2;
-const SUPPORTED_EXPORT_VERSIONS = [1, 2] as const;
+const EXPORT_VERSION = 3;
+const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3] as const;
 
 export const buildExportPayload = async (): Promise<ExportPayload> => ({
   version: EXPORT_VERSION,
@@ -20,6 +22,7 @@ export const buildExportPayload = async (): Promise<ExportPayload> => ({
   products: await productRepository.getAll(),
   meals: await mealRepository.getAllForExport(),
   globalUnits: await globalUnitRepository.getAll(),
+  preferences: await appPreferencesRepository.get(),
 });
 
 export const serializePayload = (payload: ExportPayload): Uint8Array => {
@@ -30,7 +33,7 @@ export const serializePayload = (payload: ExportPayload): Uint8Array => {
 export const deserializePayload = (data: Uint8Array): ExportPayload => {
   const json = strFromU8(gunzipSync(data));
   const parsed = JSON.parse(json) as ExportPayload;
-  if (!SUPPORTED_EXPORT_VERSIONS.includes(parsed.version as 1 | 2)) {
+  if (!SUPPORTED_EXPORT_VERSIONS.includes(parsed.version as 1 | 2 | 3)) {
     throw new Error('Unsupported export version');
   }
   return {
@@ -135,6 +138,10 @@ export const importFromGsBytes = async (bytes: Uint8Array): Promise<void> => {
           item.unitId ?? null,
         );
       }
+    }
+
+    if (payload.preferences) {
+      await usePreferencesStore.getState().applyImported(payload.preferences);
     }
   });
 };
