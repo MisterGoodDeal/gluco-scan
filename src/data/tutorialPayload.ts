@@ -1,0 +1,164 @@
+import type { ExportPayload } from '@/types/exportPayload';
+import { MealType } from '@/types/mealType';
+import { addDays, combineDateAndTime, toDateKey } from '@/utils/date';
+
+const today = toDateKey(new Date());
+const day = (offset: number) => addDays(today, offset);
+
+export const TUTORIAL_PAYLOAD: ExportPayload = {
+  version: 3,
+  exportedAt: new Date().toISOString(),
+  metadata: { tutorial: true },
+  preferences: {
+    theme: 'light',
+    locale: 'fr',
+    unitSystem: 'metric',
+  },
+  globalUnits: [
+    { id: 'global-teaspoon', abbreviation: 'càc', name: 'Cuillère à café', equivalentInGrams: 5 },
+    { id: 'global-tablespoon', abbreviation: 'càs', name: 'Cuillère à soupe', equivalentInGrams: 15 },
+    { id: 'tut-global-bowl', abbreviation: 'bol', name: 'Bol', equivalentInGrams: 200 },
+  ],
+  products: [
+    {
+      id: 'tut-prod-pates',
+      eans: ['8076802085031'],
+      name: 'Pâtes Barilla',
+      carbsPer100g: 71,
+      imageUrl: null,
+      customUnits: [
+        {
+          id: 'tut-unit-pates-portion',
+          abbreviation: 'portion',
+          name: 'Portion cuite',
+          equivalentInGrams: 80,
+        },
+      ],
+    },
+    {
+      id: 'tut-prod-riz',
+      eans: ['3560071081245'],
+      name: 'Riz Basmati',
+      carbsPer100g: 78,
+      imageUrl: null,
+      customUnits: [],
+    },
+    {
+      id: 'tut-prod-banane',
+      eans: ['0000000000017'],
+      name: 'Banane',
+      carbsPer100g: 23,
+      imageUrl: null,
+      customUnits: [
+        {
+          id: 'tut-unit-banane',
+          abbreviation: 'pc',
+          name: 'Pièce',
+          equivalentInGrams: 120,
+        },
+      ],
+    },
+    {
+      id: 'tut-prod-coca',
+      eans: ['5449000000996'],
+      name: 'Coca-Cola',
+      carbsPer100g: 10.6,
+      imageUrl: null,
+      customUnits: [
+        {
+          id: 'tut-unit-canette',
+          abbreviation: '33cl',
+          name: 'Canette',
+          equivalentInGrams: 330,
+        },
+      ],
+    },
+    {
+      id: 'tut-prod-pain',
+      eans: ['3250390001104'],
+      name: 'Pain complet',
+      carbsPer100g: 43,
+      imageUrl: null,
+      customUnits: [
+        {
+          id: 'tut-unit-tranche',
+          abbreviation: 'tr.',
+          name: 'Tranche',
+          equivalentInGrams: 35,
+        },
+      ],
+    },
+  ],
+  meals: [
+    {
+      id: 'tut-meal-1',
+      type: MealType.BREAKFAST,
+      date: day(-3),
+      createdAt: combineDateAndTime(day(-3), 8, 15),
+      totalCarbs: 27.6,
+      items: [
+        {
+          id: 'tut-item-1',
+          productId: 'tut-prod-banane',
+          quantity: 1,
+          unitType: 'custom',
+          unitId: 'tut-unit-banane',
+        },
+        {
+          id: 'tut-item-2',
+          productId: 'tut-prod-pain',
+          quantity: 2,
+          unitType: 'custom',
+          unitId: 'tut-unit-tranche',
+        },
+      ],
+    },
+    {
+      id: 'tut-meal-2',
+      type: MealType.LUNCH,
+      date: day(-2),
+      createdAt: combineDateAndTime(day(-2), 12, 30),
+      totalCarbs: 56.8,
+      items: [
+        {
+          id: 'tut-item-3',
+          productId: 'tut-prod-pates',
+          quantity: 1,
+          unitType: 'custom',
+          unitId: 'tut-unit-pates-portion',
+        },
+      ],
+    },
+    {
+      id: 'tut-meal-3',
+      type: MealType.SNACK,
+      date: day(-1),
+      createdAt: combineDateAndTime(day(-1), 16, 0),
+      totalCarbs: 35,
+      items: [
+        {
+          id: 'tut-item-4',
+          productId: 'tut-prod-coca',
+          quantity: 1,
+          unitType: 'custom',
+          unitId: 'tut-unit-canette',
+        },
+      ],
+    },
+    {
+      id: 'tut-meal-4',
+      type: MealType.DINNER,
+      date: day(0),
+      createdAt: combineDateAndTime(day(0), 19, 45),
+      totalCarbs: 156,
+      items: [
+        {
+          id: 'tut-item-5',
+          productId: 'tut-prod-riz',
+          quantity: 200,
+          unitType: 'grams',
+        },
+      ],
+    },
+  ],
+};
