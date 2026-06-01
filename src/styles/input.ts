@@ -11,3 +11,11 @@ export const inputFieldStyles = css`
   background-color: ${({ theme }) => theme.colors.glass.background};
   color: ${({ theme }) => theme.colors.text};
 `;
+
+export const inputPlainStyles = css`
+  height: ${INPUT_HEIGHT}px;
+  padding: 0;
+  border-width: 0;
+  background-color: transparent;
+  color: ${({ theme }) => theme.colors.text};
+`;

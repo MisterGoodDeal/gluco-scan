@@ -1,9 +1,10 @@
+import { SymbolView } from 'expo-symbols';
 import { router } from 'expo-router';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { PickerField } from '@/components/atoms/PickerField';
@@ -12,6 +13,7 @@ import {
   MealMetaPickerSheet,
   type MealMetaPickerField,
 } from '@/components/organisms/MealMetaPickerSheet';
+import { ProductSpotlightSearch } from '@/components/organisms/ProductSpotlightSearch';
 import { QuantityPickerModal } from '@/components/organisms/QuantityPickerModal';
 import { ScannerView } from '@/components/organisms/ScannerView';
 import { useMealProductScan } from '@/hooks/useMealProductScan';
@@ -73,6 +75,18 @@ const ScannerSection = styled.View`
   overflow: hidden;
 `;
 
+const SearchTrigger = styled.Pressable`
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  margin: 0 ${({ theme }) => theme.spacing.md}px ${({ theme }) => theme.spacing.md}px;
+  padding: ${({ theme }) => theme.spacing.md}px;
+  border-radius: ${({ theme }) => theme.radius.md}px;
+  background-color: ${({ theme }) => theme.colors.glass.background};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.glass.border};
+`;
+
 const ItemsSection = styled.View`
   margin: ${({ theme }) => theme.spacing.md}px;
   gap: ${({ theme }) => theme.spacing.sm}px;
@@ -100,12 +114,14 @@ export const MealCreateLayout: FC = () => {
   const saveMeal = useMealStore((s) => s.saveMeal);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
 
+  const theme = useTheme();
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
+  const [searchVisible, setSearchVisible] = useState(false);
   const { handleScan, isLoading, error, warning, clearMessages } = useMealProductScan();
 
   const timeLabel = `${String(draftMeta.hours).padStart(2, '0')}:${String(draftMeta.minutes).padStart(2, '0')}`;
-  const scannerActive = step === 1 && pickerProduct === null;
+  const scannerActive = step === 1 && pickerProduct === null && !searchVisible;
 
   useEffect(() => {
     void hydrateSettings();
@@ -203,6 +219,19 @@ export const MealCreateLayout: FC = () => {
               />
             </ScannerSection>
 
+            <SearchTrigger
+              onPress={() => setSearchVisible(true)}
+              accessibilityLabel={t('meals.searchProduct')}>
+              <SymbolView
+                name="magnifyingglass"
+                size={18}
+                tintColor={theme.colors.textSecondary}
+              />
+              <Text $variant="body" $color="textSecondary" style={{ flex: 1 }}>
+                {t('meals.searchSpotlightPlaceholder')}
+              </Text>
+            </SearchTrigger>
+
             <ItemsSection>
               <Text $variant="body">{t('meals.stepFoods')}</Text>
               {draftItems.length === 0 ? (
@@ -281,6 +310,11 @@ export const MealCreateLayout: FC = () => {
         draftMeta={draftMeta}
         onChange={setDraftMeta}
         onClose={() => setOpenMetaPicker(null)}
+      />
+      <ProductSpotlightSearch
+        visible={searchVisible}
+        onClose={() => setSearchVisible(false)}
+        onSelect={(product) => setPickerProduct(product)}
       />
     </Screen>
   );

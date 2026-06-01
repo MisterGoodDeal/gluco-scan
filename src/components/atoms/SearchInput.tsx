@@ -3,7 +3,9 @@ import { type KeyboardTypeOptions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components/native';
 
-import { inputFieldStyles } from '@/styles/input';
+import { inputFieldStyles, inputPlainStyles } from '@/styles/input';
+
+type SearchInputVariant = 'default' | 'plain';
 
 type SearchInputProps = {
   value: string;
@@ -13,10 +15,12 @@ type SearchInputProps = {
   mono?: boolean;
   flex?: boolean;
   keyboardType?: KeyboardTypeOptions;
+  autoFocus?: boolean;
+  variant?: SearchInputVariant;
 };
 
-const Input = styled.TextInput<{ $mono?: boolean; $flex?: boolean }>`
-  ${inputFieldStyles}
+const Input = styled.TextInput<{ $mono?: boolean; $flex?: boolean; $plain?: boolean }>`
+  ${({ $plain }) => ($plain ? inputPlainStyles : inputFieldStyles)}
   ${({ $flex }) => ($flex ? 'flex: 1;' : '')}
   font-size: ${({ theme, $mono }) =>
     $mono ? theme.typography.mono.fontSize : theme.typography.body.fontSize}px;
@@ -32,6 +36,8 @@ export const SearchInput: FC<SearchInputProps> = ({
   mono = false,
   flex = false,
   keyboardType,
+  autoFocus = false,
+  variant = 'default',
 }) => {
   const { t } = useTranslation();
 
@@ -46,8 +52,10 @@ export const SearchInput: FC<SearchInputProps> = ({
       clearButtonMode="while-editing"
       editable={editable}
       keyboardType={keyboardType}
+      autoFocus={autoFocus}
       $mono={mono}
       $flex={flex}
+      $plain={variant === 'plain'}
     />
   );
 };

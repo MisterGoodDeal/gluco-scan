@@ -65,6 +65,10 @@ export type TranslationSchema = {
     time: string;
     addFood: string;
     scanProduct: string;
+    searchProduct: string;
+    searchSpotlightPlaceholder: string;
+    searchNoResults: string;
+    searchEmptyHint: string;
     mealTotal: string;
     saveMeal: string;
     noItems: string;
@@ -184,6 +188,10 @@ export const fr: TranslationSchema = {
     time: 'Heure',
     addFood: 'Ajouter un aliment',
     scanProduct: 'Scanner un produit',
+    searchProduct: 'Rechercher dans mes produits',
+    searchSpotlightPlaceholder: 'Rechercher un aliment…',
+    searchNoResults: 'Aucun produit trouvé',
+    searchEmptyHint: 'Aucun produit enregistré',
     mealTotal: 'Total du repas',
     saveMeal: 'Enregistrer le repas',
     noItems: 'Ajoutez au moins un aliment',
