@@ -6,7 +6,9 @@ import styled, { useTheme } from 'styled-components/native';
 import { Text } from '@/components/atoms/Text';
 import type { Meal } from '@/types/meal';
 import { formatTimeLabel } from '@/utils/date';
+import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { formatDecimal } from '@/utils/format';
+import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
 import { getCurrentLocale } from '@/i18n';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 
@@ -26,6 +28,7 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
   const theme = useTheme();
   const snapPoints = useMemo(() => ['45%', '70%'], []);
   const locale = getCurrentLocale();
+  const { formatMassValue, massUnit } = useMassDisplay();
 
   const renderBackdrop = useCallback(
     (props: ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -57,7 +60,14 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
           <Row key={item.id}>
             <Text $variant="body">{item.productName}</Text>
             <Text $variant="caption" $color="textSecondary">
-              {item.quantity} {item.unitLabel ?? 'g'} — {formatDecimal(item.carbs ?? 0)} g
+              {formatMealItemQuantity(
+                item.quantity,
+                item.unitType,
+                item.unitLabel,
+                formatMassValue,
+                massUnit,
+              )}{' '}
+              — {formatDecimal(item.carbs ?? 0)} g
             </Text>
           </Row>
         ))}

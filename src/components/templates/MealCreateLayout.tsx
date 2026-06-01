@@ -21,7 +21,9 @@ import { useSettingsStore } from '@/store/settings.store';
 import { useMealStore } from '@/store/meal.store';
 import type { Product } from '@/types/product';
 import { formatDateLabel } from '@/utils/date';
+import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { formatDecimal } from '@/utils/format';
+import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { hp } from '@/utils/screen';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
@@ -102,6 +104,7 @@ const ItemRow = styled.View`
 
 export const MealCreateLayout: FC = () => {
   const { t } = useTranslation();
+  const { formatMassValue, massUnit } = useMassDisplay();
   const locale = getCurrentLocale();
   const step = useMealStore((s) => s.step);
   const setStep = useMealStore((s) => s.setStep);
@@ -240,10 +243,15 @@ export const MealCreateLayout: FC = () => {
                 draftItems.map((item) => (
                   <ItemRow key={item.id}>
                     <Text $variant="body" style={{ flex: 1, marginRight: 8 }}>
-                      {t('meals.itemLine', {
+                      {t('meals.itemLinePortion', {
                         name: item.productName,
-                        quantity: item.quantity,
-                        unit: item.unitLabel,
+                        portion: formatMealItemQuantity(
+                          item.quantity,
+                          item.unitType,
+                          item.unitLabel,
+                          formatMassValue,
+                          massUnit,
+                        ),
                         carbs: formatDecimal(item.carbs),
                       })}
                     </Text>

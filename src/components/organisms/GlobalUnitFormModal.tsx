@@ -17,6 +17,7 @@ import { InputNumber } from '@/components/atoms/InputNumber';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import type { GlobalUnit } from '@/types/globalUnit';
+import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { parseManualCarbs } from '@/utils/ean';
 import { topScreenSpace } from '@/utils/screen';
 
@@ -63,6 +64,7 @@ export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const { massUnit, formatMassForInput, displayToGrams } = useMassDisplay();
   const [name, setName] = useState('');
   const [abbreviation, setAbbreviation] = useState('');
   const [gramsText, setGramsText] = useState('');
@@ -72,12 +74,13 @@ export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
     if (!visible) return;
     setName(unit?.name ?? '');
     setAbbreviation(unit?.abbreviation ?? '');
-    setGramsText(unit ? String(unit.equivalentInGrams) : '');
-  }, [visible, unit]);
+    setGramsText(unit ? formatMassForInput(unit.equivalentInGrams) : '');
+  }, [visible, unit, formatMassForInput]);
 
   const handleSave = async () => {
-    const grams = parseManualCarbs(gramsText);
-    if (!name.trim() || !abbreviation.trim() || grams === null) return;
+    const displayValue = parseManualCarbs(gramsText);
+    if (!name.trim() || !abbreviation.trim() || displayValue === null) return;
+    const grams = displayToGrams(displayValue);
     setIsSaving(true);
     try {
       const payload = {
@@ -146,12 +149,12 @@ export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
 
                   <Field>
                     <Text $variant="caption" $color="textSecondary">
-                      {t('products.unitGrams')}
+                      {t('products.unitMass', { unit: massUnit })}
                     </Text>
                     <InputNumber
                       value={gramsText}
                       onChangeText={setGramsText}
-                      placeholder={t('products.unitGrams')}
+                      placeholder={t('products.unitMass', { unit: massUnit })}
                     />
                   </Field>
 

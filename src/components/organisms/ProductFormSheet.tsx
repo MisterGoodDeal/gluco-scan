@@ -18,6 +18,7 @@ import { fetchOffPartialByEAN } from '@/services/openFoodFacts.service';
 import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
 import type { ProductUnit } from '@/types/productUnit';
+import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
 
 type ProductFormSheetProps = {
@@ -97,6 +98,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
+  const { formatEquivalentMass } = useMassDisplay();
   const theme = useTheme();
   const snapPoints = useMemo(() => ['88%'], []);
   const create = useProductStore((s) => s.create);
@@ -314,7 +316,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                 <UnitRow key={unit.id}>
                   <UnitInfo onPress={() => openEditUnit(unit)}>
                     <Text $variant="caption">
-                      1 {unit.abbreviation} = {unit.equivalentInGrams}g ({unit.name})
+                      1 {unit.abbreviation} = {formatEquivalentMass(unit.equivalentInGrams)} ({unit.name})
                     </Text>
                   </UnitInfo>
                   <Pressable onPress={() => removeUnit(unit.id)} hitSlop={8}>

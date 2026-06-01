@@ -11,6 +11,8 @@ import { Text } from '@/components/atoms/Text';
 import { useSettingsStore } from '@/store/settings.store';
 import type { Product } from '@/types/product';
 import { computeItemCarbs } from '@/utils/carbs';
+import { useMassDisplay } from '@/hooks/useMassDisplay';
+import { defaultDisplayMassQuantity } from '@/utils/mass';
 import { formatDecimal } from '@/utils/format';
 import type { MealDraftItem } from '@/store/meal.store';
 import { generateId } from '@/utils/id';
@@ -72,6 +74,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   const { t } = useTranslation();
   const theme = useTheme();
   const globalUnits = useSettingsStore((s) => s.globalUnits);
+  const { unitSystem, massUnit, massLabel, displayToGrams } = useMassDisplay();
 
   const unitOptions: UnitOption[] = useMemo(() => {
     if (!product) return [];
@@ -91,17 +94,17 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
     }));
     const gramsOpt: UnitOption = {
       id: 'grams',
-      label: t('common.grams'),
-      abbreviation: 'g',
+      label: massLabel,
+      abbreviation: massUnit,
       equivalentInGrams: 1,
       unitType: 'grams',
     };
     return [...productOpts, ...globalOpts, gramsOpt];
-  }, [product, globalUnits, t]);
+  }, [product, globalUnits, massLabel, massUnit]);
 
   const [selectedUnit, setSelectedUnit] = useState<UnitOption | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [gramsText, setGramsText] = useState('100');
+  const [gramsText, setGramsText] = useState(() => String(defaultDisplayMassQuantity(unitSystem)));
 
   useEffect(() => {
     if (unitOptions.length > 0) {
@@ -109,11 +112,15 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
     }
   }, [unitOptions]);
 
+  useEffect(() => {
+    setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
+  }, [unitSystem]);
+
   if (!product) return null;
 
   const isGrams = selectedUnit?.unitType === 'grams';
-  const parsedGrams = parseFloat(gramsText.replace(',', '.')) || 0;
-  const qty = isGrams ? parsedGrams : quantity;
+  const parsedDisplay = parseFloat(gramsText.replace(',', '.')) || 0;
+  const qty = isGrams ? displayToGrams(parsedDisplay) : quantity;
 
   const carbs = selectedUnit
     ? computeItemCarbs(
@@ -140,7 +147,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
     onConfirm(item);
     onClose();
     setQuantity(1);
-    setGramsText('100');
+    setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
   };
 
   return (
@@ -170,7 +177,11 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
               </Chips>
 
               {isGrams ? (
-                <InputNumber value={gramsText} onChangeText={setGramsText} placeholder="100" />
+                <InputNumber
+                  value={gramsText}
+                  onChangeText={setGramsText}
+                  placeholder={String(defaultDisplayMassQuantity(unitSystem))}
+                />
               ) : (
                 <Row>
                   <ButtonIcon

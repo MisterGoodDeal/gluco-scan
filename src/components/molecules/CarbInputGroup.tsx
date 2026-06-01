@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components/native';
 
@@ -6,7 +6,7 @@ import { CarbValue } from '@/components/atoms/CarbValue';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { Text } from '@/components/atoms/Text';
 import { getDecimalSeparator } from '@/i18n';
-import { formatDecimalForInput } from '@/utils/format';
+import { useMassDisplay } from '@/hooks/useMassDisplay';
 
 type CarbInputGroupProps = {
   grams: number;
@@ -39,7 +39,12 @@ export const CarbInputGroup: FC<CarbInputGroupProps> = ({
 }) => {
   const { t } = useTranslation();
   const decimalSeparator = getDecimalSeparator();
-  const [text, setText] = useState(() => formatDecimalForInput(grams));
+  const { massLabel, formatMassForInput, displayToGrams } = useMassDisplay();
+  const [text, setText] = useState(() => formatMassForInput(grams));
+
+  useEffect(() => {
+    setText(formatMassForInput(grams));
+  }, [grams, formatMassForInput]);
 
   const handleChange = (input: string) => {
     if (input === '') {
@@ -53,11 +58,11 @@ export const CarbInputGroup: FC<CarbInputGroupProps> = ({
     setText(input);
 
     if (new RegExp(`[${decimalSeparator === ',' ? ',' : '.'}]$`).test(input)) {
-      onGramsChange(parseGramsInput(input.slice(0, -1)));
+      onGramsChange(displayToGrams(parseGramsInput(input.slice(0, -1))));
       return;
     }
 
-    onGramsChange(parseGramsInput(input));
+    onGramsChange(displayToGrams(parseGramsInput(input)));
   };
 
   const handleBlur = () => {
@@ -67,15 +72,15 @@ export const CarbInputGroup: FC<CarbInputGroupProps> = ({
       return;
     }
 
-    const parsed = parseGramsInput(text);
-    setText(formatDecimalForInput(parsed));
+    const parsed = displayToGrams(parseGramsInput(text));
+    setText(formatMassForInput(parsed));
     onGramsChange(parsed);
   };
 
   return (
     <Row>
       <Label $variant="caption" $color="textSecondary">
-        {t('common.grams')}
+        {massLabel}
       </Label>
       <InputNumber value={text} onChangeText={handleChange} onBlur={handleBlur} />
       <CarbValue grams={carbs} />

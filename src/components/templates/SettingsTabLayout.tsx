@@ -12,9 +12,12 @@ import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
+import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
 import { LanguagePickerSheet } from '@/components/organisms/LanguagePickerSheet';
-import { getCurrentLocale, getLanguageLabelKey, setAppLocale } from '@/i18n';
+import { getLanguageLabelKey } from '@/i18n';
+import { useMassDisplay } from '@/hooks/useMassDisplay';
+import { usePreferencesStore } from '@/store/preferences.store';
 import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
@@ -72,7 +75,9 @@ export const SettingsTabLayout: FC = () => {
   const [editingUnit, setEditingUnit] = useState<GlobalUnit | null>(null);
   const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
   const [isLanguageSheetOpen, setIsLanguageSheetOpen] = useState(false);
-  const currentLocale = getCurrentLocale();
+  const currentLocale = usePreferencesStore((s) => s.locale);
+  const setLocale = usePreferencesStore((s) => s.setLocale);
+  const { formatEquivalentMass } = useMassDisplay();
 
   useFocusEffect(
     useCallback(() => {
@@ -154,6 +159,14 @@ export const SettingsTabLayout: FC = () => {
           </Section>
 
           <Section>
+            <Text $variant="body">{t('settings.units')}</Text>
+            <Text $variant="caption" $color="textSecondary">
+              {t('settings.unitsDescription')}
+            </Text>
+            <UnitSystemPicker />
+          </Section>
+
+          <Section>
             <Text $variant="body">{t('settings.language')}</Text>
             <PickerField
               value={t(getLanguageLabelKey(currentLocale))}
@@ -176,7 +189,7 @@ export const SettingsTabLayout: FC = () => {
                 <UnitRow key={unit.id}>
                   <Pressable onPress={() => openEditUnit(unit)}>
                     <Text $variant="body">
-                      {unit.name} ({unit.abbreviation}) — {unit.equivalentInGrams}g
+                      {unit.name} ({unit.abbreviation}) — {formatEquivalentMass(unit.equivalentInGrams)}
                     </Text>
                   </Pressable>
                   <Pressable
@@ -228,7 +241,7 @@ export const SettingsTabLayout: FC = () => {
         visible={isLanguageSheetOpen}
         locale={currentLocale}
         onSelect={(locale) => {
-          void setAppLocale(locale);
+          void setLocale(locale);
           setIsLanguageSheetOpen(false);
         }}
         onClose={() => setIsLanguageSheetOpen(false)}
