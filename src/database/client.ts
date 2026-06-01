@@ -3,6 +3,7 @@ import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import { migrateFromMmkvIfNeeded } from '@/database/migrateFromMmkv';
 import { migrateSettingsFromMmkvIfNeeded } from '@/database/migrateSettingsFromMmkv';
 import { runMigrations } from '@/database/migrations';
+import { runTutorialRecoveryIfNeeded } from '@/services/tutorial-recovery.service';
 import { hydrateAppPreferences } from '@/store/preferences.store';
 
 const DB_NAME = 'glucoscan.db';
@@ -17,8 +18,9 @@ export const initDatabase = async (): Promise<SQLiteDatabase> => {
   initPromise = (async () => {
     const db = await openDatabaseAsync(DB_NAME);
     await runMigrations(db);
-    await migrateFromMmkvIfNeeded(db);
     dbInstance = db;
+    await runTutorialRecoveryIfNeeded();
+    await migrateFromMmkvIfNeeded(db);
     await migrateSettingsFromMmkvIfNeeded(db);
     await hydrateAppPreferences();
     return db;
