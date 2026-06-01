@@ -58,6 +58,8 @@ export const en: TranslationSchema = {
     duplicateEan: 'This EAN code is already in the list.',
     eanTaken: 'EAN {{ean}} is already used by another product.',
     eanCount: '{{count}} EAN codes',
+    compactListOnA11y: 'Compact view on, switch to detailed view',
+    compactListOffA11y: 'Switch to compact view',
   },
   meals: {
     title: 'My meals',

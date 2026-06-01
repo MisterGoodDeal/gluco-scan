@@ -12,9 +12,11 @@ import {
 } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
+import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
+import { useProductStore } from '@/store/product.store';
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
@@ -44,10 +46,18 @@ const SearchRow = styled(GlassPanel)`
   border-radius: ${({ theme }) => theme.radius.md}px;
 `;
 
-const ResultRow = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.md}px;
+const ResultRow = styled.Pressable<{ $compact?: boolean }>`
+  padding: ${({ theme, $compact }) =>
+    $compact ? theme.spacing.sm : theme.spacing.md}px;
   border-bottom-width: 1px;
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+`;
+
+const CompactResultLine = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs}px;
+  min-width: 0;
 `;
 
 const EmptyWrap = styled.View`
@@ -68,6 +78,8 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const compactList = useProductStore((s) => s.compactList);
+  const toggleCompactList = useProductStore((s) => s.toggleCompactList);
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -114,6 +126,21 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                   variant="plain"
                 />
               </View>
+              <ButtonIcon
+                onPress={toggleCompactList}
+                accessibilityLabel={
+                  compactList ? t('products.compactListOnA11y') : t('products.compactListOffA11y')
+                }
+                accessibilityState={{ selected: compactList }}>
+                <SymbolView
+                  name={{
+                    ios: compactList ? 'rectangle.expand.vertical' : 'rectangle.compress.vertical',
+                    android: compactList ? 'view_agenda' : 'view_compact',
+                  }}
+                  size={18}
+                  tintColor={compactList ? theme.colors.accent : theme.colors.textSecondary}
+                />
+              </ButtonIcon>
               <Pressable onPress={onClose} hitSlop={8}>
                 <Text $variant="caption" $color="accent">
                   {t('common.cancel')}
@@ -127,6 +154,7 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
           ) : (
             <FlatList
               data={results}
+              extraData={compactList}
               keyExtractor={(item) => item.id}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ paddingHorizontal: theme.spacing.md }}
@@ -139,15 +167,34 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                   </Text>
                 </EmptyWrap>
               }
-              renderItem={({ item }) => (
-                <ResultRow onPress={() => handleSelect(item)}>
-                  <Text $variant="body">{item.name}</Text>
-                  <Text $variant="caption" $color="textSecondary">
-                    {formatDecimal(item.carbsPer100g)} g / 100g
-                    {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}
-                  </Text>
-                </ResultRow>
-              )}
+              renderItem={({ item }) => {
+                const carbsLabel = t('common.carbsPer100g', {
+                  value: formatDecimal(item.carbsPer100g),
+                });
+
+                return (
+                  <ResultRow $compact={compactList} onPress={() => handleSelect(item)}>
+                    {compactList ? (
+                      <CompactResultLine>
+                        <Text $variant="body" numberOfLines={1} style={{ flexShrink: 1 }}>
+                          {item.name}
+                        </Text>
+                        <Text $variant="caption" $color="textSecondary" numberOfLines={1}>
+                          {carbsLabel}
+                        </Text>
+                      </CompactResultLine>
+                    ) : (
+                      <>
+                        <Text $variant="body">{item.name}</Text>
+                        <Text $variant="caption" $color="textSecondary">
+                          {carbsLabel}
+                          {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}
+                        </Text>
+                      </>
+                    )}
+                  </ResultRow>
+                );
+              }}
             />
           )}
         </Overlay>

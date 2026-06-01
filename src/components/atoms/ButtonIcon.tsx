@@ -1,10 +1,12 @@
 import { type FC, type ReactNode } from 'react';
+import { type AccessibilityState } from 'react-native';
 import styled from 'styled-components/native';
 
 type ButtonIconProps = {
   onPress: () => void;
   children: ReactNode;
   accessibilityLabel: string;
+  accessibilityState?: AccessibilityState;
 };
 
 const Pressable = styled.Pressable`
@@ -22,10 +24,12 @@ export const ButtonIcon: FC<ButtonIconProps> = ({
   onPress,
   children,
   accessibilityLabel,
+  accessibilityState,
 }) => (
   <Pressable
     onPress={onPress}
     accessibilityLabel={accessibilityLabel}
+    accessibilityState={accessibilityState}
     accessibilityRole="button"
     hitSlop={8}>
     {children}

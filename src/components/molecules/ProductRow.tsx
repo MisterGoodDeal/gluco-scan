@@ -12,6 +12,7 @@ import { formatDecimal } from '@/utils/format';
 
 type ProductRowProps = {
   product: Product;
+  compact?: boolean;
   blurTarget?: RefObject<View | null>;
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
@@ -28,6 +29,14 @@ const Info = styled(Pressable)`
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
+const CompactInfo = styled(Pressable)`
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs}px;
+  min-width: 0;
+`;
+
 const Actions = styled.View`
   flex-direction: row;
   align-items: center;
@@ -40,9 +49,51 @@ const ActionLabel = styled(Text)`
 `;
 
 export const ProductRow: FC<ProductRowProps> = memo(
-  ({ product, blurTarget, onEdit, onDelete }) => {
+  ({ product, compact = false, blurTarget, onEdit, onDelete }) => {
     const { t } = useTranslation();
     const theme = useTheme();
+    const carbsLabel = t('common.carbsPer100g', { value: formatDecimal(product.carbsPer100g) });
+
+    if (compact) {
+      return (
+        <GlassPanel
+          blurTarget={blurTarget}
+          padding={theme.spacing.sm}
+          borderRadius={theme.radius.sm}>
+          <Row>
+            <CompactInfo
+              onPress={() => onEdit(product)}
+              accessibilityRole="button"
+              accessibilityLabel={t('products.editA11y')}>
+              <Text $variant="body" numberOfLines={1} style={{ flexShrink: 1 }}>
+                {product.name}
+              </Text>
+              <Text $variant="caption" $color="textSecondary" numberOfLines={1}>
+                {carbsLabel}
+              </Text>
+            </CompactInfo>
+            <Actions>
+              <ButtonIcon
+                onPress={() => onEdit(product)}
+                accessibilityLabel={t('products.editA11y')}>
+                <View pointerEvents="none">
+                  <SymbolView
+                    name={{ ios: 'pencil', android: 'edit' }}
+                    size={16}
+                    tintColor={theme.colors.textSecondary}
+                  />
+                </View>
+              </ButtonIcon>
+              <ButtonIcon
+                onPress={() => onDelete(product.id)}
+                accessibilityLabel={t('products.deleteA11y')}>
+                <ActionLabel $color="error">×</ActionLabel>
+              </ButtonIcon>
+            </Actions>
+          </Row>
+        </GlassPanel>
+      );
+    }
 
     return (
       <GlassPanel blurTarget={blurTarget}>
@@ -53,7 +104,7 @@ export const ProductRow: FC<ProductRowProps> = memo(
             accessibilityLabel={t('products.editA11y')}>
             <Text $variant="subtitle">{product.name}</Text>
             <Text $variant="caption" $color="textSecondary">
-              {t('common.carbsPer100g', { value: formatDecimal(product.carbsPer100g) })}
+              {carbsLabel}
             </Text>
             {product.eans.length > 0 && (
               <Text $variant="caption" $color="textSecondary">

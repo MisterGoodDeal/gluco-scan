@@ -56,6 +56,8 @@ export type TranslationSchema = {
     duplicateEan: string;
     eanTaken: string;
     eanCount: string;
+    compactListOnA11y: string;
+    compactListOffA11y: string;
   };
   meals: {
     title: string;
@@ -202,6 +204,8 @@ export const fr: TranslationSchema = {
     duplicateEan: 'Ce code EAN est déjà dans la liste.',
     eanTaken: 'Le code EAN {{ean}} est déjà utilisé par un autre produit.',
     eanCount: '{{count}} codes EAN',
+    compactListOnA11y: 'Vue compacte activée, passer en vue détaillée',
+    compactListOffA11y: 'Passer en vue compacte',
   },
   meals: {
     title: 'Mes repas',

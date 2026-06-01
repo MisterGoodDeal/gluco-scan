@@ -12,6 +12,7 @@ import { hp } from '@/utils/screen';
 
 type ProductListProps = {
   products: Product[];
+  compact?: boolean;
   blurTarget?: RefObject<View | null>;
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
@@ -32,12 +33,13 @@ const EmptyContainer = styled.View`
   min-height: ${hp('30%')}px;
 `;
 
-const Separator = styled.View`
-  height: ${hp('1.5%')}px;
+const Separator = styled.View<{ $compact?: boolean }>`
+  height: ${({ theme, $compact }) => ($compact ? theme.spacing.xs : hp('1.5%'))}px;
 `;
 
 export const ProductList: FC<ProductListProps> = ({
   products,
+  compact = false,
   blurTarget,
   onEdit,
   onDelete,
@@ -62,16 +64,18 @@ export const ProductList: FC<ProductListProps> = ({
     <ListContainer>
       <FlatList
         data={products}
+        extraData={compact}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ProductRow
             product={item}
+            compact={compact}
             blurTarget={blurTarget}
             onEdit={onEdit}
             onDelete={onDelete}
           />
         )}
-        ItemSeparatorComponent={Separator}
+        ItemSeparatorComponent={() => <Separator $compact={compact} />}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={
           products.length === 0 ? { flexGrow: 1 } : { paddingBottom: hp('4%') }
