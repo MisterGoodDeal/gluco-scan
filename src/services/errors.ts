@@ -1,44 +1,65 @@
-export class ProductNotFoundError extends Error {
+import i18n from '@/i18n';
+import type { TranslationSchema } from '@/i18n/locales/fr';
+
+type ErrorTranslationKey = `errors.${keyof TranslationSchema['errors']}`;
+
+export class TranslatableError extends Error {
+  constructor(
+    public readonly translationKey: ErrorTranslationKey,
+    public readonly translationParams?: Record<string, string | number>,
+  ) {
+    super(translationKey);
+    this.name = 'TranslatableError';
+  }
+
+  override get message(): string {
+    return i18n.t(this.translationKey, this.translationParams);
+  }
+}
+
+export class ProductNotFoundError extends TranslatableError {
   constructor(ean: string) {
-    super(`Produit non trouvé pour le code ${ean}`);
+    super('errors.productNotFound', { ean });
     this.name = 'ProductNotFoundError';
   }
 }
 
-export class MissingNutrimentsError extends Error {
+export class MissingNutrimentsError extends TranslatableError {
   constructor(ean: string) {
-    super(`Données glucides indisponibles pour le code ${ean}`);
+    super('errors.missingNutriments', { ean });
     this.name = 'MissingNutrimentsError';
   }
 }
 
-export class NetworkError extends Error {
-  constructor(message = 'Impossible de contacter Open Food Facts') {
-    super(message);
+export class NetworkError extends TranslatableError {
+  constructor(
+    key: ErrorTranslationKey = 'errors.network',
+    params?: Record<string, string | number>,
+  ) {
+    super(key, params);
     this.name = 'NetworkError';
   }
 }
 
-export class InvalidBarcodeError extends Error {
+export class InvalidBarcodeError extends TranslatableError {
   constructor() {
-    super('Code-barres invalide');
+    super('errors.invalidBarcode');
     this.name = 'InvalidBarcodeError';
   }
 }
 
-export class OffRateLimitError extends Error {
+export class OffRateLimitError extends TranslatableError {
   readonly retryAfterSeconds: number;
 
   constructor(retryAfterSeconds: number) {
-    super(
-      `Limite Open Food Facts atteinte (15/min). Attendez ${retryAfterSeconds}s avant de rescanner.`,
-    );
+    super('errors.offRateLimit', { seconds: retryAfterSeconds });
     this.name = 'OffRateLimitError';
     this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
 export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof TranslatableError) return error.message;
   if (error instanceof Error) return error.message;
-  return 'Une erreur est survenue';
+  return i18n.t('errors.generic');
 };

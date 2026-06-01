@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import type { ManualProductInitial } from '@/components/organisms/ProductManualEntryModal';
 import { fetchOffPartialByEAN } from '@/services/openFoodFacts.service';
-import { OffRateLimitError } from '@/services/errors';
+import { OffRateLimitError, getErrorMessage } from '@/services/errors';
 import {
   getAllCachedProducts,
   removeCachedProduct,
@@ -84,7 +84,7 @@ export const useProductLibrary = () => {
       }));
     } catch (error) {
       if (error instanceof OffRateLimitError) {
-        setLookupWarning(error.message);
+        setLookupWarning(getErrorMessage(error));
       }
     } finally {
       setIsLookupLoading(false);

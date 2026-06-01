@@ -1,6 +1,7 @@
 import { BlurTargetView } from 'expo-blur';
 import { useIsFocused } from 'expo-router';
 import { type FC, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components/native';
@@ -23,6 +24,7 @@ const Content = styled.View`
 `;
 
 export const ScannerScreenLayout: FC = () => {
+  const { t } = useTranslation();
   const blurTargetRef = useRef<View>(null);
   const [footerHeight, setFooterHeight] = useState(0);
   const isFocused = useIsFocused();
@@ -67,8 +69,9 @@ export const ScannerScreenLayout: FC = () => {
       <ProductManualEntryModal
         visible={manualEntry !== null}
         initial={manualEntry}
-        subtitle="Produit introuvable ou incomplet — complétez les informations."
-        submitLabel="Ajouter au repas"
+        title={t('scanner.completeProduct')}
+        subtitle={t('scanner.incompleteProductSubtitle')}
+        submitLabel={t('scanner.addToMeal')}
         onClose={closeManualEntry}
         onSubmit={submitManualEntry}
       />

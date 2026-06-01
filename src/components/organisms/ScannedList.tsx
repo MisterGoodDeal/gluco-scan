@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { type FC, type RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, View } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
@@ -37,6 +38,7 @@ const Separator = styled.View`
 `;
 
 export const ScannedList: FC<ScannedListProps> = ({ blurTarget, bottomInset = 0 }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const scannedItems = useScanStore((state) => state.scannedItems);
   const updateGrams = useScanStore((state) => state.updateGrams);
@@ -53,7 +55,7 @@ export const ScannedList: FC<ScannedListProps> = ({ blurTarget, bottomInset = 0 
           <EmptyContainer style={{ paddingBottom: listBottomPadding }}>
             <GlassPanel blurTarget={blurTarget}>
               <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
-                Scannez un produit pour commencer
+                {t('scanner.emptyList')}
               </Text>
             </GlassPanel>
           </EmptyContainer>
@@ -79,7 +81,7 @@ export const ScannedList: FC<ScannedListProps> = ({ blurTarget, bottomInset = 0 
         bottom={fabBottom}
         blurTarget={blurTarget}
         onPress={() => router.push('/products')}
-        accessibilityLabel="Mes produits"
+        accessibilityLabel={t('scanner.myProductsA11y')}
         label="☰"
       />
     </ListWrapper>

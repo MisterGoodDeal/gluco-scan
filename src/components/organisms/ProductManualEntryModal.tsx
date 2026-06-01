@@ -1,5 +1,6 @@
-import { BlurView } from "expo-blur";
-import { type FC, useEffect, useState } from "react";
+import { BlurView } from 'expo-blur';
+import { type FC, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -8,17 +9,18 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import styled, { useTheme } from "styled-components/native";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import styled, { useTheme } from 'styled-components/native';
 
-import { GlassPanel } from "@/components/atoms/GlassPanel";
-import { InputNumber } from "@/components/atoms/InputNumber";
-import { SearchInput } from "@/components/atoms/SearchInput";
-import { Text } from "@/components/atoms/Text";
-import { EanScanField } from "@/components/molecules/EanScanField";
-import type { Product } from "@/types/product";
-import { isValidEan, parseManualCarbs } from "@/utils/ean";
+import { GlassPanel } from '@/components/atoms/GlassPanel';
+import { InputNumber } from '@/components/atoms/InputNumber';
+import { SearchInput } from '@/components/atoms/SearchInput';
+import { Text } from '@/components/atoms/Text';
+import { EanScanField } from '@/components/molecules/EanScanField';
+import type { Product } from '@/types/product';
+import { isValidEan, parseManualCarbs } from '@/utils/ean';
+import { formatDecimalForInput } from '@/utils/format';
 
 export type ManualProductInitial = {
   ean: string;
@@ -51,7 +53,7 @@ const KeyboardAvoid = styled(KeyboardAvoidingView)`
 `;
 
 const ModalScrollView = styled(ScrollView).attrs({
-  keyboardShouldPersistTaps: "handled",
+  keyboardShouldPersistTaps: 'handled',
   showsVerticalScrollIndicator: false,
   bounces: false,
 })`
@@ -84,12 +86,8 @@ const Actions = styled.View`
   margin-top: ${({ theme }) => theme.spacing.md}px;
 `;
 
-const ActionButton = styled.Pressable<{
-  $primary?: boolean;
-  $disabled?: boolean;
-}>`
-  padding: ${({ theme }) => theme.spacing.sm}px
-    ${({ theme }) => theme.spacing.lg}px;
+const ActionButton = styled.Pressable<{ $primary?: boolean; $disabled?: boolean }>`
+  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
   border-radius: ${({ theme }) => theme.radius.sm}px;
   background-color: ${({ theme, $primary }) =>
     $primary ? theme.colors.accent : theme.colors.glass.background};
@@ -101,30 +99,34 @@ const ActionButton = styled.Pressable<{
 export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
   visible,
   initial,
-  title = 'Compléter le produit',
+  title,
   subtitle,
-  submitLabel = "Enregistrer",
+  submitLabel,
   isLookupLoading = false,
   lookupWarning = null,
   onClose,
   onLookup,
   onSubmit,
 }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [ean, setEan] = useState("");
-  const [name, setName] = useState("");
-  const [carbsText, setCarbsText] = useState("");
+  const [ean, setEan] = useState('');
+  const [name, setName] = useState('');
+  const [carbsText, setCarbsText] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  const resolvedTitle = title ?? t('scanner.completeProduct');
+  const resolvedSubmitLabel = submitLabel ?? t('common.save');
 
   useEffect(() => {
     if (!visible || !initial) return;
     setEan(initial.ean);
-    setName(initial.name ?? "");
+    setName(initial.name ?? '');
     setCarbsText(
       initial.carbsPer100g !== undefined
-        ? String(initial.carbsPer100g).replace(".", ",")
-        : "",
+        ? formatDecimalForInput(initial.carbsPer100g)
+        : '',
     );
     setError(null);
   }, [visible, initial]);
@@ -144,7 +146,7 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
 
   const handleLookup = async () => {
     if (!onLookup || !isValidEan(ean)) {
-      setError("Code EAN invalide");
+      setError(t('modal.invalidEan'));
       return;
     }
     setError(null);
@@ -157,15 +159,15 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
     const carbsPer100g = parseManualCarbs(carbsText);
 
     if (!isValidEan(trimmedEan)) {
-      setError("Code EAN invalide");
+      setError(t('modal.invalidEan'));
       return;
     }
     if (!trimmedName) {
-      setError("Le nom du produit est requis");
+      setError(t('modal.nameRequired'));
       return;
     }
     if (carbsPer100g === null) {
-      setError("Glucides / 100g invalides");
+      setError(t('modal.invalidCarbs'));
       return;
     }
 
@@ -179,34 +181,26 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
   if (!initial) return null;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={handleClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <BlurView
         intensity={50}
         tint={theme.blur.tint}
         blurMethod={theme.blur.androidMethod}
-        style={StyleSheet.absoluteFill}
-      >
+        style={StyleSheet.absoluteFill}>
         <KeyboardAvoid
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={insets.top}
-        >
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={insets.top}>
           <ModalScrollView
             contentContainerStyle={{
               flexGrow: 1,
-              justifyContent: "center",
+              justifyContent: 'center',
               padding: theme.spacing.lg,
-            }}
-          >
+            }}>
             <Overlay onPress={handleClose}>
               <Pressable onPress={(event) => event.stopPropagation()}>
                 <ModalCard>
                   <GlassPanel padding={theme.spacing.lg}>
-                    <Text $variant="subtitle">{title}</Text>
+                    <Text $variant="subtitle">{resolvedTitle}</Text>
                     {subtitle && (
                       <Text $variant="caption" $color="textSecondary">
                         {subtitle}
@@ -216,25 +210,25 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
                     <FormFields>
                       <Field>
                         <Text $variant="caption" $color="textSecondary">
-                          Code EAN
+                          {t('modal.eanLabel')}
                         </Text>
                         <EanScanField value={ean} onScan={handleEanScanned} />
                       </Field>
 
                       <Field>
                         <Text $variant="caption" $color="textSecondary">
-                          Nom du produit
+                          {t('modal.nameLabel')}
                         </Text>
                         <SearchInput
                           value={name}
                           onChangeText={setName}
-                          placeholder="Mon produit"
+                          placeholder={t('modal.namePlaceholder')}
                         />
                       </Field>
 
                       <Field>
                         <Text $variant="caption" $color="textSecondary">
-                          Glucides / 100g
+                          {t('modal.carbsLabel')}
                         </Text>
                         <InputNumber
                           value={carbsText}
@@ -258,27 +252,19 @@ export const ProductManualEntryModal: FC<ProductManualEntryModalProps> = ({
 
                     <Actions>
                       <ActionButton onPress={handleClose}>
-                        <Text $variant="caption">Annuler</Text>
+                        <Text $variant="caption">{t('common.cancel')}</Text>
                       </ActionButton>
                       {onLookup && (
-                        <ActionButton
-                          onPress={handleLookup}
-                          $disabled={isLookupLoading || !ean}
-                        >
+                        <ActionButton onPress={handleLookup} $disabled={isLookupLoading || !ean}>
                           {isLookupLoading ? (
-                            <ActivityIndicator
-                              color={theme.colors.text}
-                              size="small"
-                            />
+                            <ActivityIndicator color={theme.colors.text} size="small" />
                           ) : (
-                            <Text $variant="caption">
-                              Importer automatiquement
-                            </Text>
+                            <Text $variant="caption">{t('modal.importOff')}</Text>
                           )}
                         </ActionButton>
                       )}
                       <ActionButton $primary onPress={handleSubmit}>
-                        <Text $variant="caption">{submitLabel}</Text>
+                        <Text $variant="caption">{resolvedSubmitLabel}</Text>
                       </ActionButton>
                     </Actions>
                   </GlassPanel>

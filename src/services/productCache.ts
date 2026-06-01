@@ -1,5 +1,6 @@
 import { createMMKV, type MMKV } from 'react-native-mmkv';
 
+import { getSortLocale } from '@/i18n';
 import { fetchProductByEAN } from '@/services/openFoodFacts.service';
 import type { Product } from '@/types/product';
 
@@ -48,7 +49,7 @@ export const getAllCachedProducts = (): Product[] => {
     }
   }
 
-  return products.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  return products.sort((a, b) => a.name.localeCompare(b.name, getSortLocale()));
 };
 
 export const getProduct = async (ean: string): Promise<Product> => {

@@ -1,5 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { type FC, type RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
@@ -43,6 +44,7 @@ export const CarbTotalFooter: FC<CarbTotalFooterProps> = ({
   blurTarget,
   onHeightChange,
 }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { totalCarbs } = useCarbCalculator();
@@ -72,16 +74,16 @@ export const CarbTotalFooter: FC<CarbTotalFooterProps> = ({
         <FooterContent>
           <TotalBlock>
             <Text $variant="caption" $color="textSecondary">
-              Glucides totaux
+              {t('scanner.totalCarbs')}
             </Text>
             <Text $variant="title" $color="accent">
-              {formatDecimal(totalCarbs)} g
+              {formatDecimal(totalCarbs)} {t('common.gramsUnit')}
             </Text>
           </TotalBlock>
           {hasItems && (
-            <ResetButton onPress={reset} accessibilityLabel="Réinitialiser la session">
+            <ResetButton onPress={reset} accessibilityLabel={t('scanner.resetSessionA11y')}>
               <Text $variant="caption" $color="textSecondary">
-                Reset
+                {t('common.reset')}
               </Text>
             </ResetButton>
           )}

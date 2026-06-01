@@ -1,4 +1,5 @@
 import { type FC, type RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, View } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -39,13 +40,15 @@ export const ProductLibraryList: FC<ProductLibraryListProps> = ({
   onAddToMeal,
   onDelete,
 }) => {
+  const { t } = useTranslation();
+
   if (products.length === 0) {
     return (
       <ListContainer>
         <EmptyContainer>
           <GlassPanel blurTarget={blurTarget}>
             <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
-              Aucun produit en cache.{'\n'}Scannez ou ajoutez-en un manuellement.
+              {t('products.emptyList')}
             </Text>
           </GlassPanel>
         </EmptyContainer>

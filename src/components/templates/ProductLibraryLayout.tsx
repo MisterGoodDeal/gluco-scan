@@ -1,6 +1,7 @@
 import { BlurTargetView } from 'expo-blur';
 import { router } from 'expo-router';
 import { type FC, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components/native';
@@ -29,6 +30,7 @@ const AddHeaderButton = styled.Pressable`
 `;
 
 export const ProductLibraryLayout: FC = () => {
+  const { t } = useTranslation();
   const blurTargetRef = useRef<View>(null);
   const addItem = useScanStore((state) => state.addItem);
 
@@ -63,12 +65,12 @@ export const ProductLibraryLayout: FC = () => {
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
         <ScreenHeader
-          title="Mes produits"
+          title={t('products.title')}
           onBack={() => router.back()}
           rightAction={
-            <AddHeaderButton onPress={openAddModal} accessibilityLabel="Ajouter">
+            <AddHeaderButton onPress={openAddModal} accessibilityLabel={t('common.add')}>
               <Text $variant="caption" $color="accent">
-                + Ajouter
+                {t('products.addButton')}
               </Text>
             </AddHeaderButton>
           }
@@ -87,13 +89,9 @@ export const ProductLibraryLayout: FC = () => {
       <ProductManualEntryModal
         visible={manualEntry !== null}
         initial={manualEntry}
-        title={isEditing ? 'Modifier le produit' : 'Ajouter un produit'}
-        subtitle={
-          isEditing
-            ? 'Modifiez les informations du produit.'
-            : 'Scannez le code-barres puis complétez les informations.'
-        }
-        submitLabel="Enregistrer"
+        title={isEditing ? t('products.editProduct') : t('products.addProduct')}
+        subtitle={isEditing ? t('products.editSubtitle') : t('products.addSubtitle')}
+        submitLabel={t('common.save')}
         isLookupLoading={isLookupLoading}
         lookupWarning={lookupWarning}
         onClose={closeAddModal}

@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { SCAN_COOLDOWN_MS } from '@/constants/api';
 import { fetchOffPartialByEAN, fetchProductByEAN } from '@/services/openFoodFacts.service';
 import { getCachedProduct, setCachedProduct } from '@/services/productCache';
-import { InvalidBarcodeError, OffRateLimitError } from '@/services/errors';
+import { InvalidBarcodeError, OffRateLimitError, getErrorMessage } from '@/services/errors';
 import { useScanStore } from '@/store/scanStore';
 import type { Product } from '@/types/product';
 import { createScanDebouncer } from '@/utils/debounce';
@@ -43,7 +43,7 @@ export const useScanner = () => {
       });
     } catch (error) {
       if (error instanceof OffRateLimitError) {
-        setScanWarning(error.message);
+        setScanWarning(getErrorMessage(error));
       }
       setManualEntry({ ean });
     }
@@ -54,7 +54,7 @@ export const useScanner = () => {
     async (rawEan: string) => {
       const ean = rawEan.trim();
       if (!isValidEan(ean)) {
-        setScanError(new InvalidBarcodeError().message);
+        setScanError(getErrorMessage(new InvalidBarcodeError()));
         setScanWarning(null);
         return;
       }
@@ -79,7 +79,7 @@ export const useScanner = () => {
           completeScan(product);
         } catch (error) {
           if (error instanceof OffRateLimitError) {
-            setScanWarning(error.message);
+            setScanWarning(getErrorMessage(error));
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
             return;
           }

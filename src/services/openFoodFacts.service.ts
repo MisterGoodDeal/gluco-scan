@@ -1,4 +1,6 @@
 import { OFF_BASE_URL, OFF_USER_AGENT } from '@/constants/api';
+import { getOffLocaleParams } from '@/i18n';
+import i18n from '@/i18n';
 import {
   MissingNutrimentsError,
   NetworkError,
@@ -32,7 +34,8 @@ const parseCarbs = (nutriments?: OffNutriments): number | null => {
 export const fetchProductByEAN = async (ean: string): Promise<Product> => {
   consumeOffApiCall();
 
-  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=fr&lc=fr&fields=product_name,nutriments`;
+  const { cc, lc } = getOffLocaleParams();
+  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=${cc}&lc=${lc}&fields=product_name,nutriments`;
 
   let response: Response;
   try {
@@ -44,14 +47,14 @@ export const fetchProductByEAN = async (ean: string): Promise<Product> => {
   }
 
   if (!response.ok) {
-    throw new NetworkError(`Erreur réseau (${response.status})`);
+    throw new NetworkError('errors.networkStatus', { status: response.status });
   }
 
   let data: OffResponse;
   try {
     data = (await response.json()) as OffResponse;
   } catch {
-    throw new NetworkError('Réponse invalide du serveur');
+    throw new NetworkError('errors.invalidResponse');
   }
 
   if (data.status !== 1 || !data.product) {
@@ -65,7 +68,7 @@ export const fetchProductByEAN = async (ean: string): Promise<Product> => {
 
   return {
     ean,
-    name: data.product.product_name?.trim() || 'Produit inconnu',
+    name: data.product.product_name?.trim() || i18n.t('products.unknownProduct'),
     carbsPer100g,
   };
 };
@@ -79,7 +82,8 @@ export type PartialOffProduct = {
 export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProduct> => {
   consumeOffApiCall();
 
-  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=fr&lc=fr&fields=product_name,nutriments`;
+  const { cc, lc } = getOffLocaleParams();
+  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=${cc}&lc=${lc}&fields=product_name,nutriments`;
 
   try {
     const response = await fetch(url, {

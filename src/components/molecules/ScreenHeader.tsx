@@ -1,4 +1,5 @@
 import { type FC, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
@@ -34,6 +35,7 @@ const RightSide = styled.View`
 `;
 
 export const ScreenHeader: FC<ScreenHeaderProps> = ({ title, onBack, rightAction }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const paddingTop = insets.top + theme.spacing.sm;
@@ -42,9 +44,9 @@ export const ScreenHeader: FC<ScreenHeaderProps> = ({ title, onBack, rightAction
     <Header $paddingTop={paddingTop}>
       <Side>
         {onBack && (
-          <BackButton onPress={onBack} accessibilityLabel="Retour">
+          <BackButton onPress={onBack} accessibilityLabel={t('common.backA11y')}>
             <Text $variant="body" $color="accent">
-              ← Retour
+              {t('common.back')}
             </Text>
           </BackButton>
         )}

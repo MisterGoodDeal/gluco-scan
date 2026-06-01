@@ -1,5 +1,6 @@
 import { SymbolView } from 'expo-symbols';
 import { memo, type FC, type RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
@@ -41,6 +42,7 @@ const ActionLabel = styled(Text)`
 
 export const CachedProductRow: FC<CachedProductRowProps> = memo(
   ({ product, blurTarget, onEdit, onAddToMeal, onDelete }) => {
+    const { t } = useTranslation();
     const theme = useTheme();
 
     return (
@@ -49,16 +51,16 @@ export const CachedProductRow: FC<CachedProductRowProps> = memo(
           <Info>
             <Text $variant="subtitle">{product.name}</Text>
             <Text $variant="caption" $color="textSecondary">
-              EAN {product.ean}
+              {t('common.ean', { ean: product.ean })}
             </Text>
             <Text $variant="caption" $color="accent">
-              {formatDecimal(product.carbsPer100g)} g / 100g
+              {t('common.carbsPer100g', { value: formatDecimal(product.carbsPer100g) })}
             </Text>
           </Info>
           <Actions>
             <ButtonIcon
               onPress={() => onEdit(product)}
-              accessibilityLabel="Modifier le produit">
+              accessibilityLabel={t('products.editA11y')}>
               <SymbolView
                 name={{ ios: 'pencil', android: 'edit' }}
                 size={18}
@@ -67,14 +69,16 @@ export const CachedProductRow: FC<CachedProductRowProps> = memo(
             </ButtonIcon>
             <ButtonIcon
               onPress={() => onAddToMeal(product)}
-              accessibilityLabel="Ajouter au repas">
+              accessibilityLabel={t('products.addToMealA11y')}>
               <SymbolView
                 name={{ ios: 'fork.knife', android: 'dining' }}
                 size={20}
                 tintColor={theme.colors.accent}
               />
             </ButtonIcon>
-            <ButtonIcon onPress={() => onDelete(product.ean)} accessibilityLabel="Supprimer">
+            <ButtonIcon
+              onPress={() => onDelete(product.ean)}
+              accessibilityLabel={t('products.deleteA11y')}>
               <ActionLabel $color="error">×</ActionLabel>
             </ButtonIcon>
           </Actions>

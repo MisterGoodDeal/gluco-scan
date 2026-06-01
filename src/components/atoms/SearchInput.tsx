@@ -1,5 +1,6 @@
 import { type FC } from 'react';
 import { type KeyboardTypeOptions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components/native';
 
 import { inputFieldStyles } from '@/styles/input';
@@ -26,23 +27,27 @@ const Input = styled.TextInput<{ $mono?: boolean; $flex?: boolean }>`
 export const SearchInput: FC<SearchInputProps> = ({
   value,
   onChangeText,
-  placeholder = 'Rechercher un produit…',
+  placeholder,
   editable = true,
   mono = false,
   flex = false,
   keyboardType,
-}) => (
-  <Input
-    value={value}
-    onChangeText={onChangeText}
-    placeholder={placeholder}
-    placeholderTextColor="#9AA3B5"
-    autoCapitalize="none"
-    autoCorrect={false}
-    clearButtonMode="while-editing"
-    editable={editable}
-    keyboardType={keyboardType}
-    $mono={mono}
-    $flex={flex}
-  />
-);
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <Input
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder ?? t('common.searchPlaceholder')}
+      placeholderTextColor="#9AA3B5"
+      autoCapitalize="none"
+      autoCorrect={false}
+      clearButtonMode="while-editing"
+      editable={editable}
+      keyboardType={keyboardType}
+      $mono={mono}
+      $flex={flex}
+    />
+  );
+};

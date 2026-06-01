@@ -1,5 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { type FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
@@ -102,6 +103,7 @@ export const ScannerView: FC<ScannerViewProps> = ({
   enabled = true,
   onClearError,
 }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -123,10 +125,10 @@ export const ScannerView: FC<ScannerViewProps> = ({
         <ScannerContainer style={{ minHeight: hp('22%') }}>
           <PermissionContainer>
             <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
-              GlucoScan a besoin de la caméra pour scanner les codes-barres.
+              {t('scanner.cameraPermission')}
             </Text>
             <PermissionButton onPress={requestPermission}>
-              <Text>Autoriser la caméra</Text>
+              <Text>{t('scanner.authorizeCamera')}</Text>
             </PermissionButton>
           </PermissionContainer>
         </ScannerContainer>

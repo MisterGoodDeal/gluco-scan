@@ -1,4 +1,5 @@
 import { memo, type FC, type RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -37,6 +38,7 @@ const DeleteLabel = styled(Text)`
 
 export const ScannedProductRow: FC<ScannedProductRowProps> = memo(
   ({ item, blurTarget, onGramsChange, onRemove }) => {
+    const { t } = useTranslation();
     const itemCarbs = getItemCarbs(item);
 
     return (
@@ -45,12 +47,12 @@ export const ScannedProductRow: FC<ScannedProductRowProps> = memo(
           <ProductInfo>
             <Text $variant="subtitle">{item.product.name}</Text>
             <Text $variant="caption" $color="textSecondary">
-              {formatDecimal(item.product.carbsPer100g)} g / 100g
+              {t('common.carbsPer100g', { value: formatDecimal(item.product.carbsPer100g) })}
             </Text>
           </ProductInfo>
           <ButtonIcon
             onPress={() => onRemove(item.id)}
-            accessibilityLabel="Supprimer le produit">
+            accessibilityLabel={t('scanner.removeProductA11y')}>
             <DeleteLabel $color="error">×</DeleteLabel>
           </ButtonIcon>
         </Header>

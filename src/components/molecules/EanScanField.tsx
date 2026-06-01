@@ -2,6 +2,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { SymbolView } from 'expo-symbols';
 import { type FC, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
@@ -55,8 +56,9 @@ const PermissionButton = styled.Pressable`
 export const EanScanField: FC<EanScanFieldProps> = ({
   value,
   onScan,
-  placeholder = 'Scanner un code-barres',
+  placeholder,
 }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
@@ -73,19 +75,19 @@ export const EanScanField: FC<EanScanFieldProps> = ({
     if (!permission?.granted) {
       const result = await requestPermission();
       if (!result.granted) {
-        setScanError('Autorisez la caméra pour scanner le code-barres.');
+        setScanError(t('modal.cameraRequired'));
         return;
       }
     }
 
     setIsScanning(true);
-  }, [isScanning, permission?.granted, requestPermission]);
+  }, [isScanning, permission?.granted, requestPermission, t]);
 
   const handleBarcodeScanned = useCallback(
     ({ data }: { data: string }) => {
       const ean = data.trim();
       if (!isValidEan(ean)) {
-        setScanError('Code-barres invalide');
+        setScanError(t('modal.invalidBarcode'));
         return;
       }
 
@@ -94,7 +96,7 @@ export const EanScanField: FC<EanScanFieldProps> = ({
       onScan(ean);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-    [onScan],
+    [onScan, t],
   );
 
   return (
@@ -105,11 +107,13 @@ export const EanScanField: FC<EanScanFieldProps> = ({
           editable={false}
           mono
           flex
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('modal.scanPlaceholder')}
         />
         <ButtonIcon
           onPress={handleToggleScan}
-          accessibilityLabel={isScanning ? 'Arrêter le scan' : 'Scanner le code EAN'}>
+          accessibilityLabel={
+            isScanning ? t('modal.stopScanA11y') : t('modal.scanEanA11y')
+          }>
           {isScanning ? (
             <ActivityIndicator color={theme.colors.accent} size="small" />
           ) : (
@@ -143,10 +147,10 @@ export const EanScanField: FC<EanScanFieldProps> = ({
       {isScanning && permission && !permission.granted && (
         <PermissionHint>
           <Text $variant="caption" $color="textSecondary">
-            Autorisez la caméra pour scanner le code-barres.
+            {t('modal.cameraRequired')}
           </Text>
           <PermissionButton onPress={requestPermission}>
-            <Text $variant="caption">Autoriser</Text>
+            <Text $variant="caption">{t('common.authorize')}</Text>
           </PermissionButton>
         </PermissionHint>
       )}
