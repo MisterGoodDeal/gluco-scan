@@ -89,6 +89,11 @@ export type TranslationSchema = {
   };
   settings: {
     title: string;
+    appearance: string;
+    appearanceDescription: string;
+    themeSystem: string;
+    themeLight: string;
+    themeDark: string;
     globalUnits: string;
     addUnit: string;
     editUnit: string;
@@ -219,6 +224,11 @@ export const fr: TranslationSchema = {
   },
   settings: {
     title: 'Paramètres',
+    appearance: 'Apparence',
+    appearanceDescription: 'Clair, sombre, ou selon le réglage système.',
+    themeSystem: 'Système',
+    themeLight: 'Clair',
+    themeDark: 'Sombre',
     globalUnits: 'Unités globales',
     addUnit: 'Ajouter une unité',
     editUnit: 'Modifier l\'unité',

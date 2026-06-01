@@ -4,7 +4,6 @@ import { router, useFocusEffect } from 'expo-router';
 import { type FC, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import styled, { useTheme } from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
@@ -93,7 +92,6 @@ export const MealsTabLayout: FC = () => {
 
   return (
     <Screen>
-      <StatusBar style="light" />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
         <Header>

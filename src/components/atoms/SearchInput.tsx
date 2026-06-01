@@ -1,7 +1,7 @@
 import { type FC } from 'react';
 import { type KeyboardTypeOptions } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { inputFieldStyles, inputPlainStyles } from '@/styles/input';
 
@@ -40,13 +40,14 @@ export const SearchInput: FC<SearchInputProps> = ({
   variant = 'default',
 }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   return (
     <Input
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder ?? t('common.searchPlaceholder')}
-      placeholderTextColor="#9AA3B5"
+      placeholderTextColor={theme.colors.textSecondary}
       autoCapitalize="none"
       autoCorrect={false}
       clearButtonMode="while-editing"

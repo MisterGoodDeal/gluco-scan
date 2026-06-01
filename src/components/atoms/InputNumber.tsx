@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { inputFieldStyles } from '@/styles/input';
 
@@ -24,14 +24,17 @@ export const InputNumber: FC<InputNumberProps> = ({
   onChangeText,
   onBlur,
   placeholder = '100',
-}) => (
+}) => {
+  const theme = useTheme();
+  return (
   <StyledInput
     value={value}
     onChangeText={onChangeText}
     onBlur={onBlur}
     placeholder={placeholder}
-    placeholderTextColor="#9AA3B5"
+    placeholderTextColor={theme.colors.textSecondary}
     keyboardType="decimal-pad"
     returnKeyType="done"
   />
-);
+  );
+};

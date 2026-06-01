@@ -5,12 +5,12 @@ import { useFocusEffect } from 'expo-router';
 import { type FC, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
+import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
 import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
@@ -133,13 +133,20 @@ export const SettingsTabLayout: FC = () => {
 
   return (
     <AppScreen>
-      <StatusBar style="light" />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
         <ScrollView>
           <Header>
             <Text $variant="subtitle">{t('settings.title')}</Text>
           </Header>
+
+          <Section>
+            <Text $variant="body">{t('settings.appearance')}</Text>
+            <Text $variant="caption" $color="textSecondary">
+              {t('settings.appearanceDescription')}
+            </Text>
+            <ThemePreferencePicker />
+          </Section>
 
           <Section>
             <SectionTitleRow>

@@ -3,7 +3,6 @@ import { useFocusEffect } from 'expo-router';
 import { type FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
@@ -78,7 +77,6 @@ export const ProductsTabLayout: FC = () => {
 
   return (
     <Screen>
-      <StatusBar style="light" />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
         <Header>

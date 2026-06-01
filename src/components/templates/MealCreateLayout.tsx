@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import styled, { useTheme } from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
@@ -149,7 +148,6 @@ export const MealCreateLayout: FC = () => {
 
   return (
     <Screen>
-      <StatusBar style="light" />
       <BackgroundGradient />
       <Header>
         <Pressable onPress={() => router.back()}>

@@ -91,6 +91,11 @@ export const en: TranslationSchema = {
   },
   settings: {
     title: 'Settings',
+    appearance: 'Appearance',
+    appearanceDescription: 'Light, dark, or follow system settings.',
+    themeSystem: 'System',
+    themeLight: 'Light',
+    themeDark: 'Dark',
     globalUnits: 'Global units',
     addUnit: 'Add unit',
     editUnit: 'Edit unit',
