@@ -1,4 +1,9 @@
 export type TranslationSchema = {
+  tabs: {
+    products: string;
+    meals: string;
+    settings: string;
+  };
   common: {
     back: string;
     backA11y: string;
@@ -12,18 +17,19 @@ export type TranslationSchema = {
     gramsUnit: string;
     carbsPer100g: string;
     ean: string;
+    delete: string;
+    confirm: string;
+    usageCount: string;
+    carbs: string;
+    next: string;
+    previous: string;
+    loading: string;
   };
   scanner: {
     cameraPermission: string;
     authorizeCamera: string;
-    emptyList: string;
-    myProductsA11y: string;
-    totalCarbs: string;
-    resetSessionA11y: string;
-    removeProductA11y: string;
-    completeProduct: string;
-    incompleteProductSubtitle: string;
-    addToMeal: string;
+    scanProduct: string;
+    scanModalTitle: string;
   };
   products: {
     title: string;
@@ -34,9 +40,53 @@ export type TranslationSchema = {
     addSubtitle: string;
     emptyList: string;
     editA11y: string;
-    addToMealA11y: string;
     deleteA11y: string;
     unknownProduct: string;
+    customUnits: string;
+    unitName: string;
+    unitAbbreviation: string;
+    unitGrams: string;
+    addUnit: string;
+  };
+  meals: {
+    title: string;
+    addMeal: string;
+    dayTotal: string;
+    emptyDay: string;
+    mealCarbs: string;
+    createTitle: string;
+    stepInfo: string;
+    stepFoods: string;
+    stepSummary: string;
+    mealType: string;
+    date: string;
+    time: string;
+    addFood: string;
+    scanProduct: string;
+    mealTotal: string;
+    saveMeal: string;
+    noItems: string;
+    selectQuantity: string;
+    breakfast: string;
+    lunch: string;
+    snack: string;
+    collation: string;
+    dinner: string;
+    itemLine: string;
+  };
+  settings: {
+    title: string;
+    globalUnits: string;
+    addUnit: string;
+    editUnit: string;
+    deleteUnitConfirm: string;
+    export: string;
+    exportDescription: string;
+    import: string;
+    importDescription: string;
+    exportSuccess: string;
+    importSuccess: string;
+    importError: string;
   };
   modal: {
     eanLabel: string;
@@ -66,6 +116,11 @@ export type TranslationSchema = {
 };
 
 export const fr: TranslationSchema = {
+  tabs: {
+    products: 'Produits',
+    meals: 'Repas',
+    settings: 'Réglages',
+  },
   common: {
     back: '← Retour',
     backA11y: 'Retour',
@@ -79,18 +134,19 @@ export const fr: TranslationSchema = {
     gramsUnit: 'g',
     carbsPer100g: '{{value}} g / 100g',
     ean: 'EAN {{ean}}',
+    delete: 'Supprimer',
+    confirm: 'Confirmer',
+    usageCount: '{{count}} utilisation(s)',
+    carbs: '{{value}} g glucides',
+    next: 'Suivant',
+    previous: 'Précédent',
+    loading: 'Chargement…',
   },
   scanner: {
     cameraPermission: 'GlucoScan a besoin de la caméra pour scanner les codes-barres.',
     authorizeCamera: 'Autoriser la caméra',
-    emptyList: 'Scannez un produit pour commencer',
-    myProductsA11y: 'Mes produits',
-    totalCarbs: 'Glucides totaux',
-    resetSessionA11y: 'Réinitialiser la session',
-    removeProductA11y: 'Supprimer le produit',
-    completeProduct: 'Compléter le produit',
-    incompleteProductSubtitle: 'Produit introuvable ou incomplet — complétez les informations.',
-    addToMeal: 'Ajouter au repas',
+    scanProduct: 'Scanner un produit',
+    scanModalTitle: 'Scanner',
   },
   products: {
     title: 'Mes produits',
@@ -98,12 +154,56 @@ export const fr: TranslationSchema = {
     addProduct: 'Ajouter un produit',
     editProduct: 'Modifier le produit',
     editSubtitle: 'Modifiez les informations du produit.',
-    addSubtitle: 'Scannez le code-barres puis complétez les informations.',
-    emptyList: 'Aucun produit en cache.\nScannez ou ajoutez-en un manuellement.',
+    addSubtitle: 'Saisissez les informations du produit.',
+    emptyList: 'Aucun produit.\nAjoutez-en un manuellement.',
     editA11y: 'Modifier le produit',
-    addToMealA11y: 'Ajouter au repas',
     deleteA11y: 'Supprimer',
     unknownProduct: 'Produit inconnu',
+    customUnits: 'Unités personnalisées',
+    unitName: 'Nom',
+    unitAbbreviation: 'Abréviation',
+    unitGrams: 'Équivalent (g)',
+    addUnit: 'Ajouter une unité',
+  },
+  meals: {
+    title: 'Mes repas',
+    addMeal: 'Nouveau repas',
+    dayTotal: 'Total : {{value}} g glucides',
+    emptyDay: 'Aucun repas ce jour-là',
+    mealCarbs: '{{value}} g glucides',
+    createTitle: 'Nouveau repas',
+    stepInfo: 'Informations',
+    stepFoods: 'Aliments',
+    stepSummary: 'Résumé',
+    mealType: 'Type de repas',
+    date: 'Date',
+    time: 'Heure',
+    addFood: 'Ajouter un aliment',
+    scanProduct: 'Scanner un produit',
+    mealTotal: 'Total du repas',
+    saveMeal: 'Enregistrer le repas',
+    noItems: 'Ajoutez au moins un aliment',
+    selectQuantity: 'Quantité',
+    breakfast: 'Petit déjeuner',
+    lunch: 'Déjeuner',
+    snack: 'Goûter',
+    collation: 'Collation',
+    dinner: 'Dîner',
+    itemLine: '{{name}} — {{quantity}} {{unit}} ({{carbs}} g)',
+  },
+  settings: {
+    title: 'Paramètres',
+    globalUnits: 'Unités globales',
+    addUnit: 'Ajouter une unité',
+    editUnit: 'Modifier l\'unité',
+    deleteUnitConfirm: 'Supprimer cette unité ?',
+    export: 'Exporter les données',
+    exportDescription: 'Fichier .gs (sauvegarde complète)',
+    import: 'Importer des données',
+    importDescription: 'Fusionner depuis un fichier .gs',
+    exportSuccess: 'Export réussi',
+    importSuccess: 'Import réussi',
+    importError: 'Import impossible',
   },
   modal: {
     eanLabel: 'Code EAN',
