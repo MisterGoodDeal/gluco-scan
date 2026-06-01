@@ -14,6 +14,7 @@ import styled, { useTheme } from 'styled-components/native';
 
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
+import { ProductImage } from '@/components/atoms/ProductImage';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { useProductStore } from '@/store/product.store';
@@ -57,6 +58,17 @@ const CompactResultLine = styled.View`
   flex-direction: row;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.xs}px;
+  min-width: 0;
+`;
+
+const DetailedResultLine = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const DetailedResultInfo = styled.View`
+  flex: 1;
   min-width: 0;
 `;
 
@@ -184,13 +196,16 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                         </Text>
                       </CompactResultLine>
                     ) : (
-                      <>
-                        <Text $variant="body">{item.name}</Text>
-                        <Text $variant="caption" $color="textSecondary">
-                          {carbsLabel}
-                          {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}
-                        </Text>
-                      </>
+                      <DetailedResultLine>
+                        {item.imageUrl ? <ProductImage uri={item.imageUrl} /> : null}
+                        <DetailedResultInfo>
+                          <Text $variant="body">{item.name}</Text>
+                          <Text $variant="caption" $color="textSecondary">
+                            {carbsLabel}
+                            {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}
+                          </Text>
+                        </DetailedResultInfo>
+                      </DetailedResultLine>
                     )}
                   </ResultRow>
                 );

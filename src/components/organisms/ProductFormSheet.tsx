@@ -106,6 +106,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   const [eans, setEans] = useState<string[]>([]);
   const [name, setName] = useState('');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [carbsText, setCarbsText] = useState('');
   const [units, setUnits] = useState<ProductUnit[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -126,6 +127,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     if (!visible) return;
     setEans(product?.eans ?? []);
     setName(product?.name ?? '');
+    setImageUrl(product?.imageUrl ?? null);
     setCarbsText(
       product?.carbsPer100g != null ? String(product.carbsPer100g).replace('.', ',') : '',
     );
@@ -147,6 +149,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       if (partial.carbsPer100g != null) {
         setCarbsText(String(partial.carbsPer100g).replace('.', ','));
       }
+      if (partial.imageUrl) setImageUrl(partial.imageUrl);
     } finally {
       setIsLookupLoading(false);
     }
@@ -208,6 +211,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           eans,
           name: trimmedName,
           carbsPer100g: carbs,
+          imageUrl,
           customUnits: units,
         };
         await update(updated);
@@ -229,6 +233,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           name: trimmedName,
           carbsPer100g: carbs,
           eans,
+          imageUrl,
         });
         for (const unit of units) {
           await productUnitRepository.create(created.id, unit);
