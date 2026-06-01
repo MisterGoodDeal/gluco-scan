@@ -13,7 +13,8 @@ import {
   type MealMetaPickerField,
 } from '@/components/organisms/MealMetaPickerSheet';
 import { QuantityPickerModal } from '@/components/organisms/QuantityPickerModal';
-import { ScanMealModal } from '@/components/organisms/ScanMealModal';
+import { ScannerView } from '@/components/organisms/ScannerView';
+import { useMealProductScan } from '@/hooks/useMealProductScan';
 import { getCurrentLocale } from '@/i18n';
 import { useSettingsStore } from '@/store/settings.store';
 import { useMealStore } from '@/store/meal.store';
@@ -21,6 +22,7 @@ import type { Product } from '@/types/product';
 import { formatDateLabel } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
 import { getMealTypeLabelKey } from '@/utils/mealType';
+import { hp } from '@/utils/screen';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
 
 const Header = styled(ScreenHeaderBar)`
@@ -64,11 +66,23 @@ const ActionButton = styled.Pressable<{ $primary?: boolean }>`
   border-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
+const ScannerSection = styled.View`
+  height: ${hp('30%')}px;
+  margin: ${({ theme }) => theme.spacing.md}px;
+  border-radius: ${({ theme }) => theme.radius.lg}px;
+  overflow: hidden;
+`;
+
+const ItemsSection = styled.View`
+  margin: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+`;
+
 const ItemRow = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.sm}px;
-  margin-horizontal: ${({ theme }) => theme.spacing.md}px;
+  align-items: center;
+  padding: ${({ theme }) => theme.spacing.sm}px 0;
   border-bottom-width: 1px;
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
 `;
@@ -86,11 +100,12 @@ export const MealCreateLayout: FC = () => {
   const saveMeal = useMealStore((s) => s.saveMeal);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
 
-  const [scanVisible, setScanVisible] = useState(false);
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
+  const { handleScan, isLoading, error, warning, clearMessages } = useMealProductScan();
 
   const timeLabel = `${String(draftMeta.hours).padStart(2, '0')}:${String(draftMeta.minutes).padStart(2, '0')}`;
+  const scannerActive = step === 1 && pickerProduct === null;
 
   useEffect(() => {
     void hydrateSettings();
@@ -101,6 +116,11 @@ export const MealCreateLayout: FC = () => {
   }, [step]);
 
   const draftTotal = draftItems.reduce((sum, item) => sum + item.carbs, 0);
+
+  const onBarcodeScan = async (ean: string) => {
+    const product = await handleScan(ean);
+    if (product) setPickerProduct(product);
+  };
 
   const handleSave = async () => {
     if (draftItems.length === 0) {
@@ -131,7 +151,7 @@ export const MealCreateLayout: FC = () => {
         ))}
       </StepIndicator>
 
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
         {step === 0 && (
           <>
             <Field>
@@ -169,33 +189,51 @@ export const MealCreateLayout: FC = () => {
 
         {step === 1 && (
           <>
-            <View style={{ margin: 16, alignSelf: 'center' }}>
-              <ActionButton $primary onPress={() => setScanVisible(true)}>
-                <Text $variant="caption">{t('meals.scanProduct')}</Text>
-              </ActionButton>
-            </View>
-            {draftItems.map((item) => (
-              <ItemRow key={item.id}>
-                <Text $variant="body">
-                  {t('meals.itemLine', {
-                    name: item.productName,
-                    quantity: item.quantity,
-                    unit: item.unitLabel,
-                    carbs: formatDecimal(item.carbs),
-                  })}
+            <ScannerSection>
+              <ScannerView
+                fill
+                onScan={onBarcodeScan}
+                isLoadingProduct={isLoading}
+                scanError={error}
+                scanWarning={warning}
+                scanSuccessFlash={false}
+                isScanning={!isLoading && scannerActive}
+                enabled={scannerActive}
+                onClearError={clearMessages}
+              />
+            </ScannerSection>
+
+            <ItemsSection>
+              <Text $variant="body">{t('meals.stepFoods')}</Text>
+              {draftItems.length === 0 ? (
+                <Text $variant="caption" $color="textSecondary">
+                  {t('scanner.scanProduct')}
                 </Text>
-                <Pressable onPress={() => removeDraftItem(item.id)}>
-                  <Text $color="error">×</Text>
-                </Pressable>
-              </ItemRow>
-            ))}
+              ) : (
+                draftItems.map((item) => (
+                  <ItemRow key={item.id}>
+                    <Text $variant="body" style={{ flex: 1, marginRight: 8 }}>
+                      {t('meals.itemLine', {
+                        name: item.productName,
+                        quantity: item.quantity,
+                        unit: item.unitLabel,
+                        carbs: formatDecimal(item.carbs),
+                      })}
+                    </Text>
+                    <Pressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
+                      <Text $color="error">×</Text>
+                    </Pressable>
+                  </ItemRow>
+                ))
+              )}
+            </ItemsSection>
           </>
         )}
 
         {step === 2 && (
           <>
             {draftItems.map((item) => (
-              <ItemRow key={item.id}>
+              <ItemRow key={item.id} style={{ marginHorizontal: 16 }}>
                 <Text $variant="body">{item.productName}</Text>
                 <Text $variant="caption" $color="accent">
                   {formatDecimal(item.carbs)} g
@@ -229,11 +267,6 @@ export const MealCreateLayout: FC = () => {
         )}
       </NavRow>
 
-      <ScanMealModal
-        visible={scanVisible}
-        onClose={() => setScanVisible(false)}
-        onProductScanned={setPickerProduct}
-      />
       <QuantityPickerModal
         visible={pickerProduct !== null}
         product={pickerProduct}
