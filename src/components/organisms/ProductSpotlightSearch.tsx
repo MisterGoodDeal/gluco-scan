@@ -25,6 +25,7 @@ import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
 import { productMatchesQuery } from '@/utils/productSearch';
+import { listRowDivider } from '@/styles/listRow';
 import { topScreenSpace } from '@/utils/screen';
 
 type ProductSpotlightSearchProps = {
@@ -50,11 +51,10 @@ const SearchRow = styled(GlassPanel)`
   border-radius: ${({ theme }) => theme.radius.md}px;
 `;
 
-const ResultRow = styled.Pressable<{ $compact?: boolean }>`
+const ResultRow = styled.Pressable<{ $compact?: boolean; $isLast?: boolean }>`
   padding: ${({ theme, $compact }) =>
     $compact ? theme.spacing.sm : theme.spacing.md}px;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+  ${listRowDivider}
 `;
 
 const CompactResultLine = styled.View`
@@ -193,13 +193,16 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                   </Text>
                 </EmptyWrap>
               }
-              renderItem={({ item }) => {
+              renderItem={({ item, index }) => {
                 const carbsLabel = t('common.carbsPer100g', {
                   value: formatDecimal(item.carbsPer100g),
                 });
 
                 return (
-                  <ResultRow $compact={compactList} onPress={() => handleSelect(item)}>
+                  <ResultRow
+                    $compact={compactList}
+                    $isLast={index === results.length - 1}
+                    onPress={() => handleSelect(item)}>
                     {compactList ? (
                       <CompactResultLine>
                         <Text $variant="body" numberOfLines={1} style={{ flexShrink: 1 }}>

@@ -25,6 +25,7 @@ import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
 import { Screen as AppScreen } from '@/styles/global';
+import { listRowDivider } from '@/styles/listRow';
 
 const Section = styled.View`
   padding: ${({ theme }) => theme.spacing.md}px;
@@ -37,11 +38,12 @@ const SectionTitleRow = styled.View`
   justify-content: space-between;
 `;
 
-const UnitRow = styled.View`
+const UnitRow = styled.View<{ $isLast?: boolean }>`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
+  ${listRowDivider}
 `;
 
 const AddButton = styled.Pressable`
@@ -188,8 +190,8 @@ export const SettingsTabLayout: FC = () => {
               </AddButton>
             </SectionTitleRow>
             <GlassPanel blurTarget={blurTargetRef}>
-              {globalUnits.map((unit) => (
-                <UnitRow key={unit.id}>
+              {globalUnits.map((unit, index) => (
+                <UnitRow key={unit.id} $isLast={index === globalUnits.length - 1}>
                   <Pressable onPress={() => openEditUnit(unit)}>
                     <Text $variant="body">
                       {unit.name} ({unit.abbreviation}) — {formatEquivalentMass(unit.equivalentInGrams)}

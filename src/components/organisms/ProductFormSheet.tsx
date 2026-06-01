@@ -26,6 +26,7 @@ import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
+import { listRowDivider } from '@/styles/listRow';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
 
 type ProductFormSheetProps = {
@@ -76,13 +77,12 @@ const SectionTitleRow = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const UnitRow = styled.View`
+const UnitRow = styled.View<{ $isLast?: boolean }>`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+  ${listRowDivider}
 `;
 
 const UnitInfo = styled(Pressable)`
@@ -409,8 +409,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                 {t('products.noCustomUnits')}
               </Text>
             ) : (
-              units.map((unit) => (
-                <UnitRow key={unit.id}>
+              units.map((unit, index) => (
+                <UnitRow key={unit.id} $isLast={index === units.length - 1}>
                   <UnitInfo onPress={() => openEditUnit(unit)}>
                     <Text $variant="caption">
                       1 {unit.abbreviation} = {formatEquivalentMass(unit.equivalentInGrams)} ({unit.name})

@@ -6,6 +6,7 @@ import styled from 'styled-components/native';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { EanScanField } from '@/components/molecules/EanScanField';
+import { listRowDivider } from '@/styles/listRow';
 import { isValidEan } from '@/utils/ean';
 
 type ProductEanListEditorProps = {
@@ -14,13 +15,12 @@ type ProductEanListEditorProps = {
   onScan: (ean: string) => void;
 };
 
-const EanRow = styled.View`
+const EanRow = styled.View<{ $isLast?: boolean }>`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: ${({ theme }) => theme.spacing.xs}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+  ${listRowDivider}
 `;
 
 const ManualRow = styled.View`
@@ -86,8 +86,8 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
   return (
     <>
       {eans.length > 0 ? (
-        eans.map((ean) => (
-          <EanRow key={ean}>
+        eans.map((ean, index) => (
+          <EanRow key={ean} $isLast={index === eans.length - 1}>
             <Text $variant="mono" style={{ flex: 1 }}>
               {ean}
             </Text>

@@ -25,6 +25,7 @@ import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { formatDecimal } from '@/utils/format';
 import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
 import { getMealTypeLabelKey } from '@/utils/mealType';
+import { listRowDivider } from '@/styles/listRow';
 import { hp } from '@/utils/screen';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
 
@@ -93,13 +94,12 @@ const ItemsSection = styled.View`
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const ItemRow = styled.View`
+const ItemRow = styled.View<{ $isLast?: boolean }>`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+  ${listRowDivider}
 `;
 
 export const MealCreateLayout: FC = () => {
@@ -240,8 +240,8 @@ export const MealCreateLayout: FC = () => {
                   {t('scanner.scanProduct')}
                 </Text>
               ) : (
-                draftItems.map((item) => (
-                  <ItemRow key={item.id}>
+                draftItems.map((item, index) => (
+                  <ItemRow key={item.id} $isLast={index === draftItems.length - 1}>
                     <Text $variant="body" style={{ flex: 1, marginRight: 8 }}>
                       {t('meals.itemLinePortion', {
                         name: item.productName,

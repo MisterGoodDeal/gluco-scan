@@ -11,6 +11,7 @@ import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { formatDecimal } from '@/utils/format';
 import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
 import { getCurrentLocale } from '@/i18n';
+import { listRowDivider } from '@/styles/listRow';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 
 type MealDetailSheetProps = {
@@ -18,11 +19,10 @@ type MealDetailSheetProps = {
   onClose: () => void;
 };
 
-const Row = styled.View`
+const Row = styled.View<{ $isLast?: boolean }>`
   gap: ${({ theme }) => theme.spacing.sm}px;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+  ${listRowDivider}
 `;
 
 const ItemInfo = styled.View`
@@ -62,8 +62,8 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
         <Text $variant="caption" $color="textSecondary" style={{ marginBottom: 16 }}>
           {formatTimeLabel(meal.createdAt, locale)}
         </Text>
-        {meal.items.map((item) => (
-          <Row key={item.id}>
+        {meal.items.map((item, index) => (
+          <Row key={item.id} $isLast={index === meal.items.length - 1}>
             <ItemInfo>
               <Text $variant="body">{item.productName}</Text>
               <Text $variant="caption" $color="textSecondary">

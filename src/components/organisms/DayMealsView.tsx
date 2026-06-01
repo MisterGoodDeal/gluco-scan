@@ -12,6 +12,7 @@ import { getCurrentLocale } from '@/i18n';
 import type { Meal } from '@/types/meal';
 import { formatDateLabel, formatTimeLabel } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
+import { listRowDivider } from '@/styles/listRow';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 
 type DayMealsViewProps = {
@@ -29,13 +30,12 @@ const Page = styled(ScrollView)<{ $width: number }>`
   flex: 1;
 `;
 
-const MealRow = styled.View`
+const MealRow = styled.View<{ $isLast?: boolean }>`
   flex-direction: row;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm}px;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
+  ${listRowDivider}
 `;
 
 const MealContent = styled.View`
@@ -98,8 +98,8 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
 
       {hasMeals ? (
         <GlassPanel>
-          {sortedMeals.map((meal) => (
-            <MealRow key={meal.id}>
+          {sortedMeals.map((meal, index) => (
+            <MealRow key={meal.id} $isLast={index === sortedMeals.length - 1}>
               <MealContent>
                 <MealInfo onPress={() => onMealPress(meal)}>
                   <Text $variant="body">
