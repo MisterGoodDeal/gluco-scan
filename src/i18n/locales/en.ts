@@ -49,6 +49,7 @@ export const en: TranslationSchema = {
     unitAbbreviation: 'Abbreviation',
     unitGrams: 'Equivalent (g)',
     addUnit: 'Add unit',
+    noCustomUnits: 'No custom units yet.',
   },
   meals: {
     title: 'My meals',

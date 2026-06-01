@@ -9,7 +9,7 @@ import styled from 'styled-components/native';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
-import { ProductFormModal } from '@/components/organisms/ProductFormModal';
+import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
 import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
@@ -104,7 +104,7 @@ export const ProductsTabLayout: FC = () => {
           onRefresh={() => void loadProducts()}
         />
       </BlurTargetView>
-      <ProductFormModal
+      <ProductFormSheet
         visible={isModalOpen}
         product={editingProduct}
         onClose={closeModal}

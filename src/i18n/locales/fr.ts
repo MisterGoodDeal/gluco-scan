@@ -47,6 +47,7 @@ export type TranslationSchema = {
     unitAbbreviation: string;
     unitGrams: string;
     addUnit: string;
+    noCustomUnits: string;
   };
   meals: {
     title: string;
@@ -165,6 +166,7 @@ export const fr: TranslationSchema = {
     unitAbbreviation: 'Abréviation',
     unitGrams: 'Équivalent (g)',
     addUnit: 'Ajouter une unité',
+    noCustomUnits: 'Aucune unité personnalisée.',
   },
   meals: {
     title: 'Mes repas',
