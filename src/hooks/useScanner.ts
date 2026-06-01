@@ -2,12 +2,14 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
 
 import { SCAN_COOLDOWN_MS } from '@/constants/api';
-import { getProduct } from '@/hooks/useProductCache';
-import { InvalidBarcodeError, getErrorMessage } from '@/services/errors';
+import { fetchOffPartialByEAN, fetchProductByEAN } from '@/services/openFoodFacts.service';
+import { getCachedProduct, setCachedProduct } from '@/services/productCache';
+import { InvalidBarcodeError } from '@/services/errors';
 import { useScanStore } from '@/store/scanStore';
+import type { Product } from '@/types/product';
 import { createScanDebouncer } from '@/utils/debounce';
-
-const isValidEan = (ean: string): boolean => /^\d{8,14}$/.test(ean);
+import { isValidEan } from '@/utils/ean';
+import type { ManualProductInitial } from '@/components/organisms/ProductManualEntryModal';
 
 export const useScanner = () => {
   const addItem = useScanStore((state) => state.addItem);
@@ -17,6 +19,28 @@ export const useScanner = () => {
   const [scanError, setScanError] = useState<string | null>(null);
   const [scanSuccessFlash, setScanSuccessFlash] = useState(false);
   const [lastScannedEan, setLastScannedEan] = useState<string | null>(null);
+  const [manualEntry, setManualEntry] = useState<ManualProductInitial | null>(null);
+
+  const completeScan = useCallback(
+    (product: Product) => {
+      addItem(product);
+      setLastScannedEan(product.ean);
+      setScanSuccessFlash(true);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setTimeout(() => setScanSuccessFlash(false), 300);
+    },
+    [addItem],
+  );
+
+  const openManualEntry = useCallback(async (ean: string) => {
+    const partial = await fetchOffPartialByEAN(ean);
+    setManualEntry({
+      ean,
+      name: partial.name,
+      carbsPer100g: partial.carbsPer100g,
+    });
+    setScanError(null);
+  }, []);
 
   const handleScan = useCallback(
     async (rawEan: string) => {
@@ -33,20 +57,36 @@ export const useScanner = () => {
       setScanError(null);
 
       try {
-        const product = await getProduct(ean);
-        addItem(product);
-        setLastScannedEan(ean);
-        setScanSuccessFlash(true);
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => setScanSuccessFlash(false), 300);
-      } catch (error) {
-        setScanError(getErrorMessage(error));
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        const cached = getCachedProduct(ean);
+        if (cached) {
+          completeScan(cached);
+          return;
+        }
+
+        try {
+          const product = await fetchProductByEAN(ean);
+          setCachedProduct(product);
+          completeScan(product);
+        } catch {
+          await openManualEntry(ean);
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
       } finally {
         setIsLoadingProduct(false);
       }
     },
-    [addItem],
+    [completeScan, openManualEntry],
+  );
+
+  const closeManualEntry = useCallback(() => setManualEntry(null), []);
+
+  const submitManualEntry = useCallback(
+    (product: Product) => {
+      setCachedProduct(product);
+      completeScan(product);
+      setManualEntry(null);
+    },
+    [completeScan],
   );
 
   const clearError = useCallback(() => setScanError(null), []);
@@ -59,5 +99,8 @@ export const useScanner = () => {
     lastScannedEan,
     clearError,
     isScanning: !isLoadingProduct,
+    manualEntry,
+    closeManualEntry,
+    submitManualEntry,
   };
 };
