@@ -19,6 +19,7 @@ type ProductListProps = {
   onDelete: (id: string) => void;
   refreshing?: boolean;
   onRefresh?: () => void;
+  contentInsetTop?: number;
 };
 
 const ListContainer = styled.View`
@@ -46,6 +47,7 @@ export const ProductList: FC<ProductListProps> = ({
   onDelete,
   refreshing = false,
   onRefresh,
+  contentInsetTop = 0,
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -80,7 +82,9 @@ export const ProductList: FC<ProductListProps> = ({
         ItemSeparatorComponent={() => <Separator $compact={compact} />}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={
-          products.length === 0 ? { flexGrow: 1 } : { paddingBottom: tabBarInset }
+          products.length === 0
+            ? { flexGrow: 1, paddingTop: contentInsetTop }
+            : { paddingTop: contentInsetTop, paddingBottom: tabBarInset }
         }
         refreshControl={refreshControl}
         ListEmptyComponent={

@@ -10,14 +10,16 @@ import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
+import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
+import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
-import { Screen, ScreenHeaderBar } from '@/styles/global';
+import { Screen } from '@/styles/global';
 
-const Header = styled(ScreenHeaderBar)`
+const TitleRow = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -27,6 +29,7 @@ const SearchRow = styled.View`
   flex-direction: row;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const SearchField = styled.View`
@@ -45,6 +48,7 @@ export const ProductsTabLayout: FC = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const blurTargetRef = useRef<View>(null);
+  const { headerHeight, onHeaderLayout } = useBlurHeaderInset(1);
   const hydrate = useProductStore((s) => s.hydrate);
   const isLoading = useProductStore((s) => s.isLoading);
   const query = useProductStore((s) => s.query);
@@ -94,43 +98,46 @@ export const ProductsTabLayout: FC = () => {
     <Screen>
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
-        <Header>
-          <Text $variant="subtitle">{t('products.title')}</Text>
-          <AddButton onPress={openAdd} accessibilityLabel={t('common.add')}>
-            <Text $variant="caption" $color="accent">
-              {t('products.addButton')}
-            </Text>
-          </AddButton>
-        </Header>
-        <SearchRow style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-          <SearchField>
-            <SearchInput value={query} onChangeText={setQuery} flex />
-          </SearchField>
-          <ButtonIcon
-            onPress={toggleCompactList}
-            accessibilityLabel={
-              compactList ? t('products.compactListOnA11y') : t('products.compactListOffA11y')
-            }
-            accessibilityState={{ selected: compactList }}>
-            <SymbolView
-              name={{
-                ios: compactList ? 'rectangle.expand.vertical' : 'rectangle.compress.vertical',
-                android: compactList ? 'view_agenda' : 'view_compact',
-              }}
-              size={20}
-              tintColor={compactList ? theme.colors.accent : theme.colors.textSecondary}
-            />
-          </ButtonIcon>
-        </SearchRow>
         <ProductList
           products={filteredProducts}
           compact={compactList}
           blurTarget={blurTargetRef}
+          contentInsetTop={headerHeight}
           onEdit={openEdit}
           onDelete={(id) => void remove(id)}
           refreshing={isLoading}
           onRefresh={() => void loadProducts()}
         />
+        <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
+          <TitleRow>
+            <Text $variant="subtitle">{t('products.title')}</Text>
+            <AddButton onPress={openAdd} accessibilityLabel={t('common.add')}>
+              <Text $variant="caption" $color="accent">
+                {t('products.addButton')}
+              </Text>
+            </AddButton>
+          </TitleRow>
+          <SearchRow>
+            <SearchField>
+              <SearchInput value={query} onChangeText={setQuery} flex />
+            </SearchField>
+            <ButtonIcon
+              onPress={toggleCompactList}
+              accessibilityLabel={
+                compactList ? t('products.compactListOnA11y') : t('products.compactListOffA11y')
+              }
+              accessibilityState={{ selected: compactList }}>
+              <SymbolView
+                name={{
+                  ios: compactList ? 'rectangle.expand.vertical' : 'rectangle.compress.vertical',
+                  android: compactList ? 'view_agenda' : 'view_compact',
+                }}
+                size={20}
+                tintColor={compactList ? theme.colors.accent : theme.colors.textSecondary}
+              />
+            </ButtonIcon>
+          </SearchRow>
+        </BlurScreenHeader>
       </BlurTargetView>
       <ProductFormSheet
         visible={isModalOpen}

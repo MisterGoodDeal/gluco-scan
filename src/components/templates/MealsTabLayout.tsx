@@ -9,15 +9,17 @@ import styled, { useTheme } from 'styled-components/native';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { Text } from '@/components/atoms/Text';
+import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { MealDetailSheet } from '@/components/organisms/MealDetailSheet';
 import { MealsDayPager } from '@/components/organisms/MealsDayPager';
+import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useMealStore } from '@/store/meal.store';
 import { mealRepository } from '@/repositories/meal.repository';
 import type { Meal } from '@/types/meal';
 import { addDays, toDateKey } from '@/utils/date';
-import { Screen, ScreenHeaderBar } from '@/styles/global';
+import { Screen } from '@/styles/global';
 
-const Header = styled(ScreenHeaderBar)`
+const TitleRow = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -33,6 +35,7 @@ export const MealsTabLayout: FC = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const blurTargetRef = useRef<View>(null);
+  const { headerHeight, onHeaderLayout } = useBlurHeaderInset(0);
   const todayKey = toDateKey(new Date());
   const selectedDate = useMealStore((s) => s.selectedDate);
   const setSelectedDate = useMealStore((s) => s.setSelectedDate);
@@ -94,44 +97,47 @@ export const MealsTabLayout: FC = () => {
     <Screen>
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
-        <Header>
-          <Text $variant="subtitle">{t('meals.title')}</Text>
-          <HeaderActions>
-            <ButtonIcon
-              onPress={handleGoToToday}
-              accessibilityLabel={t('meals.goToTodayA11y')}>
-              <SymbolView
-                name={{ ios: 'calendar', android: 'calendar_today' }}
-                size={20}
-                tintColor={
-                  selectedDate === todayKey ? theme.colors.accent : theme.colors.textSecondary
-                }
-              />
-            </ButtonIcon>
-            <ButtonIcon
-              onPress={() => {
-                useMealStore.getState().resetDraft();
-                router.push('/meal/create');
-              }}
-              accessibilityLabel={t('meals.addMeal')}>
-              <SymbolView
-                name={{ ios: 'plus', android: 'add' }}
-                size={22}
-                tintColor={theme.colors.accent}
-              />
-            </ButtonIcon>
-          </HeaderActions>
-        </Header>
         <MealsDayPager
           centerDate={selectedDate}
           mealsByDate={mealsByDate}
           totalsByDate={totalsByDate}
+          headerInset={headerHeight}
           onDateChange={handleDateChange}
           onMealPress={setSelectedMeal}
           onMealDelete={(id) => void handleMealDelete(id)}
           scrollToDateKey={scrollToDateKey}
           onScrollToDateDone={() => setScrollToDateKey(null)}
         />
+        <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
+          <TitleRow>
+            <Text $variant="subtitle">{t('meals.title')}</Text>
+            <HeaderActions>
+              <ButtonIcon
+                onPress={handleGoToToday}
+                accessibilityLabel={t('meals.goToTodayA11y')}>
+                <SymbolView
+                  name={{ ios: 'calendar', android: 'calendar_today' }}
+                  size={20}
+                  tintColor={
+                    selectedDate === todayKey ? theme.colors.accent : theme.colors.textSecondary
+                  }
+                />
+              </ButtonIcon>
+              <ButtonIcon
+                onPress={() => {
+                  useMealStore.getState().resetDraft();
+                  router.push('/meal/create');
+                }}
+                accessibilityLabel={t('meals.addMeal')}>
+                <SymbolView
+                  name={{ ios: 'plus', android: 'add' }}
+                  size={22}
+                  tintColor={theme.colors.accent}
+                />
+              </ButtonIcon>
+            </HeaderActions>
+          </TitleRow>
+        </BlurScreenHeader>
       </BlurTargetView>
       {selectedMeal && (
         <MealDetailSheet meal={selectedMeal} onClose={() => setSelectedMeal(null)} />

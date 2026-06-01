@@ -21,6 +21,7 @@ type DayMealsViewProps = {
   dayTotalCarbs: number;
   onMealPress: (meal: Meal) => void;
   onMealDelete: (mealId: string) => void;
+  headerInset?: number;
 };
 
 const Page = styled(ScrollView)<{ $width: number }>`
@@ -64,6 +65,7 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   dayTotalCarbs,
   onMealPress,
   onMealDelete,
+  headerInset = 0,
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -87,6 +89,7 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         padding: theme.spacing.md,
+        paddingTop: theme.spacing.md + headerInset,
         paddingBottom: tabBarInset,
       }}>
       <Text $variant="subtitle" style={{ marginBottom: 16, textTransform: 'capitalize' }}>

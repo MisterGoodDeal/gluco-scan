@@ -13,8 +13,10 @@ import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
+import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
 import { LanguagePickerSheet } from '@/components/organisms/LanguagePickerSheet';
+import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { getLanguageLabelKey } from '@/i18n';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
@@ -22,9 +24,7 @@ import { usePreferencesStore } from '@/store/preferences.store';
 import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
-import { Screen as AppScreen, ScreenHeaderBar } from '@/styles/global';
-
-const Header = styled(ScreenHeaderBar)``;
+import { Screen as AppScreen } from '@/styles/global';
 
 const Section = styled.View`
   padding: ${({ theme }) => theme.spacing.md}px;
@@ -65,6 +65,7 @@ const ActionButton = styled.Pressable<{ $primary?: boolean }>`
 export const SettingsTabLayout: FC = () => {
   const { t } = useTranslation();
   const blurTargetRef = useRef<View>(null);
+  const { headerHeight, onHeaderLayout } = useBlurHeaderInset(0);
   const hydrate = useSettingsStore((s) => s.hydrate);
   const globalUnits = useSettingsStore((s) => s.globalUnits);
   const createUnit = useSettingsStore((s) => s.createUnit);
@@ -147,11 +148,11 @@ export const SettingsTabLayout: FC = () => {
     <AppScreen>
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
-        <ScrollView contentContainerStyle={{ paddingBottom: tabBarInset }}>
-          <Header>
-            <Text $variant="subtitle">{t('settings.title')}</Text>
-          </Header>
-
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: headerHeight,
+            paddingBottom: tabBarInset,
+          }}>
           <Section>
             <Text $variant="body">{t('settings.appearance')}</Text>
             <Text $variant="caption" $color="textSecondary">
@@ -232,6 +233,9 @@ export const SettingsTabLayout: FC = () => {
             </ActionButton>
           </Section>
         </ScrollView>
+        <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
+          <Text $variant="subtitle">{t('settings.title')}</Text>
+        </BlurScreenHeader>
       </BlurTargetView>
       <GlobalUnitFormModal
         visible={isUnitModalOpen}

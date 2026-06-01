@@ -15,6 +15,7 @@ type MealsDayPagerProps = {
   onMealDelete: (mealId: string) => void;
   scrollToDateKey?: string | null;
   onScrollToDateDone?: () => void;
+  headerInset?: number;
 };
 
 export const MealsDayPager: FC<MealsDayPagerProps> = ({
@@ -27,6 +28,7 @@ export const MealsDayPager: FC<MealsDayPagerProps> = ({
   onMealDelete,
   scrollToDateKey,
   onScrollToDateDone,
+  headerInset = 0,
 }) => {
   const { width } = useWindowDimensions();
   const todayKey = toDateKey(new Date());
@@ -102,6 +104,7 @@ export const MealsDayPager: FC<MealsDayPagerProps> = ({
           dayTotalCarbs={totalsByDate[item] ?? 0}
           onMealPress={onMealPress}
           onMealDelete={onMealDelete}
+          headerInset={headerInset}
         />
       )}
     />
