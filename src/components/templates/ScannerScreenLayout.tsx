@@ -4,11 +4,12 @@ import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components/native';
 
+import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { CarbTotalFooter } from '@/components/organisms/CarbTotalFooter';
+import { ProductManualEntryModal } from '@/components/organisms/ProductManualEntryModal';
 import { ScannedList } from '@/components/organisms/ScannedList';
 import { ScannerView } from '@/components/organisms/ScannerView';
 import { useScanner } from '@/hooks/useScanner';
-import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { Screen } from '@/styles/global';
 
 const Main = styled.View`
@@ -30,6 +31,9 @@ export const ScannerScreenLayout: FC = () => {
     scanSuccessFlash,
     isScanning,
     clearError,
+    manualEntry,
+    closeManualEntry,
+    submitManualEntry,
   } = useScanner();
 
   return (
@@ -55,6 +59,14 @@ export const ScannerScreenLayout: FC = () => {
           />
         </Main>
       </BlurTargetView>
+      <ProductManualEntryModal
+        visible={manualEntry !== null}
+        initial={manualEntry}
+        subtitle="Produit introuvable ou incomplet — complétez les informations."
+        submitLabel="Ajouter au repas"
+        onClose={closeManualEntry}
+        onSubmit={submitManualEntry}
+      />
     </Screen>
   );
 };

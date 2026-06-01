@@ -1,7 +1,9 @@
+import { router } from 'expo-router';
 import { type FC, type RefObject } from 'react';
 import { FlatList, View } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
+import { FAB_SIZE, FloatingActionButton } from '@/components/atoms/FloatingActionButton';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ScannedProductRow } from '@/components/molecules/ScannedProductRow';
@@ -12,6 +14,11 @@ type ScannedListProps = {
   blurTarget?: RefObject<View | null>;
   bottomInset?: number;
 };
+
+const ListWrapper = styled.View`
+  flex: 1;
+  position: relative;
+`;
 
 const ListContainer = styled.View`
   flex: 1;
@@ -30,43 +37,51 @@ const Separator = styled.View`
 `;
 
 export const ScannedList: FC<ScannedListProps> = ({ blurTarget, bottomInset = 0 }) => {
+  const theme = useTheme();
   const scannedItems = useScanStore((state) => state.scannedItems);
   const updateGrams = useScanStore((state) => state.updateGrams);
   const removeItem = useScanStore((state) => state.removeItem);
 
-  const listBottomPadding = bottomInset > 0 ? bottomInset : hp('14%');
-
-  if (scannedItems.length === 0) {
-    return (
-      <ListContainer>
-        <EmptyContainer style={{ paddingBottom: listBottomPadding }}>
-          <GlassPanel blurTarget={blurTarget}>
-            <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
-              Scannez un produit pour commencer
-            </Text>
-          </GlassPanel>
-        </EmptyContainer>
-      </ListContainer>
-    );
-  }
+  const fabBottom = bottomInset + theme.spacing.md;
+  const listBottomPadding =
+    (bottomInset > 0 ? bottomInset : hp('14%')) + FAB_SIZE + theme.spacing.md * 2;
 
   return (
-    <ListContainer>
-      <FlatList
-        data={scannedItems}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ScannedProductRow
-            item={item}
-            blurTarget={blurTarget}
-            onGramsChange={updateGrams}
-            onRemove={removeItem}
+    <ListWrapper>
+      <ListContainer>
+        {scannedItems.length === 0 ? (
+          <EmptyContainer style={{ paddingBottom: listBottomPadding }}>
+            <GlassPanel blurTarget={blurTarget}>
+              <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
+                Scannez un produit pour commencer
+              </Text>
+            </GlassPanel>
+          </EmptyContainer>
+        ) : (
+          <FlatList
+            data={scannedItems}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ScannedProductRow
+                item={item}
+                blurTarget={blurTarget}
+                onGramsChange={updateGrams}
+                onRemove={removeItem}
+              />
+            )}
+            ItemSeparatorComponent={Separator}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: listBottomPadding }}
           />
         )}
-        ItemSeparatorComponent={Separator}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: listBottomPadding }}
+      </ListContainer>
+      <FloatingActionButton
+        bottom={fabBottom}
+        blurTarget={blurTarget}
+        onPress={() => router.push('/products')}
+        accessibilityLabel="Mes produits"
+        label="☰"
       />
-    </ListContainer>
+    </ListWrapper>
   );
 };

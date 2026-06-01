@@ -1,6 +1,8 @@
 import { type FC } from 'react';
 import styled from 'styled-components/native';
 
+import { inputFieldStyles } from '@/styles/input';
+
 type InputNumberProps = {
   value: string;
   onChangeText: (text: string) => void;
@@ -9,15 +11,11 @@ type InputNumberProps = {
 };
 
 const StyledInput = styled.TextInput`
+  ${inputFieldStyles}
   min-width: 72px;
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
-  background-color: ${({ theme }) => theme.colors.glass.background};
-  color: ${({ theme }) => theme.colors.text};
   font-size: ${({ theme }) => theme.typography.mono.fontSize}px;
   font-weight: ${({ theme }) => theme.typography.mono.fontWeight};
+  font-family: ${({ theme }) => theme.typography.mono.fontFamily};
   text-align: center;
 `;
 
