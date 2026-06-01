@@ -7,6 +7,7 @@ import styled from 'styled-components/native';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ProductRow } from '@/components/molecules/ProductRow';
+import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
 import type { Product } from '@/types/product';
 import { hp } from '@/utils/screen';
 
@@ -48,6 +49,7 @@ export const ProductList: FC<ProductListProps> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const tabBarInset = useTabBarBottomInset();
 
   const refreshControl =
     onRefresh != null ? (
@@ -78,7 +80,7 @@ export const ProductList: FC<ProductListProps> = ({
         ItemSeparatorComponent={() => <Separator $compact={compact} />}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={
-          products.length === 0 ? { flexGrow: 1 } : { paddingBottom: hp('4%') }
+          products.length === 0 ? { flexGrow: 1 } : { paddingBottom: tabBarInset }
         }
         refreshControl={refreshControl}
         ListEmptyComponent={

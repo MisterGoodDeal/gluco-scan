@@ -1,8 +1,10 @@
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Platform } from 'react-native';
 import { useTheme } from 'styled-components/native';
 
 import { TabBarIcon } from '@/components/atoms/TabBarIcon';
+import { TabBarBackground } from '@/components/navigation/TabBarBackground';
 
 export const unstable_settings = {
   initialRouteName: 'meals/index',
@@ -16,9 +18,17 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarBackground: () => <TabBarBackground />,
         tabBarStyle: {
-          backgroundColor: theme.colors.background,
+          position: 'absolute',
+          backgroundColor: 'transparent',
+          borderTopWidth: 1,
           borderTopColor: theme.colors.glass.border,
+          elevation: 0,
+          ...Platform.select({
+            ios: { shadowOpacity: 0 },
+            default: {},
+          }),
         },
         tabBarActiveTintColor: theme.colors.accent,
         tabBarInactiveTintColor: theme.colors.textSecondary,

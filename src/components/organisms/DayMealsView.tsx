@@ -1,11 +1,12 @@
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, useWindowDimensions } from 'react-native';
-import styled from 'styled-components/native';
+import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
+import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
 import { getCurrentLocale } from '@/i18n';
 import type { Meal } from '@/types/meal';
 import { formatDateLabel, formatTimeLabel } from '@/utils/date';
@@ -21,9 +22,8 @@ type DayMealsViewProps = {
   onMealDelete: (mealId: string) => void;
 };
 
-const Page = styled.View<{ $width: number }>`
+const Page = styled(ScrollView)<{ $width: number }>`
   width: ${({ $width }) => $width}px;
-  padding: ${({ theme }) => theme.spacing.md}px;
   flex: 1;
 `;
 
@@ -60,8 +60,10 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   onMealDelete,
 }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const { width } = useWindowDimensions();
   const locale = getCurrentLocale();
+  const tabBarInset = useTabBarBottomInset();
 
   const sortedMeals = useMemo(
     () =>
@@ -74,7 +76,13 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   const hasMeals = sortedMeals.length > 0;
 
   return (
-    <Page $width={width}>
+    <Page
+      $width={width}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        padding: theme.spacing.md,
+        paddingBottom: tabBarInset,
+      }}>
       <Text $variant="subtitle" style={{ marginBottom: 16, textTransform: 'capitalize' }}>
         {formatDateLabel(dateKey, locale)}
       </Text>
