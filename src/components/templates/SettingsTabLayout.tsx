@@ -7,11 +7,14 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import styled from 'styled-components/native';
 
+import { PickerField } from '@/components/atoms/PickerField';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
+import { LanguagePickerSheet } from '@/components/organisms/LanguagePickerSheet';
+import { getCurrentLocale, getLanguageLabelKey, setAppLocale } from '@/i18n';
 import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
@@ -68,6 +71,8 @@ export const SettingsTabLayout: FC = () => {
 
   const [editingUnit, setEditingUnit] = useState<GlobalUnit | null>(null);
   const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
+  const [isLanguageSheetOpen, setIsLanguageSheetOpen] = useState(false);
+  const currentLocale = getCurrentLocale();
 
   useFocusEffect(
     useCallback(() => {
@@ -149,6 +154,15 @@ export const SettingsTabLayout: FC = () => {
           </Section>
 
           <Section>
+            <Text $variant="body">{t('settings.language')}</Text>
+            <PickerField
+              value={t(getLanguageLabelKey(currentLocale))}
+              onPress={() => setIsLanguageSheetOpen(true)}
+              accessibilityLabel={t('settings.language')}
+            />
+          </Section>
+
+          <Section>
             <SectionTitleRow>
               <Text $variant="body">{t('settings.globalUnits')}</Text>
               <AddButton onPress={openAddUnit} accessibilityLabel={t('settings.addUnit')}>
@@ -209,6 +223,15 @@ export const SettingsTabLayout: FC = () => {
         unit={editingUnit}
         onClose={closeUnitModal}
         onSave={handleSaveUnit}
+      />
+      <LanguagePickerSheet
+        visible={isLanguageSheetOpen}
+        locale={currentLocale}
+        onSelect={(locale) => {
+          void setAppLocale(locale);
+          setIsLanguageSheetOpen(false);
+        }}
+        onClose={() => setIsLanguageSheetOpen(false)}
       />
     </AppScreen>
   );

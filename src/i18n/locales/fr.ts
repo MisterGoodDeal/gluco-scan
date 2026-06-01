@@ -94,6 +94,9 @@ export type TranslationSchema = {
     themeSystem: string;
     themeLight: string;
     themeDark: string;
+    language: string;
+    languageFr: string;
+    languageEn: string;
     globalUnits: string;
     addUnit: string;
     editUnit: string;
@@ -229,6 +232,9 @@ export const fr: TranslationSchema = {
     themeSystem: 'Système',
     themeLight: 'Clair',
     themeDark: 'Sombre',
+    language: 'Langue',
+    languageFr: 'Français',
+    languageEn: 'English',
     globalUnits: 'Unités globales',
     addUnit: 'Ajouter une unité',
     editUnit: 'Modifier l\'unité',
