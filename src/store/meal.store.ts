@@ -5,6 +5,7 @@ import type { Meal } from '@/types/meal';
 import type { MealItem } from '@/types/mealItem';
 import { MealType } from '@/types/mealType';
 import { toDateKey } from '@/utils/date';
+import { inferMealTypeFromTime } from '@/utils/mealType';
 
 export type MealDraftMeta = {
   type: MealType;
@@ -43,11 +44,13 @@ type MealStore = {
 
 const defaultMeta = (): MealDraftMeta => {
   const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
   return {
-    type: MealType.LUNCH,
+    type: inferMealTypeFromTime(hours, minutes),
     dateKey: toDateKey(now),
-    hours: now.getHours(),
-    minutes: now.getMinutes(),
+    hours,
+    minutes,
   };
 };
 
@@ -80,7 +83,13 @@ export const useMealStore = create<MealStore>((set, get) => ({
   setStep: (step) => set({ step }),
 
   setDraftMeta: (meta) =>
-    set((state) => ({ draftMeta: { ...state.draftMeta, ...meta } })),
+    set((state) => {
+      const draftMeta = { ...state.draftMeta, ...meta };
+      if ('hours' in meta || 'minutes' in meta) {
+        draftMeta.type = inferMealTypeFromTime(draftMeta.hours, draftMeta.minutes);
+      }
+      return { draftMeta };
+    }),
 
   addDraftItem: (item) =>
     set((state) => ({ draftItems: [...state.draftItems, item] })),
