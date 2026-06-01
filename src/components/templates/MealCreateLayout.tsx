@@ -169,13 +169,11 @@ export const MealCreateLayout: FC = () => {
 
         {step === 1 && (
           <>
-            <Pressable
-              style={{ margin: 16, alignSelf: 'center' }}
-              onPress={() => setScanVisible(true)}>
-              <ActionButton $primary>
+            <View style={{ margin: 16, alignSelf: 'center' }}>
+              <ActionButton $primary onPress={() => setScanVisible(true)}>
                 <Text $variant="caption">{t('meals.scanProduct')}</Text>
               </ActionButton>
-            </Pressable>
+            </View>
             {draftItems.map((item) => (
               <ItemRow key={item.id}>
                 <Text $variant="body">
@@ -207,11 +205,11 @@ export const MealCreateLayout: FC = () => {
             <Text $variant="title" $color="accent" style={{ textAlign: 'center', marginTop: 24 }}>
               {t('meals.mealTotal')}: {formatDecimal(draftTotal)} g
             </Text>
-            <Pressable style={{ margin: 24, alignSelf: 'center' }} onPress={handleSave}>
-              <ActionButton $primary>
+            <View style={{ margin: 24, alignSelf: 'center' }}>
+              <ActionButton $primary onPress={handleSave}>
                 <Text $variant="caption">{t('meals.saveMeal')}</Text>
               </ActionButton>
-            </Pressable>
+            </View>
           </>
         )}
       </ScrollView>

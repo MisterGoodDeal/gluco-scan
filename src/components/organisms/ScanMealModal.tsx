@@ -39,7 +39,11 @@ export const ScanMealModal: FC<ScanMealModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="fullScreen"
+      onRequestClose={onClose}>
       <View style={[StyleSheet.absoluteFill, { backgroundColor: theme.colors.background }]}>
         <Header>
           <Text $variant="subtitle">{t('scanner.scanModalTitle')}</Text>
