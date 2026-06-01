@@ -8,7 +8,12 @@ import {
   ProductNotFoundError,
 } from '@/services/errors';
 import { consumeOffApiCall } from '@/services/offRateLimiter';
-import type { Product } from '@/types/product';
+
+export type OffProductResult = {
+  ean: string;
+  name: string;
+  carbsPer100g: number;
+};
 
 type OffNutriments = {
   carbohydrates_100g?: number;
@@ -31,7 +36,7 @@ const parseCarbs = (nutriments?: OffNutriments): number | null => {
   return carbs;
 };
 
-export const fetchProductByEAN = async (ean: string): Promise<Product> => {
+export const fetchProductByEAN = async (ean: string): Promise<OffProductResult> => {
   consumeOffApiCall();
 
   const { cc, lc } = getOffLocaleParams();
