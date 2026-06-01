@@ -1,22 +1,26 @@
-import { Picker } from '@react-native-picker/picker';
 import { router } from 'expo-router';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
+import { PickerField } from '@/components/atoms/PickerField';
 import { Text } from '@/components/atoms/Text';
+import {
+  MealMetaPickerSheet,
+  type MealMetaPickerField,
+} from '@/components/organisms/MealMetaPickerSheet';
 import { QuantityPickerModal } from '@/components/organisms/QuantityPickerModal';
 import { ScanMealModal } from '@/components/organisms/ScanMealModal';
+import { getCurrentLocale } from '@/i18n';
 import { useSettingsStore } from '@/store/settings.store';
 import { useMealStore } from '@/store/meal.store';
 import type { Product } from '@/types/product';
-import { MEAL_TYPES, MealType } from '@/types/mealType';
+import { formatDateLabel } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
 import { getMealTypeLabelKey } from '@/utils/mealType';
-import { addDays, toDateKey } from '@/utils/date';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
 
 const Header = styled(ScreenHeaderBar)`
@@ -69,11 +73,9 @@ const ItemRow = styled.View`
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
-const DATE_OPTIONS = Array.from({ length: 14 }, (_, i) => addDays(toDateKey(new Date()), i - 7));
-
 export const MealCreateLayout: FC = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const locale = getCurrentLocale();
   const step = useMealStore((s) => s.step);
   const setStep = useMealStore((s) => s.setStep);
   const draftMeta = useMealStore((s) => s.draftMeta);
@@ -86,10 +88,17 @@ export const MealCreateLayout: FC = () => {
 
   const [scanVisible, setScanVisible] = useState(false);
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
+  const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
+
+  const timeLabel = `${String(draftMeta.hours).padStart(2, '0')}:${String(draftMeta.minutes).padStart(2, '0')}`;
 
   useEffect(() => {
     void hydrateSettings();
   }, [hydrateSettings]);
+
+  useEffect(() => {
+    if (step !== 0) setOpenMetaPicker(null);
+  }, [step]);
 
   const draftTotal = draftItems.reduce((sum, item) => sum + item.carbs, 0);
 
@@ -129,54 +138,31 @@ export const MealCreateLayout: FC = () => {
               <Text $variant="caption" $color="textSecondary">
                 {t('meals.mealType')}
               </Text>
-              <Picker
-                selectedValue={draftMeta.type}
-                onValueChange={(v) => setDraftMeta({ type: v as MealType })}
-                style={{ color: theme.colors.text }}>
-                {MEAL_TYPES.map((type) => (
-                  <Picker.Item
-                    key={type}
-                    label={t(getMealTypeLabelKey(type))}
-                    value={type}
-                  />
-                ))}
-              </Picker>
+              <PickerField
+                value={t(getMealTypeLabelKey(draftMeta.type))}
+                onPress={() => setOpenMetaPicker('mealType')}
+                accessibilityLabel={t('meals.mealType')}
+              />
             </Field>
             <Field>
               <Text $variant="caption" $color="textSecondary">
                 {t('meals.date')}
               </Text>
-              <Picker
-                selectedValue={draftMeta.dateKey}
-                onValueChange={(v) => setDraftMeta({ dateKey: v })}
-                style={{ color: theme.colors.text }}>
-                {DATE_OPTIONS.map((d) => (
-                  <Picker.Item key={d} label={d} value={d} />
-                ))}
-              </Picker>
+              <PickerField
+                value={formatDateLabel(draftMeta.dateKey, locale)}
+                onPress={() => setOpenMetaPicker('date')}
+                accessibilityLabel={t('meals.date')}
+              />
             </Field>
             <Field>
               <Text $variant="caption" $color="textSecondary">
                 {t('meals.time')}
               </Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Picker
-                  selectedValue={draftMeta.hours}
-                  onValueChange={(v) => setDraftMeta({ hours: Number(v) })}
-                  style={{ flex: 1, color: theme.colors.text }}>
-                  {Array.from({ length: 24 }, (_, h) => (
-                    <Picker.Item key={h} label={String(h).padStart(2, '0')} value={h} />
-                  ))}
-                </Picker>
-                <Picker
-                  selectedValue={draftMeta.minutes}
-                  onValueChange={(v) => setDraftMeta({ minutes: Number(v) })}
-                  style={{ flex: 1, color: theme.colors.text }}>
-                  {Array.from({ length: 60 }, (_, m) => (
-                    <Picker.Item key={m} label={String(m).padStart(2, '0')} value={m} />
-                  ))}
-                </Picker>
-              </View>
+              <PickerField
+                value={timeLabel}
+                onPress={() => setOpenMetaPicker('time')}
+                accessibilityLabel={t('meals.time')}
+              />
             </Field>
           </>
         )}
@@ -258,6 +244,12 @@ export const MealCreateLayout: FC = () => {
           addDraftItem(item);
           setPickerProduct(null);
         }}
+      />
+      <MealMetaPickerSheet
+        field={openMetaPicker}
+        draftMeta={draftMeta}
+        onChange={setDraftMeta}
+        onClose={() => setOpenMetaPicker(null)}
       />
     </Screen>
   );
