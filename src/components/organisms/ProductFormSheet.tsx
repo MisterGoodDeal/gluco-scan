@@ -27,6 +27,9 @@ import type { Product } from '@/types/product';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
+import { useTutorialStore } from '@/store/tutorial.store';
+import { TutorialStatus } from '@/types/tutorial';
+import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
 import { listRowDivider } from '@/styles/listRow';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
 
@@ -126,6 +129,14 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const { formatEquivalentMass } = useMassDisplay();
   const theme = useTheme();
   const snapPoints = useMemo(() => ['88%'], []);
+  const tutorialStatus = useTutorialStore((s) => s.status);
+  const tutorialStep = useTutorialStore((s) => s.currentStep);
+  const productFormStepIndex = getTutorialInlineStepIndex('product-form');
+  const showTutorialBanner =
+    visible &&
+    tutorialStatus === TutorialStatus.RUNNING &&
+    tutorialStep === productFormStepIndex;
+
   const create = useProductStore((s) => s.create);
   const update = useProductStore((s) => s.update);
 
@@ -312,7 +323,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       <BottomSheet
         index={0}
         snapPoints={snapPoints}
-        enablePanDownToClose
+        enablePanDownToClose={!showTutorialBanner}
         onClose={handleDismiss}
         backdropComponent={renderBackdrop}
         {...getBottomSheetProps(theme)}
@@ -321,7 +332,9 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         android_keyboardInputMode="adjustResize">
         <BottomSheetScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingHorizontal: theme.spacing.lg }}>
+          contentContainerStyle={{
+            paddingHorizontal: theme.spacing.lg,
+          }}>
           <SheetHeader>
             <Text $variant="subtitle">
               {product ? t('products.editProduct') : t('products.addProduct')}
