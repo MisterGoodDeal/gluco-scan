@@ -10,13 +10,12 @@ import styled from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
-import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
+import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
 import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
 import { Screen as AppScreen, ScreenHeaderBar } from '@/styles/global';
-import { parseManualCarbs } from '@/utils/ean';
 
 const Header = styled(ScreenHeaderBar)``;
 
@@ -25,11 +24,25 @@ const Section = styled.View`
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
+const SectionTitleRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
 const UnitRow = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
+`;
+
+const AddButton = styled.Pressable`
+  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.radius.sm}px;
+  background-color: ${({ theme }) => theme.colors.accentMuted};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
 const ActionButton = styled.Pressable<{ $primary?: boolean }>`
@@ -53,10 +66,8 @@ export const SettingsTabLayout: FC = () => {
   const setExporting = useSettingsStore((s) => s.setExporting);
   const setImporting = useSettingsStore((s) => s.setImporting);
 
-  const [editing, setEditing] = useState<GlobalUnit | null>(null);
-  const [name, setName] = useState('');
-  const [abbreviation, setAbbreviation] = useState('');
-  const [gramsText, setGramsText] = useState('');
+  const [editingUnit, setEditingUnit] = useState<GlobalUnit | null>(null);
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -64,29 +75,27 @@ export const SettingsTabLayout: FC = () => {
     }, [hydrate]),
   );
 
-  const openNew = () => {
-    setEditing(null);
-    setName('');
-    setAbbreviation('');
-    setGramsText('');
+  const openAddUnit = () => {
+    setEditingUnit(null);
+    setIsUnitModalOpen(true);
   };
 
-  const openEdit = (unit: GlobalUnit) => {
-    setEditing(unit);
-    setName(unit.name);
-    setAbbreviation(unit.abbreviation);
-    setGramsText(String(unit.equivalentInGrams));
+  const openEditUnit = (unit: GlobalUnit) => {
+    setEditingUnit(unit);
+    setIsUnitModalOpen(true);
   };
 
-  const saveUnit = async () => {
-    const grams = parseManualCarbs(gramsText);
-    if (!name.trim() || !abbreviation.trim() || grams === null) return;
-    if (editing) {
-      await updateUnit({ ...editing, name: name.trim(), abbreviation: abbreviation.trim(), equivalentInGrams: grams });
+  const closeUnitModal = () => {
+    setIsUnitModalOpen(false);
+    setEditingUnit(null);
+  };
+
+  const handleSaveUnit = async (data: Omit<GlobalUnit, 'id'> | GlobalUnit) => {
+    if ('id' in data) {
+      await updateUnit(data);
     } else {
-      await createUnit({ name: name.trim(), abbreviation: abbreviation.trim(), equivalentInGrams: grams });
+      await createUnit(data);
     }
-    openNew();
   };
 
   const handleExport = async () => {
@@ -133,11 +142,18 @@ export const SettingsTabLayout: FC = () => {
           </Header>
 
           <Section>
-            <Text $variant="body">{t('settings.globalUnits')}</Text>
+            <SectionTitleRow>
+              <Text $variant="body">{t('settings.globalUnits')}</Text>
+              <AddButton onPress={openAddUnit} accessibilityLabel={t('settings.addUnit')}>
+                <Text $variant="caption" $color="accent">
+                  {t('settings.addUnit')}
+                </Text>
+              </AddButton>
+            </SectionTitleRow>
             <GlassPanel blurTarget={blurTargetRef}>
               {globalUnits.map((unit) => (
                 <UnitRow key={unit.id}>
-                  <Pressable onPress={() => openEdit(unit)}>
+                  <Pressable onPress={() => openEditUnit(unit)}>
                     <Text $variant="body">
                       {unit.name} ({unit.abbreviation}) — {unit.equivalentInGrams}g
                     </Text>
@@ -158,22 +174,6 @@ export const SettingsTabLayout: FC = () => {
                 </UnitRow>
               ))}
             </GlassPanel>
-            <SearchInput value={name} onChangeText={setName} placeholder={t('products.unitName')} />
-            <SearchInput
-              value={abbreviation}
-              onChangeText={setAbbreviation}
-              placeholder={t('products.unitAbbreviation')}
-            />
-            <SearchInput
-              value={gramsText}
-              onChangeText={setGramsText}
-              placeholder={t('products.unitGrams')}
-            />
-            <ActionButton $primary onPress={saveUnit}>
-              <Text $variant="caption">
-                {editing ? t('common.save') : t('settings.addUnit')}
-              </Text>
-            </ActionButton>
           </Section>
 
           <Section>
@@ -197,6 +197,12 @@ export const SettingsTabLayout: FC = () => {
           </Section>
         </ScrollView>
       </BlurTargetView>
+      <GlobalUnitFormModal
+        visible={isUnitModalOpen}
+        unit={editingUnit}
+        onClose={closeUnitModal}
+        onSave={handleSaveUnit}
+      />
     </AppScreen>
   );
 };

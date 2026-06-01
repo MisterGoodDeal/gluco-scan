@@ -50,6 +50,14 @@ const UnitRow = styled.View`
   padding: ${({ theme }) => theme.spacing.xs}px 0;
 `;
 
+const FooterActions = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
+`;
+
 const ActionButton = styled.Pressable<{ $primary?: boolean }>`
   padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
   border-radius: ${({ theme }) => theme.radius.sm}px;
@@ -57,8 +65,6 @@ const ActionButton = styled.Pressable<{ $primary?: boolean }>`
     $primary ? theme.colors.accent : theme.colors.glass.background};
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.glass.border};
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-  align-self: flex-end;
 `;
 
 export const ProductFormModal: FC<ProductFormModalProps> = ({
@@ -278,18 +284,18 @@ export const ProductFormModal: FC<ProductFormModalProps> = ({
 
                   {isLookupLoading && <ActivityIndicator color={theme.colors.accent} />}
 
-                  <Pressable
-                    onPress={onClose}
-                    style={{ marginTop: theme.spacing.sm, alignSelf: 'flex-start' }}>
-                    <Text $variant="caption">{t('common.cancel')}</Text>
-                  </Pressable>
-                  <ActionButton $primary onPress={handleSave} disabled={isSaving}>
-                    {isSaving ? (
-                      <ActivityIndicator color={theme.colors.text} size="small" />
-                    ) : (
-                      <Text $variant="caption">{t('common.save')}</Text>
-                    )}
-                  </ActionButton>
+                  <FooterActions>
+                    <ActionButton onPress={onClose} disabled={isSaving}>
+                      <Text $variant="caption">{t('common.cancel')}</Text>
+                    </ActionButton>
+                    <ActionButton $primary onPress={handleSave} disabled={isSaving}>
+                      {isSaving ? (
+                        <ActivityIndicator color={theme.colors.text} size="small" />
+                      ) : (
+                        <Text $variant="caption">{t('common.save')}</Text>
+                      )}
+                    </ActionButton>
+                  </FooterActions>
                 </GlassPanel>
               </Pressable>
             </Overlay>
