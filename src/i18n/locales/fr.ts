@@ -15,6 +15,8 @@ export type TranslationSchema = {
     searchPlaceholder: string;
     grams: string;
     gramsUnit: string;
+    ounces: string;
+    ouncesUnit: string;
     carbsPer100g: string;
     ean: string;
     delete: string;
@@ -46,6 +48,7 @@ export type TranslationSchema = {
     unitName: string;
     unitAbbreviation: string;
     unitGrams: string;
+    unitMass: string;
     addUnit: string;
     noCustomUnits: string;
     noEans: string;
@@ -97,6 +100,10 @@ export type TranslationSchema = {
     language: string;
     languageFr: string;
     languageEn: string;
+    units: string;
+    unitsDescription: string;
+    unitMetric: string;
+    unitImperial: string;
     globalUnits: string;
     addUnit: string;
     editUnit: string;
@@ -153,6 +160,8 @@ export const fr: TranslationSchema = {
     searchPlaceholder: 'Rechercher un produit…',
     grams: 'Grammes',
     gramsUnit: 'g',
+    ounces: 'Onces',
+    ouncesUnit: 'oz',
     carbsPer100g: '{{value}} g / 100g',
     ean: 'EAN {{ean}}',
     delete: 'Supprimer',
@@ -184,6 +193,7 @@ export const fr: TranslationSchema = {
     unitName: 'Nom',
     unitAbbreviation: 'Abréviation',
     unitGrams: 'Équivalent (g)',
+    unitMass: 'Équivalent ({{unit}})',
     addUnit: 'Ajouter une unité',
     noCustomUnits: 'Aucune unité personnalisée.',
     noEans: 'Aucun code EAN.',
@@ -235,6 +245,10 @@ export const fr: TranslationSchema = {
     language: 'Langue',
     languageFr: 'Français',
     languageEn: 'English',
+    units: 'Unités de mesure',
+    unitsDescription: 'Affichage des masses en grammes ou en onces.',
+    unitMetric: 'Métrique',
+    unitImperial: 'Impérial',
     globalUnits: 'Unités globales',
     addUnit: 'Ajouter une unité',
     editUnit: 'Modifier l\'unité',
