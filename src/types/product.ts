@@ -5,6 +5,7 @@ export interface Product {
   eans: string[];
   name: string;
   carbsPer100g: number;
+  imageUrl?: string | null;
   customUnits: ProductUnit[];
   usageCount?: number;
 }
