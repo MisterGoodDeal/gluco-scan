@@ -58,6 +58,9 @@ export type TranslationSchema = {
     eanCount: string;
     compactListOnA11y: string;
     compactListOffA11y: string;
+    refreshFromOffA11y: string;
+    refreshNoEan: string;
+    refreshNoData: string;
   };
   meals: {
     title: string;
@@ -206,6 +209,9 @@ export const fr: TranslationSchema = {
     eanCount: '{{count}} codes EAN',
     compactListOnA11y: 'Vue compacte activée, passer en vue détaillée',
     compactListOffA11y: 'Passer en vue compacte',
+    refreshFromOffA11y: 'Actualiser depuis Open Food Facts',
+    refreshNoEan: 'Ajoutez un code EAN pour actualiser les informations.',
+    refreshNoData: 'Aucune donnée trouvée sur Open Food Facts pour ce code.',
   },
   meals: {
     title: 'Mes repas',

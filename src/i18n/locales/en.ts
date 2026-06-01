@@ -60,6 +60,9 @@ export const en: TranslationSchema = {
     eanCount: '{{count}} EAN codes',
     compactListOnA11y: 'Compact view on, switch to detailed view',
     compactListOffA11y: 'Switch to compact view',
+    refreshFromOffA11y: 'Refresh from Open Food Facts',
+    refreshNoEan: 'Add an EAN code to refresh product information.',
+    refreshNoData: 'No data found on Open Food Facts for this code.',
   },
   meals: {
     title: 'My meals',
