@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { DatabaseGate } from '@/components/organisms/DatabaseGate';
+import { TutorialHost } from '@/components/providers/TutorialHost';
 
 export default function RootLayout() {
   return (
@@ -14,6 +15,7 @@ export default function RootLayout() {
         <AppThemeProvider>
           <DatabaseGate>
             <BottomSheetModalProvider>
+              <TutorialHost>
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="(tabs)" />
@@ -22,6 +24,7 @@ export default function RootLayout() {
                   options={{ presentation: 'fullScreenModal' }}
                 />
               </Stack>
+              </TutorialHost>
             </BottomSheetModalProvider>
           </DatabaseGate>
         </AppThemeProvider>
