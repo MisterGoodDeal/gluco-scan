@@ -4,24 +4,15 @@ import { initReactI18next } from 'react-i18next';
 
 import { en } from '@/i18n/locales/en';
 import { fr } from '@/i18n/locales/fr';
-import { readStoredLocale, writeStoredLocale } from '@/i18n/localeStorage';
 import { supportedLocales, type SupportedLocale } from '@/i18n/types';
 
 export { supportedLocales, type SupportedLocale };
 
-const resolveInitialLocale = (): SupportedLocale => {
-  const stored = readStoredLocale();
-  if (stored) return stored;
-
+const resolveBootstrapLocale = (): SupportedLocale => {
   const deviceLocale = getLocales()[0]?.languageCode ?? 'fr';
   return supportedLocales.includes(deviceLocale as SupportedLocale)
     ? (deviceLocale as SupportedLocale)
     : 'fr';
-};
-
-export const setAppLocale = async (locale: SupportedLocale): Promise<void> => {
-  writeStoredLocale(locale);
-  await i18n.changeLanguage(locale);
 };
 
 export const getLanguageLabelKey = (locale: SupportedLocale): 'settings.languageFr' | 'settings.languageEn' =>
@@ -32,7 +23,7 @@ void i18n.use(initReactI18next).init({
     fr: { translation: fr },
     en: { translation: en },
   },
-  lng: resolveInitialLocale(),
+  lng: resolveBootstrapLocale(),
   fallbackLng: 'fr',
   interpolation: { escapeValue: false },
   compatibilityJSON: 'v4',
