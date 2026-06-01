@@ -55,6 +55,13 @@ export const ProductRow: FC<ProductRowProps> = memo(
             <Text $variant="caption" $color="textSecondary">
               {t('common.carbsPer100g', { value: formatDecimal(product.carbsPer100g) })}
             </Text>
+            {product.eans.length > 0 && (
+              <Text $variant="caption" $color="textSecondary">
+                {product.eans.length === 1
+                  ? t('common.ean', { ean: product.eans[0] })
+                  : t('products.eanCount', { count: product.eans.length })}
+              </Text>
+            )}
             <Text $variant="caption" $color="textSecondary">
               {t('common.usageCount', { count: product.usageCount ?? 0 })}
             </Text>

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
+import { productMatchesQuery } from '@/utils/productSearch';
 
 type ProductStore = {
   products: Product[];
@@ -10,7 +11,7 @@ type ProductStore = {
   hydrate: () => Promise<void>;
   setQuery: (query: string) => void;
   getFiltered: () => Product[];
-  create: (data: { name: string; carbsPer100g: number; ean?: string }) => Promise<Product>;
+  create: (data: { name: string; carbsPer100g: number; eans?: string[] }) => Promise<Product>;
   update: (product: Product) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };
@@ -36,11 +37,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     const { products, query } = get();
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return products;
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(trimmed) ||
-        (p.ean?.includes(trimmed) ?? false),
-    );
+    return products.filter((p) => productMatchesQuery(p, trimmed));
   },
 
   create: async (data) => {

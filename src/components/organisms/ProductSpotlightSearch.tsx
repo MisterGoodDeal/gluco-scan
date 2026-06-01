@@ -18,6 +18,7 @@ import { Text } from '@/components/atoms/Text';
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
+import { productMatchesQuery } from '@/utils/productSearch';
 import { topScreenSpace } from '@/utils/screen';
 
 type ProductSpotlightSearchProps = {
@@ -55,13 +56,9 @@ const EmptyWrap = styled.View`
 `;
 
 const filterProducts = (products: Product[], query: string): Product[] => {
-  const trimmed = query.trim().toLowerCase();
+  const trimmed = query.trim();
   if (!trimmed) return products;
-  return products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(trimmed) ||
-      (p.ean?.includes(trimmed) ?? false),
-  );
+  return products.filter((p) => productMatchesQuery(p, trimmed));
 };
 
 export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
@@ -147,7 +144,7 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                   <Text $variant="body">{item.name}</Text>
                   <Text $variant="caption" $color="textSecondary">
                     {formatDecimal(item.carbsPer100g)} g / 100g
-                    {item.ean ? ` · ${item.ean}` : ''}
+                    {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}
                   </Text>
                 </ResultRow>
               )}

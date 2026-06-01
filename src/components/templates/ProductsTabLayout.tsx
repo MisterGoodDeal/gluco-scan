@@ -13,6 +13,7 @@ import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
 import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
+import { productMatchesQuery } from '@/utils/productSearch';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
 
 const Header = styled(ScreenHeaderBar)`
@@ -40,11 +41,7 @@ export const ProductsTabLayout: FC = () => {
   const filteredProducts = useProductStore((s) => {
     const trimmed = s.query.trim().toLowerCase();
     if (!trimmed) return s.products;
-    return s.products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(trimmed) ||
-        (p.ean?.includes(trimmed) ?? false),
-    );
+    return s.products.filter((p) => productMatchesQuery(p, trimmed));
   });
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);

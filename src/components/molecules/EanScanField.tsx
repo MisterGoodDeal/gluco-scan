@@ -12,7 +12,7 @@ import { Text } from '@/components/atoms/Text';
 import { isValidEan } from '@/utils/ean';
 
 type EanScanFieldProps = {
-  value: string;
+  value?: string;
   onScan: (ean: string) => void;
   placeholder?: string;
 };
@@ -54,7 +54,7 @@ const PermissionButton = styled.Pressable`
 `;
 
 export const EanScanField: FC<EanScanFieldProps> = ({
-  value,
+  value = '',
   onScan,
   placeholder,
 }) => {

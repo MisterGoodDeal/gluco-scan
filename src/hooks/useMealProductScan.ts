@@ -25,7 +25,7 @@ export const useMealProductScan = () => {
       const created = await productRepository.create({
         name: fromOff.name,
         carbsPer100g: fromOff.carbsPer100g,
-        ean: fromOff.ean,
+        eans: [fromOff.ean],
       });
       return created;
     } catch (err) {
@@ -39,7 +39,7 @@ export const useMealProductScan = () => {
           return productRepository.create({
             name: partial.name,
             carbsPer100g: partial.carbsPer100g,
-            ean,
+            eans: [ean],
           });
         }
       } catch {

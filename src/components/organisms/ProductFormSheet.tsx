@@ -10,8 +10,9 @@ import styled, { useTheme } from 'styled-components/native';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
-import { EanScanField } from '@/components/molecules/EanScanField';
+import { ProductEanListEditor } from '@/components/molecules/ProductEanListEditor';
 import { ProductUnitFormModal } from '@/components/organisms/ProductUnitFormModal';
+import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import { fetchOffPartialByEAN } from '@/services/openFoodFacts.service';
 import { useProductStore } from '@/store/product.store';
@@ -101,7 +102,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const create = useProductStore((s) => s.create);
   const update = useProductStore((s) => s.update);
 
-  const [ean, setEan] = useState('');
+  const [eans, setEans] = useState<string[]>([]);
   const [name, setName] = useState('');
   const [carbsText, setCarbsText] = useState('');
   const [units, setUnits] = useState<ProductUnit[]>([]);
@@ -121,7 +122,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   useEffect(() => {
     if (!visible) return;
-    setEan(product?.ean ?? '');
+    setEans(product?.eans ?? []);
     setName(product?.name ?? '');
     setCarbsText(
       product?.carbsPer100g != null ? String(product.carbsPer100g).replace('.', ',') : '',
@@ -137,7 +138,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   }, [onClose]);
 
   const handleLookup = async (scannedEan: string) => {
-    setEan(scannedEan);
     setIsLookupLoading(true);
     try {
       const partial = await fetchOffPartialByEAN(scannedEan);
@@ -178,8 +178,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const handleSave = async () => {
     const trimmedName = name.trim();
     const carbs = parseManualCarbs(carbsText);
-    const trimmedEan = ean.trim();
-
     if (!trimmedName) {
       setError(t('modal.nameRequired'));
       return;
@@ -188,8 +186,15 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       setError(t('modal.invalidCarbs'));
       return;
     }
-    if (trimmedEan && !isValidEan(trimmedEan)) {
-      setError(t('modal.invalidEan'));
+    for (const code of eans) {
+      if (!isValidEan(code)) {
+        setError(t('modal.invalidEan'));
+        return;
+      }
+    }
+    const conflict = await productEanRepository.findConflicts(eans, product?.id);
+    if (conflict) {
+      setError(t('products.eanTaken', { ean: conflict }));
       return;
     }
 
@@ -198,7 +203,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       if (product) {
         const updated: Product = {
           ...product,
-          ean: trimmedEan || undefined,
+          eans,
           name: trimmedName,
           carbsPer100g: carbs,
           customUnits: units,
@@ -221,7 +226,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         const created = await create({
           name: trimmedName,
           carbsPer100g: carbs,
-          ean: trimmedEan || undefined,
+          eans,
         });
         for (const unit of units) {
           await productUnitRepository.create(created.id, unit);
@@ -270,7 +275,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             <Text $variant="caption" $color="textSecondary">
               {t('modal.eanLabel')}
             </Text>
-            <EanScanField value={ean} onScan={handleLookup} />
+            <ProductEanListEditor eans={eans} onChange={setEans} onScan={handleLookup} />
           </Field>
 
           <Field>

@@ -48,6 +48,11 @@ export type TranslationSchema = {
     unitGrams: string;
     addUnit: string;
     noCustomUnits: string;
+    noEans: string;
+    addEan: string;
+    duplicateEan: string;
+    eanTaken: string;
+    eanCount: string;
   };
   meals: {
     title: string;
@@ -173,6 +178,11 @@ export const fr: TranslationSchema = {
     unitGrams: 'Équivalent (g)',
     addUnit: 'Ajouter une unité',
     noCustomUnits: 'Aucune unité personnalisée.',
+    noEans: 'Aucun code EAN.',
+    addEan: 'Ajouter un code EAN',
+    duplicateEan: 'Ce code EAN est déjà dans la liste.',
+    eanTaken: 'Le code EAN {{ean}} est déjà utilisé par un autre produit.',
+    eanCount: '{{count}} codes EAN',
   },
   meals: {
     title: 'Mes repas',
@@ -222,7 +232,7 @@ export const fr: TranslationSchema = {
     importError: 'Import impossible',
   },
   modal: {
-    eanLabel: 'Code EAN',
+    eanLabel: 'Codes EAN',
     nameLabel: 'Nom du produit',
     carbsLabel: 'Glucides / 100g',
     namePlaceholder: 'Mon produit',

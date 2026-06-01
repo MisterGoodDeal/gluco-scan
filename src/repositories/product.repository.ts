@@ -1,59 +1,67 @@
 import { getDatabase } from '@/database/client';
+import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import type { Product } from '@/types/product';
 import { generateId } from '@/utils/id';
+import { productMatchesQuery } from '@/utils/productSearch';
 
 type ProductRow = {
   id: string;
-  ean: string | null;
   name: string;
   carbs_per_100g: number;
   created_at: string;
   usage_count?: number;
 };
 
-const mapRow = (row: ProductRow, customUnits: Product['customUnits'] = []): Product => ({
+const mapRow = (
+  row: ProductRow,
+  customUnits: Product['customUnits'],
+  eans: string[],
+): Product => ({
   id: row.id,
-  ean: row.ean ?? undefined,
+  eans,
   name: row.name,
   carbsPer100g: row.carbs_per_100g,
   customUnits,
   usageCount: row.usage_count ?? 0,
 });
 
+const loadProduct = async (row: ProductRow): Promise<Product> => {
+  const [units, eans] = await Promise.all([
+    productUnitRepository.getByProductId(row.id),
+    productEanRepository.getByProductId(row.id),
+  ]);
+  return mapRow(row, units, eans);
+};
+
 export const productRepository = {
   async getAll(): Promise<Product[]> {
     const db = getDatabase();
     const rows = await db.getAllAsync<ProductRow>(
-      `SELECT p.*, COUNT(mi.id) as usage_count
+      `SELECT p.id, p.name, p.carbs_per_100g, p.created_at, COUNT(mi.id) as usage_count
        FROM products p
        LEFT JOIN meal_items mi ON mi.product_id = p.id
        GROUP BY p.id
        ORDER BY p.name`,
     );
+    const eansByProduct = await productEanRepository.getByProductIds(rows.map((r) => r.id));
     const products: Product[] = [];
     for (const row of rows) {
       const units = await productUnitRepository.getByProductId(row.id);
-      products.push(mapRow(row, units));
+      products.push(mapRow(row, units, eansByProduct.get(row.id) ?? []));
     }
     return products;
   },
 
   async search(query: string): Promise<Product[]> {
     const all = await this.getAll();
-    const trimmed = query.trim().toLowerCase();
-    if (!trimmed) return all;
-    return all.filter(
-      (p) =>
-        p.name.toLowerCase().includes(trimmed) ||
-        (p.ean?.includes(trimmed) ?? false),
-    );
+    return all.filter((p) => productMatchesQuery(p, query));
   },
 
   async getById(id: string): Promise<Product | null> {
     const db = getDatabase();
     const row = await db.getFirstAsync<ProductRow>(
-      `SELECT p.*, COUNT(mi.id) as usage_count
+      `SELECT p.id, p.name, p.carbs_per_100g, p.created_at, COUNT(mi.id) as usage_count
        FROM products p
        LEFT JOIN meal_items mi ON mi.product_id = p.id
        WHERE p.id = ?
@@ -61,38 +69,32 @@ export const productRepository = {
       id,
     );
     if (!row) return null;
-    const units = await productUnitRepository.getByProductId(id);
-    return mapRow(row, units);
+    return loadProduct(row);
   },
 
   async getByEan(ean: string): Promise<Product | null> {
-    const db = getDatabase();
-    const row = await db.getFirstAsync<ProductRow>(
-      'SELECT * FROM products WHERE ean = ?',
-      ean,
-    );
-    if (!row) return null;
-    const units = await productUnitRepository.getByProductId(row.id);
-    return mapRow(row, units);
+    const productId = await productEanRepository.getProductIdByEan(ean);
+    if (!productId) return null;
+    return this.getById(productId);
   },
 
   async create(data: {
     name: string;
     carbsPer100g: number;
-    ean?: string;
+    eans?: string[];
   }): Promise<Product> {
     const db = getDatabase();
     const id = generateId();
     const now = new Date().toISOString();
     await db.runAsync(
       `INSERT INTO products (id, ean, name, carbs_per_100g, created_at)
-       VALUES (?, ?, ?, ?, ?)`,
+       VALUES (?, NULL, ?, ?, ?)`,
       id,
-      data.ean ?? null,
       data.name,
       data.carbsPer100g,
       now,
     );
+    await productEanRepository.setForProduct(id, data.eans ?? []);
     const product = await this.getById(id);
     if (!product) throw new Error('Failed to create product');
     return product;
@@ -101,12 +103,12 @@ export const productRepository = {
   async update(product: Product): Promise<Product> {
     const db = getDatabase();
     await db.runAsync(
-      `UPDATE products SET ean = ?, name = ?, carbs_per_100g = ? WHERE id = ?`,
-      product.ean ?? null,
+      `UPDATE products SET name = ?, carbs_per_100g = ? WHERE id = ?`,
       product.name,
       product.carbsPer100g,
       product.id,
     );
+    await productEanRepository.setForProduct(product.id, product.eans);
     const updated = await this.getById(product.id);
     if (!updated) throw new Error('Failed to update product');
     return updated;

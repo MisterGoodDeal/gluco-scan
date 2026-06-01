@@ -50,6 +50,11 @@ export const en: TranslationSchema = {
     unitGrams: 'Equivalent (g)',
     addUnit: 'Add unit',
     noCustomUnits: 'No custom units yet.',
+    noEans: 'No EAN codes yet.',
+    addEan: 'Add EAN code',
+    duplicateEan: 'This EAN code is already in the list.',
+    eanTaken: 'EAN {{ean}} is already used by another product.',
+    eanCount: '{{count}} EAN codes',
   },
   meals: {
     title: 'My meals',
@@ -99,7 +104,7 @@ export const en: TranslationSchema = {
     importError: 'Import failed',
   },
   modal: {
-    eanLabel: 'EAN code',
+    eanLabel: 'EAN codes',
     nameLabel: 'Product name',
     carbsLabel: 'Carbs / 100g',
     namePlaceholder: 'My product',

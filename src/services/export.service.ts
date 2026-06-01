@@ -5,11 +5,14 @@ import { gzipSync, gunzipSync, strToU8, strFromU8 } from 'fflate';
 import { getDatabase } from '@/database/client';
 import { globalUnitRepository } from '@/repositories/globalUnit.repository';
 import { mealRepository } from '@/repositories/meal.repository';
+import { productEanRepository } from '@/repositories/productEan.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import type { ExportPayload } from '@/types/exportPayload';
+import { normalizeExportProduct } from '@/utils/exportProduct';
 
-const EXPORT_VERSION = 1;
+const EXPORT_VERSION = 2;
+const SUPPORTED_EXPORT_VERSIONS = [1, 2] as const;
 
 export const buildExportPayload = async (): Promise<ExportPayload> => ({
   version: EXPORT_VERSION,
@@ -27,10 +30,14 @@ export const serializePayload = (payload: ExportPayload): Uint8Array => {
 export const deserializePayload = (data: Uint8Array): ExportPayload => {
   const json = strFromU8(gunzipSync(data));
   const parsed = JSON.parse(json) as ExportPayload;
-  if (parsed.version !== EXPORT_VERSION) {
+  if (!SUPPORTED_EXPORT_VERSIONS.includes(parsed.version as 1 | 2)) {
     throw new Error('Unsupported export version');
   }
-  return parsed;
+  return {
+    ...parsed,
+    version: EXPORT_VERSION,
+    products: parsed.products.map(normalizeExportProduct),
+  };
 };
 
 export const exportToGsFile = async (): Promise<string> => {
@@ -62,13 +69,13 @@ export const importFromGsBytes = async (bytes: Uint8Array): Promise<void> => {
       if (!existing) {
         await db.runAsync(
           `INSERT INTO products (id, ean, name, carbs_per_100g, created_at)
-           VALUES (?, ?, ?, ?, ?)`,
+           VALUES (?, NULL, ?, ?, ?)`,
           product.id,
-          product.ean ?? null,
           product.name,
           product.carbsPer100g,
           new Date().toISOString(),
         );
+        await productEanRepository.setForProduct(product.id, product.eans);
       } else {
         await productRepository.update(product);
       }
