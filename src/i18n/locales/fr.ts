@@ -53,6 +53,7 @@ export type TranslationSchema = {
     addMeal: string;
     dayTotal: string;
     emptyDay: string;
+    emptyToday: string;
     mealCarbs: string;
     createTitle: string;
     stepInfo: string;
@@ -169,7 +170,8 @@ export const fr: TranslationSchema = {
     title: 'Mes repas',
     addMeal: 'Nouveau repas',
     dayTotal: 'Total : {{value}} g glucides',
-    emptyDay: 'Aucun repas ce jour-là',
+    emptyDay: 'Aucun repas pour ce jour.',
+    emptyToday: "Aucun repas pour aujourd'hui. Commencez par en ajouter un.",
     mealCarbs: '{{value}} g glucides',
     createTitle: 'Nouveau repas',
     stepInfo: 'Informations',

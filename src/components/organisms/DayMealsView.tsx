@@ -1,19 +1,19 @@
-import { type FC } from 'react';
+import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions } from 'react-native';
 import styled from 'styled-components/native';
 
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
-import type { Meal } from '@/types/meal';
-import { MEAL_TYPES, MealType } from '@/types/mealType';
-import { formatDateLabel } from '@/utils/date';
-import { formatDecimal } from '@/utils/format';
 import { getCurrentLocale } from '@/i18n';
+import type { Meal } from '@/types/meal';
+import { formatDateLabel, formatTimeLabel } from '@/utils/date';
+import { formatDecimal } from '@/utils/format';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 
 type DayMealsViewProps = {
   dateKey: string;
+  isToday: boolean;
   meals: Meal[];
   dayTotalCarbs: number;
   onMealPress: (meal: Meal) => void;
@@ -22,6 +22,7 @@ type DayMealsViewProps = {
 const Page = styled.View<{ $width: number }>`
   width: ${({ $width }) => $width}px;
   padding: ${({ theme }) => theme.spacing.md}px;
+  flex: 1;
 `;
 
 const MealRow = styled(Pressable)`
@@ -30,8 +31,14 @@ const MealRow = styled(Pressable)`
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
+const EmptyState = styled.View`
+  padding: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.md}px;
+  align-items: center;
+`;
+
 export const DayMealsView: FC<DayMealsViewProps> = ({
   dateKey,
+  isToday,
   meals,
   dayTotalCarbs,
   onMealPress,
@@ -40,7 +47,15 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   const { width } = useWindowDimensions();
   const locale = getCurrentLocale();
 
-  const mealsByType = (type: MealType) => meals.filter((m) => m.type === type);
+  const sortedMeals = useMemo(
+    () =>
+      [...meals].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      ),
+    [meals],
+  );
+
+  const hasMeals = sortedMeals.length > 0;
 
   return (
     <Page $width={width}>
@@ -48,33 +63,34 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
         {formatDateLabel(dateKey, locale)}
       </Text>
 
-      <GlassPanel>
-        {MEAL_TYPES.map((type) => {
-          const typeMeals = mealsByType(type);
-          if (typeMeals.length === 0) {
-            return (
-              <MealRow key={type} disabled>
-                <Text $variant="body">{t(getMealTypeLabelKey(type))}</Text>
-                <Text $variant="caption" $color="textSecondary">
-                  —
-                </Text>
-              </MealRow>
-            );
-          }
-          return typeMeals.map((meal) => (
+      {hasMeals ? (
+        <GlassPanel>
+          {sortedMeals.map((meal) => (
             <MealRow key={meal.id} onPress={() => onMealPress(meal)}>
-              <Text $variant="body">{t(getMealTypeLabelKey(type))}</Text>
+              <Text $variant="body">
+                {t(getMealTypeLabelKey(meal.type))} · {formatTimeLabel(meal.createdAt, locale)}
+              </Text>
               <Text $variant="caption" $color="accent">
                 {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
               </Text>
             </MealRow>
-          ));
-        })}
-      </GlassPanel>
+          ))}
+        </GlassPanel>
+      ) : (
+        <GlassPanel>
+          <EmptyState>
+            <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
+              {isToday ? t('meals.emptyToday') : t('meals.emptyDay')}
+            </Text>
+          </EmptyState>
+        </GlassPanel>
+      )}
 
-      <Text $variant="title" $color="accent" style={{ marginTop: 24, textAlign: 'center' }}>
-        {t('meals.dayTotal', { value: formatDecimal(dayTotalCarbs) })}
-      </Text>
+      {hasMeals && (
+        <Text $variant="title" $color="accent" style={{ marginTop: 24, textAlign: 'center' }}>
+          {t('meals.dayTotal', { value: formatDecimal(dayTotalCarbs) })}
+        </Text>
+      )}
     </Page>
   );
 };

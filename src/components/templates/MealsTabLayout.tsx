@@ -55,11 +55,15 @@ export const MealsTabLayout: FC = () => {
     setTotalsByDate(totalsMap);
   }, []);
 
+  const refreshMeals = useCallback(() => {
+    void hydrateDay(selectedDate);
+    void loadWindow(selectedDate);
+  }, [hydrateDay, loadWindow, selectedDate]);
+
   useFocusEffect(
     useCallback(() => {
-      void hydrateDay(selectedDate);
-      void loadWindow(selectedDate);
-    }, [hydrateDay, loadWindow, selectedDate]),
+      refreshMeals();
+    }, [refreshMeals]),
   );
 
   const handleDateChange = (dateKey: string) => {
