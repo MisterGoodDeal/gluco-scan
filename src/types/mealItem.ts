@@ -7,6 +7,7 @@ export interface MealItem {
   unitType: MealItemUnitType;
   unitId?: string;
   productName?: string;
+  imageUrl?: string | null;
   carbs?: number;
   unitLabel?: string;
 }

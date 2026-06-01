@@ -3,6 +3,7 @@ import { type ComponentProps, type FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components/native';
 
+import { ProductImage } from '@/components/atoms/ProductImage';
 import { Text } from '@/components/atoms/Text';
 import type { Meal } from '@/types/meal';
 import { formatTimeLabel } from '@/utils/date';
@@ -18,15 +19,20 @@ type MealDetailSheetProps = {
 };
 
 const Row = styled.View`
+  gap: ${({ theme }) => theme.spacing.sm}px;
   padding: ${({ theme }) => theme.spacing.sm}px 0;
   border-bottom-width: 1px;
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
+const ItemInfo = styled.View`
+  gap: ${({ theme }) => theme.spacing.xs}px;
+`;
+
 export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const snapPoints = useMemo(() => ['45%', '70%'], []);
+  const snapPoints = useMemo(() => ['50%', '85%'], []);
   const locale = getCurrentLocale();
   const { formatMassValue, massUnit } = useMassDisplay();
 
@@ -58,17 +64,20 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
         </Text>
         {meal.items.map((item) => (
           <Row key={item.id}>
-            <Text $variant="body">{item.productName}</Text>
-            <Text $variant="caption" $color="textSecondary">
-              {formatMealItemQuantity(
-                item.quantity,
-                item.unitType,
-                item.unitLabel,
-                formatMassValue,
-                massUnit,
-              )}{' '}
-              — {formatDecimal(item.carbs ?? 0)} g
-            </Text>
+            <ItemInfo>
+              <Text $variant="body">{item.productName}</Text>
+              <Text $variant="caption" $color="textSecondary">
+                {formatMealItemQuantity(
+                  item.quantity,
+                  item.unitType,
+                  item.unitLabel,
+                  formatMassValue,
+                  massUnit,
+                )}{' '}
+                — {formatDecimal(item.carbs ?? 0)} g
+              </Text>
+            </ItemInfo>
+            {item.imageUrl ? <ProductImage uri={item.imageUrl} size={64} /> : null}
           </Row>
         ))}
         <Text $variant="title" $color="accent" style={{ marginTop: 16 }}>

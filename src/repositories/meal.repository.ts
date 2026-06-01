@@ -56,6 +56,7 @@ const mapMealItemRow = async (
     unitType,
     unitId: row.unit_id ?? undefined,
     productName: product?.name,
+    imageUrl: product?.imageUrl ?? null,
     carbs,
     unitLabel,
   };

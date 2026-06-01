@@ -6,6 +6,7 @@ import styled, { useTheme } from 'styled-components/native';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
+import { MealItemThumbnails } from '@/components/molecules/MealItemThumbnails';
 import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
 import { getCurrentLocale } from '@/i18n';
 import type { Meal } from '@/types/meal';
@@ -36,8 +37,13 @@ const MealRow = styled.View`
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
-const MealInfo = styled(Pressable)`
+const MealContent = styled.View`
   flex: 1;
+  min-width: 0;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const MealInfo = styled.Pressable`
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
@@ -91,15 +97,18 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
         <GlassPanel>
           {sortedMeals.map((meal) => (
             <MealRow key={meal.id}>
-              <MealInfo onPress={() => onMealPress(meal)}>
-                <Text $variant="body">
-                  {t(getMealTypeLabelKey(meal.type))} ·{' '}
-                  {formatTimeLabel(meal.createdAt, locale)}
-                </Text>
-                <Text $variant="caption" $color="accent">
-                  {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
-                </Text>
-              </MealInfo>
+              <MealContent>
+                <MealInfo onPress={() => onMealPress(meal)}>
+                  <Text $variant="body">
+                    {t(getMealTypeLabelKey(meal.type))} ·{' '}
+                    {formatTimeLabel(meal.createdAt, locale)}
+                  </Text>
+                  <Text $variant="caption" $color="accent">
+                    {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
+                  </Text>
+                  <MealItemThumbnails items={meal.items} size={28} />
+                </MealInfo>
+              </MealContent>
               <ButtonIcon
                 onPress={() => onMealDelete(meal.id)}
                 accessibilityLabel={t('meals.deleteA11y')}>
