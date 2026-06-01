@@ -5,11 +5,14 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
@@ -90,6 +93,7 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const compactList = useProductStore((s) => s.compactList);
   const toggleCompactList = useProductStore((s) => s.toggleCompactList);
   const [query, setQuery] = useState('');
@@ -120,8 +124,12 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
         tint={theme.blur.tint}
         blurMethod={theme.blur.androidMethod}
         style={StyleSheet.absoluteFill}>
-        <Overlay>
-          <SearchBarWrap>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={topScreenSpace}>
+          <Overlay>
+            <SearchBarWrap>
             <SearchRow>
               <SymbolView
                 name="magnifyingglass"
@@ -165,11 +173,17 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
             <ActivityIndicator color={theme.colors.accent} style={{ marginTop: 24 }} />
           ) : (
             <FlatList
+              style={{ flex: 1 }}
               data={results}
               extraData={compactList}
               keyExtractor={(item) => item.id}
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ paddingHorizontal: theme.spacing.md }}
+              keyboardDismissMode="on-drag"
+              automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+              contentContainerStyle={{
+                paddingHorizontal: theme.spacing.md,
+                paddingBottom: insets.bottom + theme.spacing.md,
+              }}
               ListEmptyComponent={
                 <EmptyWrap>
                   <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
@@ -212,7 +226,8 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
               }}
             />
           )}
-        </Overlay>
+          </Overlay>
+        </KeyboardAvoidingView>
       </BlurView>
     </Modal>
   );
