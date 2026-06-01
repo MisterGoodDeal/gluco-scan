@@ -2,19 +2,26 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
+import { SymbolView } from 'expo-symbols';
 import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
+import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { InputNumber } from '@/components/atoms/InputNumber';
+import { ProductImage } from '@/components/atoms/ProductImage';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { ProductEanListEditor } from '@/components/molecules/ProductEanListEditor';
 import { ProductUnitFormModal } from '@/components/organisms/ProductUnitFormModal';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
-import { fetchOffPartialByEAN } from '@/services/openFoodFacts.service';
+import { getErrorMessage } from '@/services/errors';
+import {
+  fetchOffPartialByEAN,
+  type PartialOffProduct,
+} from '@/services/openFoodFacts.service';
 import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
 import type { ProductUnit } from '@/types/productUnit';
@@ -39,6 +46,23 @@ const SheetHeader = styled.View`
 const Field = styled.View`
   gap: ${({ theme }) => theme.spacing.xs}px;
   margin-top: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const InputRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const InputWrap = styled.View`
+  flex: 1;
+`;
+
+const OffPreviewRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const UnitsSection = styled.View`
@@ -141,19 +165,54 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     onClose();
   }, [onClose]);
 
-  const handleLookup = async (scannedEan: string) => {
-    setIsLookupLoading(true);
-    try {
-      const partial = await fetchOffPartialByEAN(scannedEan);
-      if (partial.name) setName(partial.name);
-      if (partial.carbsPer100g != null) {
-        setCarbsText(String(partial.carbsPer100g).replace('.', ','));
-      }
-      if (partial.imageUrl) setImageUrl(partial.imageUrl);
-    } finally {
-      setIsLookupLoading(false);
+  const applyOffPartial = useCallback((partial: PartialOffProduct) => {
+    if (partial.name) setName(partial.name);
+    if (partial.carbsPer100g != null) {
+      setCarbsText(String(partial.carbsPer100g).replace('.', ','));
     }
+    if (partial.imageUrl) setImageUrl(partial.imageUrl);
+  }, []);
+
+  const fetchFromOff = useCallback(
+    async (ean: string): Promise<boolean> => {
+      setIsLookupLoading(true);
+      setError(null);
+      try {
+        const partial = await fetchOffPartialByEAN(ean);
+        const hasData =
+          Boolean(partial.name) ||
+          partial.carbsPer100g != null ||
+          Boolean(partial.imageUrl);
+        if (!hasData) {
+          setError(t('products.refreshNoData'));
+          return false;
+        }
+        applyOffPartial(partial);
+        return true;
+      } catch (err) {
+        setError(getErrorMessage(err));
+        return false;
+      } finally {
+        setIsLookupLoading(false);
+      }
+    },
+    [applyOffPartial, t],
+  );
+
+  const handleLookup = async (scannedEan: string) => {
+    await fetchFromOff(scannedEan);
   };
+
+  const handleRefreshFromOff = async () => {
+    const ean = eans.find((code) => isValidEan(code));
+    if (!ean) {
+      setError(t('products.refreshNoEan'));
+      return;
+    }
+    await fetchFromOff(ean);
+  };
+
+  const canRefreshFromOff = eans.some((code) => isValidEan(code));
 
   const openAddUnit = () => {
     setEditingUnit(null);
@@ -289,11 +348,35 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             <Text $variant="caption" $color="textSecondary">
               {t('modal.nameLabel')}
             </Text>
-            <SearchInput
-              value={name}
-              onChangeText={setName}
-              placeholder={t('modal.namePlaceholder')}
-            />
+            <InputRow>
+              <InputWrap>
+                <SearchInput
+                  value={name}
+                  onChangeText={setName}
+                  placeholder={t('modal.namePlaceholder')}
+                  flex
+                />
+              </InputWrap>
+              <ButtonIcon
+                onPress={() => {
+                  if (!canRefreshFromOff || isLookupLoading) return;
+                  void handleRefreshFromOff();
+                }}
+                accessibilityLabel={t('products.refreshFromOffA11y')}
+                accessibilityState={{ disabled: !canRefreshFromOff || isLookupLoading }}>
+                {isLookupLoading ? (
+                  <ActivityIndicator color={theme.colors.accent} size="small" />
+                ) : (
+                  <SymbolView
+                    name={{ ios: 'arrow.clockwise', android: 'refresh' }}
+                    size={18}
+                    tintColor={
+                      canRefreshFromOff ? theme.colors.accent : theme.colors.textSecondary
+                    }
+                  />
+                )}
+              </ButtonIcon>
+            </InputRow>
           </Field>
 
           <Field>
@@ -302,6 +385,15 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             </Text>
             <InputNumber value={carbsText} onChangeText={setCarbsText} />
           </Field>
+
+          {imageUrl ? (
+            <OffPreviewRow>
+              <ProductImage uri={imageUrl} size={44} />
+              <Text $variant="caption" $color="textSecondary" style={{ flex: 1 }}>
+                {t('modal.importOff')}
+              </Text>
+            </OffPreviewRow>
+          ) : null}
 
           <UnitsSection>
             <SectionTitleRow>
@@ -336,10 +428,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             <Text $variant="caption" $color="error" style={{ marginTop: 8 }}>
               {error}
             </Text>
-          )}
-
-          {isLookupLoading && (
-            <ActivityIndicator color={theme.colors.accent} style={{ marginTop: 8 }} />
           )}
 
           <FooterActions>
