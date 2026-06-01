@@ -24,15 +24,6 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: theme.colors.textSecondary,
       }}>
       <Tabs.Screen
-        name="meals/index"
-        options={{
-          title: t('tabs.meals'),
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name={{ ios: 'fork.knife', android: 'restaurant' }} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="products"
         options={{
           title: t('tabs.products'),
@@ -41,6 +32,15 @@ export default function TabsLayout() {
               name={{ ios: 'shippingbox', android: 'inventory_2' }}
               color={color}
             />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="meals/index"
+        options={{
+          title: t('tabs.meals'),
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name={{ ios: 'fork.knife', android: 'restaurant' }} color={color} />
           ),
         }}
       />
