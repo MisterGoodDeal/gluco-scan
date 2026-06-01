@@ -124,6 +124,54 @@ export const en: TranslationSchema = {
     importSuccess: 'Import successful',
     importError: 'Import failed',
   },
+  tutorial: {
+    welcome: {
+      title: 'Welcome',
+      message: 'Would you like a guided tour with sample data?',
+      start: 'Get started',
+      skip: 'Skip',
+    },
+    finish: 'Finish',
+    quit: {
+      title: 'Leave tutorial',
+      message: 'Your data will be restored.',
+      button: 'Leave',
+      confirm: 'Leave',
+    },
+    settings: {
+      title: 'Tutorial',
+      relaunch: 'Restart tutorial',
+      relaunchDescription: 'Explore the app with sample data',
+      disabledDuringTutorial: 'Unavailable during the tutorial',
+    },
+    steps: {
+      products: {
+        title: 'Your products',
+        message: 'Find all your foods here.',
+      },
+      productForm: {
+        title: 'Product details',
+        message: 'Each product can have its own portions.',
+      },
+      meals: {
+        title: 'Meal history',
+        message: 'Browse your meal history.',
+      },
+      mealCreate: {
+        title: 'Create a meal',
+        message: 'Create a meal and add a product to continue.',
+        hint: 'Save a meal with at least one item.',
+      },
+      settings: {
+        title: 'Settings',
+        message: 'Manage global units and backups.',
+      },
+      finish: {
+        title: 'All set',
+        message: 'You are ready to use the app.',
+      },
+    },
+  },
   modal: {
     eanLabel: 'EAN codes',
     nameLabel: 'Product name',

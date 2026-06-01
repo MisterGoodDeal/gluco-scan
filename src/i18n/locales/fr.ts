@@ -147,6 +147,35 @@ export type TranslationSchema = {
     offRateLimit: string;
     generic: string;
   };
+  tutorial: {
+    welcome: {
+      title: string;
+      message: string;
+      start: string;
+      skip: string;
+    };
+    finish: string;
+    quit: {
+      title: string;
+      message: string;
+      button: string;
+      confirm: string;
+    };
+    settings: {
+      title: string;
+      relaunch: string;
+      relaunchDescription: string;
+      disabledDuringTutorial: string;
+    };
+    steps: {
+      products: { title: string; message: string };
+      productForm: { title: string; message: string };
+      meals: { title: string; message: string };
+      mealCreate: { title: string; message: string; hint: string };
+      settings: { title: string; message: string };
+      finish: { title: string; message: string };
+    };
+  };
 };
 
 export const fr: TranslationSchema = {
@@ -272,6 +301,54 @@ export const fr: TranslationSchema = {
     exportSuccess: 'Export réussi',
     importSuccess: 'Import réussi',
     importError: 'Import impossible',
+  },
+  tutorial: {
+    welcome: {
+      title: 'Bienvenue',
+      message: 'Souhaitez-vous découvrir l\'application avec des données d\'exemple ?',
+      start: 'Commencer',
+      skip: 'Ignorer',
+    },
+    finish: 'Terminer',
+    quit: {
+      title: 'Quitter le tutoriel',
+      message: 'Vos données seront restaurées.',
+      button: 'Quitter',
+      confirm: 'Quitter',
+    },
+    settings: {
+      title: 'Tutoriel',
+      relaunch: 'Relancer le tutoriel',
+      relaunchDescription: 'Découvrir l\'application avec des données d\'exemple',
+      disabledDuringTutorial: 'Indisponible pendant le tutoriel',
+    },
+    steps: {
+      products: {
+        title: 'Vos produits',
+        message: 'Retrouvez ici tous vos aliments.',
+      },
+      productForm: {
+        title: 'Fiche produit',
+        message: 'Chaque produit peut avoir ses propres portions.',
+      },
+      meals: {
+        title: 'Historique des repas',
+        message: 'Consultez votre historique alimentaire.',
+      },
+      mealCreate: {
+        title: 'Créer un repas',
+        message: 'Créez un repas et ajoutez un produit pour continuer.',
+        hint: 'Enregistrez un repas avec au moins un aliment.',
+      },
+      settings: {
+        title: 'Paramètres',
+        message: 'Gérez vos unités globales et vos sauvegardes.',
+      },
+      finish: {
+        title: 'C\'est parti',
+        message: 'Vous êtes prêt à utiliser l\'application.',
+      },
+    },
   },
   modal: {
     eanLabel: 'Codes EAN',
