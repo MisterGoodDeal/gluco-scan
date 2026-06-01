@@ -65,3 +65,35 @@ export const fetchProductByEAN = async (ean: string): Promise<Product> => {
     carbsPer100g,
   };
 };
+
+export type PartialOffProduct = {
+  ean: string;
+  name?: string;
+  carbsPer100g?: number;
+};
+
+export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProduct> => {
+  const url = `${OFF_BASE_URL}/${ean}?product_type=all&cc=fr&lc=fr&fields=product_name,nutriments`;
+
+  try {
+    const response = await fetch(url, {
+      headers: { 'User-Agent': OFF_USER_AGENT },
+    });
+
+    if (!response.ok) return { ean };
+
+    const data = (await response.json()) as OffResponse;
+    if (data.status !== 1 || !data.product) return { ean };
+
+    const carbsPer100g = parseCarbs(data.product.nutriments);
+    const name = data.product.product_name?.trim();
+
+    return {
+      ean,
+      name: name || undefined,
+      carbsPer100g: carbsPer100g ?? undefined,
+    };
+  } catch {
+    return { ean };
+  }
+};
