@@ -13,6 +13,7 @@ type ScannerViewProps = {
   scanError: string | null;
   scanSuccessFlash: boolean;
   isScanning: boolean;
+  enabled?: boolean;
   onClearError: () => void;
 };
 
@@ -92,6 +93,7 @@ export const ScannerView: FC<ScannerViewProps> = ({
   scanError,
   scanSuccessFlash,
   isScanning,
+  enabled = true,
   onClearError,
 }) => {
   const theme = useTheme();
@@ -130,12 +132,13 @@ export const ScannerView: FC<ScannerViewProps> = ({
     <>
       <ScannerContainer>
         <Camera
+          active={enabled}
           facing="back"
           barcodeScannerSettings={{
             barcodeTypes: ['ean13', 'ean8', 'upc_a'],
           }}
           onBarcodeScanned={
-            isScanning && !isLoadingProduct
+            enabled && isScanning && !isLoadingProduct
               ? ({ data }) => {
                   onClearError();
                   onScan(data);

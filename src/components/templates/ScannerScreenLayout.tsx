@@ -1,4 +1,5 @@
 import { BlurTargetView } from 'expo-blur';
+import { useIsFocused } from 'expo-router';
 import { type FC, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -24,6 +25,7 @@ const Content = styled.View`
 export const ScannerScreenLayout: FC = () => {
   const blurTargetRef = useRef<View>(null);
   const [footerHeight, setFooterHeight] = useState(0);
+  const isFocused = useIsFocused();
   const {
     handleScan,
     isLoadingProduct,
@@ -48,7 +50,8 @@ export const ScannerScreenLayout: FC = () => {
               isLoadingProduct={isLoadingProduct}
               scanError={scanError}
               scanSuccessFlash={scanSuccessFlash}
-              isScanning={isScanning}
+              isScanning={isScanning && isFocused}
+              enabled={isFocused}
               onClearError={clearError}
             />
             <ScannedList blurTarget={blurTargetRef} bottomInset={footerHeight} />
