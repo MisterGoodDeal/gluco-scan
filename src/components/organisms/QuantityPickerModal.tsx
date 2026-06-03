@@ -14,14 +14,22 @@ import { computeItemCarbs } from '@/utils/carbs';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { defaultDisplayMassQuantity } from '@/utils/mass';
 import { formatDecimal } from '@/utils/format';
-import type { MealDraftItem } from '@/store/meal.store';
-import { generateId } from '@/utils/id';
+
+export type QuantityPickerConfirm = {
+  quantity: number;
+  unitType: 'grams' | 'custom';
+  unitId?: string;
+  productName: string;
+  carbsPer100g: number;
+  carbs: number;
+  unitLabel: string;
+};
 
 type QuantityPickerModalProps = {
   visible: boolean;
   product: Product | null;
   onClose: () => void;
-  onConfirm: (item: MealDraftItem) => void;
+  onConfirm: (payload: QuantityPickerConfirm) => void;
 };
 
 type UnitOption = {
@@ -133,9 +141,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
 
   const handleConfirm = () => {
     if (!selectedUnit) return;
-    const item: MealDraftItem = {
-      id: generateId(),
-      productId: product.id,
+    onConfirm({
       quantity: qty,
       unitType: selectedUnit.unitType,
       unitId: selectedUnit.unitType === 'custom' ? selectedUnit.id : undefined,
@@ -143,8 +149,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
       carbsPer100g: product.carbsPer100g,
       carbs,
       unitLabel: selectedUnit.abbreviation,
-    };
-    onConfirm(item);
+    });
     onClose();
     setQuantity(1);
     setGramsText(String(defaultDisplayMassQuantity(unitSystem)));

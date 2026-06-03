@@ -17,13 +17,18 @@ import {
 import { ProductSpotlightSearch } from '@/components/organisms/ProductSpotlightSearch';
 import { QuantityPickerModal } from '@/components/organisms/QuantityPickerModal';
 import { ScannerView } from '@/components/organisms/ScannerView';
-import { useMealProductScan } from '@/hooks/useMealProductScan';
+import {
+  persistOffProduct,
+  useMealProductScan,
+  type MealScanResult,
+} from '@/hooks/useMealProductScan';
 import { getCurrentLocale } from '@/i18n';
 import { useSettingsStore } from '@/store/settings.store';
 import { useMealStore } from '@/store/meal.store';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import type { Product } from '@/types/product';
+import { generateId } from '@/utils/id';
 import { formatDateLabel } from '@/utils/date';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { formatDecimal } from '@/utils/format';
@@ -130,12 +135,35 @@ export const MealCreateLayout: FC = () => {
     tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create';
   const tutorialBannerInset = showTutorialBanner ? insets.bottom + 160 : 0;
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
+  const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
   const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const { handleScan, isLoading, error, warning, clearMessages } = useMealProductScan();
 
   const timeLabel = `${String(draftMeta.hours).padStart(2, '0')}:${String(draftMeta.minutes).padStart(2, '0')}`;
   const scannerActive = step === 1 && pickerProduct === null && !searchVisible;
+
+  const openProductPicker = (result: MealScanResult) => {
+    if (result.kind === 'existing') {
+      setPendingOffScan(null);
+      setPickerProduct(result.product);
+      return;
+    }
+    setPendingOffScan(result);
+    setPickerProduct({
+      id: '',
+      eans: [result.off.ean],
+      name: result.off.name,
+      carbsPer100g: result.off.carbsPer100g,
+      imageUrl: result.off.imageUrl ?? null,
+      customUnits: [],
+    });
+  };
+
+  const closeProductPicker = () => {
+    setPickerProduct(null);
+    setPendingOffScan(null);
+  };
 
   useEffect(() => {
     void hydrateSettings();
@@ -148,8 +176,8 @@ export const MealCreateLayout: FC = () => {
   const draftTotal = draftItems.reduce((sum, item) => sum + item.carbs, 0);
 
   const onBarcodeScan = async (ean: string) => {
-    const product = await handleScan(ean);
-    if (product) setPickerProduct(product);
+    const result = await handleScan(ean);
+    if (result) openProductPicker(result);
   };
 
   const handleSave = async () => {
@@ -324,10 +352,20 @@ export const MealCreateLayout: FC = () => {
       <QuantityPickerModal
         visible={pickerProduct !== null}
         product={pickerProduct}
-        onClose={() => setPickerProduct(null)}
-        onConfirm={(item) => {
-          addDraftItem(item);
-          setPickerProduct(null);
+        onClose={closeProductPicker}
+        onConfirm={async (payload) => {
+          const product =
+            pendingOffScan?.kind === 'off'
+              ? await persistOffProduct(pendingOffScan.off)
+              : pickerProduct;
+          if (!product) return;
+
+          addDraftItem({
+            id: generateId(),
+            productId: product.id,
+            ...payload,
+          });
+          closeProductPicker();
         }}
       />
       <MealMetaPickerSheet
@@ -339,7 +377,10 @@ export const MealCreateLayout: FC = () => {
       <ProductSpotlightSearch
         visible={searchVisible}
         onClose={() => setSearchVisible(false)}
-        onSelect={(product) => setPickerProduct(product)}
+        onSelect={(product) => {
+          setPendingOffScan(null);
+          setPickerProduct(product);
+        }}
       />
       <TutorialMealCreateBanner />
     </Screen>

@@ -1,5 +1,6 @@
 import { getDatabase } from '@/database/client';
 import { generateId } from '@/utils/id';
+import { normalizeEan } from '@/utils/ean';
 
 type ProductEanRow = {
   product_id: string;
@@ -36,9 +37,11 @@ export const productEanRepository = {
 
   async getProductIdByEan(ean: string): Promise<string | null> {
     const db = getDatabase();
+    const normalized = normalizeEan(ean);
     const row = await db.getFirstAsync<{ product_id: string }>(
-      'SELECT product_id FROM product_eans WHERE ean = ?',
-      ean,
+      'SELECT product_id FROM product_eans WHERE ean = ? OR ean = ?',
+      normalized,
+      ean.trim(),
     );
     return row?.product_id ?? null;
   },
@@ -58,7 +61,7 @@ export const productEanRepository = {
 
   async setForProduct(productId: string, eans: string[]): Promise<void> {
     const db = getDatabase();
-    const unique = [...new Set(eans.map((e) => e.trim()).filter(Boolean))];
+    const unique = [...new Set(eans.map((e) => normalizeEan(e)).filter(Boolean))];
     await db.runAsync('DELETE FROM product_eans WHERE product_id = ?', productId);
     for (const ean of unique) {
       await db.runAsync(
