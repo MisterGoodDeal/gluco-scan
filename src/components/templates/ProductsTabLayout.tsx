@@ -40,6 +40,7 @@ const SearchRow = styled.View`
 
 const SearchField = styled.View`
   flex: 1;
+  min-width: 0;
 `;
 
 const AddButton = styled.Pressable`
@@ -151,10 +152,10 @@ export const ProductsTabLayout: FC = () => {
             </TutorialAnchor>
           </TitleRow>
           <SearchRow>
-            <TutorialAnchor id="tutorial-products-search">
-            <SearchField>
-              <SearchInput value={query} onChangeText={setQuery} flex />
-            </SearchField>
+            <TutorialAnchor id="tutorial-products-search" style={{ flex: 1, minWidth: 0 }}>
+              <SearchField>
+                <SearchInput value={query} onChangeText={setQuery} flex />
+              </SearchField>
             </TutorialAnchor>
             <ButtonIcon
               onPress={toggleCompactList}
