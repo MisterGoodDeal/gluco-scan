@@ -133,7 +133,7 @@ export const MealCreateLayout: FC = () => {
   const theme = useTheme();
   const showTutorialBanner =
     tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create';
-  const tutorialBannerInset = showTutorialBanner ? insets.bottom + 160 : 0;
+  const navBottomInset = insets.bottom + theme.spacing.lg;
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
   const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
@@ -215,7 +215,7 @@ export const MealCreateLayout: FC = () => {
       <ScrollView
         style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: tutorialBannerInset }}>
+        contentContainerStyle={{ paddingBottom: theme.spacing.md }}>
         {step === 0 && (
           <>
             <Field>
@@ -334,7 +334,8 @@ export const MealCreateLayout: FC = () => {
         )}
       </ScrollView>
 
-      <NavRow style={{ paddingBottom: showTutorialBanner ? tutorialBannerInset : 0 }}>
+      {showTutorialBanner ? <TutorialMealCreateBanner /> : null}
+      <NavRow style={{ paddingBottom: navBottomInset }}>
         {step > 0 ? (
           <ActionButton onPress={() => setStep(step - 1)}>
             <Text $variant="caption">{t('common.previous')}</Text>
@@ -382,7 +383,6 @@ export const MealCreateLayout: FC = () => {
           setPickerProduct(product);
         }}
       />
-      <TutorialMealCreateBanner />
     </Screen>
   );
 };

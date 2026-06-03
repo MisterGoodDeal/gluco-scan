@@ -1,6 +1,8 @@
 import { type FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
+import { useTheme } from 'styled-components/native';
+
 import { TutorialStepCard } from '@/components/molecules/TutorialStepCard';
 import { useTutorialCardBottomInset } from '@/hooks/useTutorialCardBottomInset';
 import { TUTORIAL_STEPS } from '@/config/tutorialSteps';
@@ -12,14 +14,18 @@ type TutorialInlineBannerProps = {
   stepId: TutorialStepId;
   includeTabBarInset?: boolean;
   extraBottom?: number;
+  /** Au-dessus des contrôles de l'écran (ex. barre Suivant), sans chevauchement. */
+  stacked?: boolean;
 };
 
 export const TutorialInlineBanner: FC<TutorialInlineBannerProps> = ({
   stepId,
   includeTabBarInset = false,
   extraBottom = 0,
+  stacked = false,
 }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const cardBottom = useTutorialCardBottomInset(includeTabBarInset) + extraBottom;
   const status = useTutorialStore((s) => s.status);
   const currentStep = useTutorialStore((s) => s.currentStep);
@@ -65,7 +71,8 @@ export const TutorialInlineBanner: FC<TutorialInlineBannerProps> = ({
       onNext={handleNext}
       style={{
         marginHorizontal: 16,
-        marginBottom: cardBottom,
+        marginBottom: stacked ? theme.spacing.sm : cardBottom,
+        marginTop: stacked ? theme.spacing.sm : 0,
       }}
     />
   );
