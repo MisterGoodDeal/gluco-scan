@@ -1,4 +1,5 @@
 import { BlurTargetView } from 'expo-blur';
+import Constants from 'expo-constants';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useFocusEffect } from 'expo-router';
@@ -91,6 +92,7 @@ export const SettingsTabLayout: FC = () => {
   const startTutorial = useTutorialStore((s) => s.startTutorial);
   const isTutorialRunning = tutorialStatus === TutorialStatus.RUNNING;
   const isTutorialBusy = tutorialStatus === TutorialStatus.STARTING;
+  const appVersion = Constants.expoConfig?.version ?? '—';
 
   useFocusEffect(
     useCallback(() => {
@@ -266,6 +268,12 @@ export const SettingsTabLayout: FC = () => {
             <ActionButton onPress={handleImport} disabled={isTutorialRunning}>
               <Text $variant="caption">{t('settings.import')}</Text>
             </ActionButton>
+          </Section>
+
+          <Section>
+            <Text $variant="caption" $color="textSecondary">
+              Version {appVersion}
+            </Text>
           </Section>
           </TutorialAnchor>
         </ScrollView>
