@@ -84,6 +84,8 @@ export const en: TranslationSchema = {
     searchSpotlightPlaceholder: 'Search for a food…',
     searchNoResults: 'No products found',
     searchEmptyHint: 'No products saved yet',
+    productNotFoundOff:
+      'Product not found on Open Food Facts. Add it manually in the Products tab, then search for it below.',
     mealTotal: 'Meal total',
     saveMeal: 'Save meal',
     noItems: 'Add at least one food item',

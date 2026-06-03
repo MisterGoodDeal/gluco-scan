@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
 
 import { SCAN_COOLDOWN_MS } from '@/constants/api';
+import i18n from '@/i18n';
 import { productRepository } from '@/repositories/product.repository';
 import {
   fetchOffPartialByEAN,
@@ -72,7 +73,8 @@ export const useMealProductScan = () => {
         // partial fetch may also rate limit
       }
       if (err instanceof ProductNotFoundError) {
-        setError(getErrorMessage(err));
+        setError(i18n.t('meals.productNotFoundOff'));
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } else if (!(err instanceof OffRateLimitError)) {
         setError(getErrorMessage(err));
       }

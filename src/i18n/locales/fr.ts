@@ -82,6 +82,7 @@ export type TranslationSchema = {
     searchSpotlightPlaceholder: string;
     searchNoResults: string;
     searchEmptyHint: string;
+    productNotFoundOff: string;
     mealTotal: string;
     saveMeal: string;
     noItems: string;
@@ -262,6 +263,8 @@ export const fr: TranslationSchema = {
     searchSpotlightPlaceholder: 'Rechercher un aliment…',
     searchNoResults: 'Aucun produit trouvé',
     searchEmptyHint: 'Aucun produit enregistré',
+    productNotFoundOff:
+      "Produit introuvable sur Open Food Facts. Ajoutez-le manuellement dans l'onglet Produits, puis recherchez-le ci-dessous.",
     mealTotal: 'Total du repas',
     saveMeal: 'Enregistrer le repas',
     noItems: 'Ajoutez au moins un aliment',
