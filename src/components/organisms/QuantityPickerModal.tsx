@@ -110,49 +110,67 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
     return [...productOpts, ...globalOpts, gramsOpt];
   }, [product, globalUnits, massLabel, massUnit]);
 
+  const defaultUnit = useMemo((): UnitOption | null => {
+    if (!product || unitOptions.length === 0) return null;
+    if (product.customUnits.length > 0) return unitOptions[0];
+    return unitOptions.find((opt) => opt.unitType === 'grams') ?? unitOptions[0];
+  }, [product, unitOptions]);
+
   const [selectedUnit, setSelectedUnit] = useState<UnitOption | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [gramsText, setGramsText] = useState(() => String(defaultDisplayMassQuantity(unitSystem)));
 
-  useEffect(() => {
-    if (unitOptions.length > 0) {
-      setSelectedUnit((current) => current ?? unitOptions[0]);
-    }
-  }, [unitOptions]);
+  const productKey = product
+    ? product.id || product.eans[0] || product.name
+    : null;
 
   useEffect(() => {
+    if (!visible) {
+      setSelectedUnit(null);
+      setQuantity(1);
+      return;
+    }
+    if (!defaultUnit) return;
+    setSelectedUnit(defaultUnit);
+    setQuantity(1);
     setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
-  }, [unitSystem]);
+  }, [visible, productKey, defaultUnit, unitSystem]);
 
   if (!product) return null;
 
-  const isGrams = selectedUnit?.unitType === 'grams';
+  const activeUnit =
+    selectedUnit &&
+    unitOptions.some(
+      (opt) => opt.id === selectedUnit.id && opt.unitType === selectedUnit.unitType,
+    )
+      ? selectedUnit
+      : defaultUnit;
+
+  const isGrams = activeUnit?.unitType === 'grams';
   const parsedDisplay = parseFloat(gramsText.replace(',', '.')) || 0;
   const qty = isGrams ? displayToGrams(parsedDisplay) : quantity;
 
-  const carbs = selectedUnit
+  const carbs = activeUnit
     ? computeItemCarbs(
         qty,
-        selectedUnit.unitType,
+        activeUnit.unitType,
         product.carbsPer100g,
-        selectedUnit.equivalentInGrams,
+        activeUnit.equivalentInGrams,
       )
     : 0;
 
   const handleConfirm = () => {
-    if (!selectedUnit) return;
+    if (!activeUnit) return;
     onConfirm({
       quantity: qty,
-      unitType: selectedUnit.unitType,
-      unitId: selectedUnit.unitType === 'custom' ? selectedUnit.id : undefined,
+      unitType: activeUnit.unitType,
+      unitId: activeUnit.unitType === 'custom' ? activeUnit.id : undefined,
       productName: product.name,
       carbsPer100g: product.carbsPer100g,
       carbs,
-      unitLabel: selectedUnit.abbreviation,
+      unitLabel: activeUnit.abbreviation,
     });
     onClose();
-    setQuantity(1);
-    setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
   };
 
   return (
@@ -174,7 +192,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
                 {unitOptions.map((opt) => (
                   <UnitChip
                     key={opt.id}
-                    $selected={selectedUnit?.id === opt.id}
+                    $selected={activeUnit?.id === opt.id && activeUnit?.unitType === opt.unitType}
                     onPress={() => setSelectedUnit(opt)}>
                     <Text $variant="caption">{opt.abbreviation}</Text>
                   </UnitChip>
@@ -195,7 +213,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
                     <Text $variant="subtitle">−</Text>
                   </ButtonIcon>
                   <Text $variant="title">
-                    {quantity} {selectedUnit?.abbreviation}
+                    {quantity} {activeUnit?.abbreviation}
                   </Text>
                   <ButtonIcon
                     onPress={() => setQuantity((q) => q + 1)}
