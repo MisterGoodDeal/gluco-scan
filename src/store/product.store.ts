@@ -20,6 +20,7 @@ type ProductStore = {
   toggleCompactList: () => void;
   getFiltered: () => Product[];
   create: (data: {
+    id?: string;
     name: string;
     carbsPer100g: number;
     eans?: string[];

@@ -2,6 +2,7 @@ import { getDatabase } from '@/database/client';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import type { Product } from '@/types/product';
+import { deleteLocalProductImage, isLocalProductImage } from '@/services/productImage.service';
 import { generateId } from '@/utils/id';
 import { productMatchesQuery } from '@/utils/productSearch';
 
@@ -81,13 +82,14 @@ export const productRepository = {
   },
 
   async create(data: {
+    id?: string;
     name: string;
     carbsPer100g: number;
     eans?: string[];
     imageUrl?: string | null;
   }): Promise<Product> {
     const db = getDatabase();
-    const id = generateId();
+    const id = data.id ?? generateId();
     const now = new Date().toISOString();
     await db.runAsync(
       `INSERT INTO products (id, ean, name, carbs_per_100g, image_url, created_at)
@@ -105,6 +107,15 @@ export const productRepository = {
   },
 
   async update(product: Product): Promise<Product> {
+    const existing = await this.getById(product.id);
+    if (existing?.imageUrl && isLocalProductImage(existing.imageUrl)) {
+      const nextIsLocal =
+        product.imageUrl != null && isLocalProductImage(product.imageUrl);
+      if (!nextIsLocal || existing.imageUrl !== product.imageUrl) {
+        deleteLocalProductImage(existing.imageUrl);
+      }
+    }
+
     const db = getDatabase();
     await db.runAsync(
       `UPDATE products SET name = ?, carbs_per_100g = ?, image_url = ? WHERE id = ?`,
@@ -120,6 +131,10 @@ export const productRepository = {
   },
 
   async delete(id: string): Promise<void> {
+    const existing = await this.getById(id);
+    if (existing?.imageUrl) {
+      deleteLocalProductImage(existing.imageUrl);
+    }
     const db = getDatabase();
     await db.runAsync('DELETE FROM products WHERE id = ?', id);
   },
