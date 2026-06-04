@@ -70,6 +70,9 @@ export type TranslationSchema = {
     emptyToday: string;
     mealCarbs: string;
     createTitle: string;
+    editTitle: string;
+    editItemHint: string;
+    editItemA11y: string;
     stepInfo: string;
     stepFoods: string;
     stepSummary: string;
@@ -251,6 +254,9 @@ export const fr: TranslationSchema = {
     emptyToday: "Aucun repas pour aujourd'hui. Commencez par en ajouter un.",
     mealCarbs: '{{value}} g glucides',
     createTitle: 'Nouveau repas',
+    editTitle: 'Modifier le repas',
+    editItemHint: 'Appuyez sur un aliment pour modifier sa quantité.',
+    editItemA11y: 'Modifier la quantité de {{name}}',
     stepInfo: 'Informations',
     stepFoods: 'Aliments',
     stepSummary: 'Résumé',

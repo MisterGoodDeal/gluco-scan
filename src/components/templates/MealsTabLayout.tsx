@@ -12,7 +12,6 @@ import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { Text } from '@/components/atoms/Text';
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
-import { MealDetailSheet } from '@/components/organisms/MealDetailSheet';
 import { MealsDayPager } from '@/components/organisms/MealsDayPager';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useMealStore } from '@/store/meal.store';
@@ -42,8 +41,6 @@ export const MealsTabLayout: FC = () => {
   const selectedDate = useMealStore((s) => s.selectedDate);
   const setSelectedDate = useMealStore((s) => s.setSelectedDate);
   const hydrateDay = useMealStore((s) => s.hydrateDay);
-  const selectedMeal = useMealStore((s) => s.selectedMeal);
-  const setSelectedMeal = useMealStore((s) => s.setSelectedMeal);
 
   const [mealsByDate, setMealsByDate] = useState<Record<string, Meal[]>>({});
   const [totalsByDate, setTotalsByDate] = useState<Record<string, number>>({});
@@ -87,12 +84,9 @@ export const MealsTabLayout: FC = () => {
   const handleMealDelete = useCallback(
     async (mealId: string) => {
       await mealRepository.delete(mealId);
-      if (selectedMeal?.id === mealId) {
-        setSelectedMeal(null);
-      }
       refreshMeals();
     },
-    [refreshMeals, selectedMeal?.id, setSelectedMeal],
+    [refreshMeals],
   );
 
   return (
@@ -107,7 +101,7 @@ export const MealsTabLayout: FC = () => {
             totalsByDate={totalsByDate}
             headerInset={headerHeight}
             onDateChange={handleDateChange}
-            onMealPress={setSelectedMeal}
+            onMealPress={(meal) => router.push(`/meal/edit?mealId=${meal.id}`)}
             onMealDelete={(id) => void handleMealDelete(id)}
             scrollToDateKey={scrollToDateKey}
             onScrollToDateDone={() => setScrollToDateKey(null)}
@@ -146,9 +140,6 @@ export const MealsTabLayout: FC = () => {
           </TutorialAnchor>
         </BlurScreenHeader>
       </BlurTargetView>
-      {selectedMeal && (
-        <MealDetailSheet meal={selectedMeal} onClose={() => setSelectedMeal(null)} />
-      )}
     </Screen>
   );
 };

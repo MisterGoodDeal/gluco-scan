@@ -1,8 +1,8 @@
 import { SymbolView } from 'expo-symbols';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
@@ -23,8 +23,9 @@ import {
   type MealScanResult,
 } from '@/hooks/useMealProductScan';
 import { getCurrentLocale } from '@/i18n';
+import { productRepository } from '@/repositories/product.repository';
 import { useSettingsStore } from '@/store/settings.store';
-import { useMealStore } from '@/store/meal.store';
+import { useMealStore, type MealDraftItem } from '@/store/meal.store';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import type { Product } from '@/types/product';
@@ -111,7 +112,16 @@ const ItemRow = styled.View<{ $isLast?: boolean }>`
   ${listRowDivider}
 `;
 
+const ItemTouchable = styled(TouchableOpacity)`
+  flex: 1;
+  margin-right: ${({ theme }) => theme.spacing.sm}px;
+  padding-vertical: ${({ theme }) => theme.spacing.xs}px;
+  border-radius: ${({ theme }) => theme.radius.sm}px;
+`;
+
 export const MealCreateLayout: FC = () => {
+  const { mealId } = useLocalSearchParams<{ mealId?: string }>();
+  const isEditing = Boolean(mealId);
   const { t } = useTranslation();
   const { formatMassValue, massUnit } = useMassDisplay();
   const locale = getCurrentLocale();
@@ -122,6 +132,9 @@ export const MealCreateLayout: FC = () => {
   const draftItems = useMealStore((s) => s.draftItems);
   const removeDraftItem = useMealStore((s) => s.removeDraftItem);
   const addDraftItem = useMealStore((s) => s.addDraftItem);
+  const updateDraftItem = useMealStore((s) => s.updateDraftItem);
+  const beginEditMeal = useMealStore((s) => s.beginEditMeal);
+  const resetDraft = useMealStore((s) => s.resetDraft);
   const saveMeal = useMealStore((s) => s.saveMeal);
   const setMealCreateValidated = useTutorialStore((s) => s.setMealCreateValidated);
   const tutorialStatus = useTutorialStore((s) => s.status);
@@ -132,9 +145,12 @@ export const MealCreateLayout: FC = () => {
 
   const theme = useTheme();
   const showTutorialBanner =
-    tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create';
+    !isEditing &&
+    tutorialStatus === TutorialStatus.RUNNING &&
+    getTutorialStepId() === 'meal-create';
   const navBottomInset = insets.bottom + theme.spacing.lg;
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
   const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
@@ -163,7 +179,24 @@ export const MealCreateLayout: FC = () => {
   const closeProductPicker = () => {
     setPickerProduct(null);
     setPendingOffScan(null);
+    setEditingItemId(null);
   };
+
+  const pickerInitialItem =
+    editingItemId != null
+      ? (draftItems.find((item) => item.id === editingItemId) ?? null)
+      : null;
+
+  useEffect(() => {
+    if (mealId) {
+      void beginEditMeal(mealId).then((ok) => {
+        if (!ok) router.back();
+      });
+      return () => resetDraft();
+    }
+    resetDraft();
+    return () => resetDraft();
+  }, [mealId, beginEditMeal, resetDraft]);
 
   useEffect(() => {
     void hydrateSettings();
@@ -180,29 +213,72 @@ export const MealCreateLayout: FC = () => {
     if (result) openProductPicker(result);
   };
 
+  const openEditItem = async (item: MealDraftItem) => {
+    const product = await productRepository.getById(item.productId);
+    if (!product) return;
+    setEditingItemId(item.id);
+    setPendingOffScan(null);
+    setPickerProduct(product);
+  };
+
   const handleSave = async () => {
     if (draftItems.length === 0) {
       Alert.alert(t('meals.noItems'));
       return;
     }
     await saveMeal();
-    setMealCreateValidated(true);
-    if (tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create') {
-      tutorialNextStep();
+    if (!isEditing) {
+      setMealCreateValidated(true);
+      if (tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create') {
+        tutorialNextStep();
+      }
     }
     router.back();
   };
+
+  const renderDraftItem = (item: MealDraftItem, isLast: boolean) => (
+    <ItemRow key={item.id} $isLast={isLast}>
+      <ItemTouchable
+        activeOpacity={0.6}
+        accessibilityRole="button"
+        accessibilityLabel={t('meals.editItemA11y', { name: item.productName })}
+        onPress={() => void openEditItem(item)}>
+        <Text $variant="body">
+          {t('meals.itemLinePortion', {
+            name: item.productName,
+            portion: formatMealItemQuantity(
+              item.quantity,
+              item.unitType,
+              item.unitLabel,
+              formatMassValue,
+              massUnit,
+            ),
+            carbs: formatDecimal(item.carbs),
+          })}
+        </Text>
+      </ItemTouchable>
+      <Pressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
+        <Text $color="error">×</Text>
+      </Pressable>
+    </ItemRow>
+  );
 
   return (
     <Screen>
       <BackgroundGradient />
       <Header>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            resetDraft();
+            router.back();
+          }}>
           <Text $variant="body" $color="accent">
             {t('common.cancel')}
           </Text>
         </Pressable>
-        <Text $variant="subtitle">{t('meals.createTitle')}</Text>
+        <Text $variant="subtitle">
+          {isEditing ? t('meals.editTitle') : t('meals.createTitle')}
+        </Text>
         <View style={{ width: 60 }} />
       </Header>
 
@@ -282,31 +358,19 @@ export const MealCreateLayout: FC = () => {
 
             <ItemsSection>
               <Text $variant="body">{t('meals.stepFoods')}</Text>
+              {draftItems.length > 0 ? (
+                <Text $variant="caption" $color="textSecondary">
+                  {t('meals.editItemHint')}
+                </Text>
+              ) : null}
               {draftItems.length === 0 ? (
                 <Text $variant="caption" $color="textSecondary">
                   {t('scanner.scanProduct')}
                 </Text>
               ) : (
-                draftItems.map((item, index) => (
-                  <ItemRow key={item.id} $isLast={index === draftItems.length - 1}>
-                    <Text $variant="body" style={{ flex: 1, marginRight: 8 }}>
-                      {t('meals.itemLinePortion', {
-                        name: item.productName,
-                        portion: formatMealItemQuantity(
-                          item.quantity,
-                          item.unitType,
-                          item.unitLabel,
-                          formatMassValue,
-                          massUnit,
-                        ),
-                        carbs: formatDecimal(item.carbs),
-                      })}
-                    </Text>
-                    <Pressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
-                      <Text $color="error">×</Text>
-                    </Pressable>
-                  </ItemRow>
-                ))
+                draftItems.map((item, index) =>
+                  renderDraftItem(item, index === draftItems.length - 1),
+                )
               )}
             </ItemsSection>
           </>
@@ -314,13 +378,10 @@ export const MealCreateLayout: FC = () => {
 
         {step === 2 && (
           <>
-            {draftItems.map((item) => (
-              <ItemRow key={item.id} style={{ marginHorizontal: 16 }}>
-                <Text $variant="body">{item.productName}</Text>
-                <Text $variant="caption" $color="accent">
-                  {formatDecimal(item.carbs)} g
-                </Text>
-              </ItemRow>
+            {draftItems.map((item, index) => (
+              <View key={item.id} style={{ marginHorizontal: 16 }}>
+                {renderDraftItem(item, index === draftItems.length - 1)}
+              </View>
             ))}
             <Text $variant="title" $color="accent" style={{ textAlign: 'center', marginTop: 24 }}>
               {t('meals.mealTotal')}: {formatDecimal(draftTotal)} g
@@ -353,6 +414,7 @@ export const MealCreateLayout: FC = () => {
       <QuantityPickerModal
         visible={pickerProduct !== null}
         product={pickerProduct}
+        initialItem={pickerInitialItem}
         onClose={closeProductPicker}
         onConfirm={async (payload) => {
           const product =
@@ -361,11 +423,21 @@ export const MealCreateLayout: FC = () => {
               : pickerProduct;
           if (!product) return;
 
-          addDraftItem({
-            id: generateId(),
-            productId: product.id,
-            ...payload,
-          });
+          if (editingItemId) {
+            const existing = draftItems.find((item) => item.id === editingItemId);
+            if (!existing) return;
+            updateDraftItem(editingItemId, {
+              ...existing,
+              productId: product.id,
+              ...payload,
+            });
+          } else {
+            addDraftItem({
+              id: generateId(),
+              productId: product.id,
+              ...payload,
+            });
+          }
           closeProductPicker();
         }}
       />

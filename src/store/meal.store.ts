@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { mealRepository } from '@/repositories/meal.repository';
+import { productRepository } from '@/repositories/product.repository';
 import type { Meal } from '@/types/meal';
 import type { MealItem } from '@/types/mealItem';
 import { MealType } from '@/types/mealType';
@@ -30,6 +31,7 @@ type MealStore = {
   step: number;
   draftMeta: MealDraftMeta;
   draftItems: MealDraftItem[];
+  editingMealId: string | null;
   selectedMeal: Meal | null;
   hydrateDay: (dateKey?: string) => Promise<void>;
   setSelectedDate: (dateKey: string) => void;
@@ -38,6 +40,8 @@ type MealStore = {
   setDraftMeta: (meta: Partial<MealDraftMeta>) => void;
   addDraftItem: (item: MealDraftItem) => void;
   removeDraftItem: (id: string) => void;
+  updateDraftItem: (id: string, item: MealDraftItem) => void;
+  beginEditMeal: (mealId: string) => Promise<boolean>;
   resetDraft: () => void;
   saveMeal: () => Promise<void>;
 };
@@ -62,6 +66,7 @@ export const useMealStore = create<MealStore>((set, get) => ({
   step: 0,
   draftMeta: defaultMeta(),
   draftItems: [],
+  editingMealId: null,
   selectedMeal: null,
 
   hydrateDay: async (dateKey) => {
@@ -99,25 +104,76 @@ export const useMealStore = create<MealStore>((set, get) => ({
       draftItems: state.draftItems.filter((item) => item.id !== id),
     })),
 
+  updateDraftItem: (id, item) =>
+    set((state) => ({
+      draftItems: state.draftItems.map((draft) => (draft.id === id ? item : draft)),
+    })),
+
+  beginEditMeal: async (mealId) => {
+    const meal = await mealRepository.getById(mealId);
+    if (!meal) return false;
+
+    const created = new Date(meal.createdAt);
+    const draftItems: MealDraftItem[] = [];
+
+    for (const item of meal.items) {
+      const product = await productRepository.getById(item.productId);
+      draftItems.push({
+        id: item.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        unitType: item.unitType,
+        unitId: item.unitId,
+        productName: item.productName ?? product?.name ?? '',
+        carbsPer100g: product?.carbsPer100g ?? 0,
+        carbs: item.carbs ?? 0,
+        unitLabel: item.unitLabel ?? 'g',
+      });
+    }
+
+    set({
+      editingMealId: meal.id,
+      step: 1,
+      draftMeta: {
+        type: meal.type,
+        dateKey: meal.date,
+        hours: created.getHours(),
+        minutes: created.getMinutes(),
+      },
+      draftItems,
+    });
+    return true;
+  },
+
   resetDraft: () =>
     set({
       step: 0,
       draftMeta: defaultMeta(),
       draftItems: [],
+      editingMealId: null,
     }),
 
   saveMeal: async () => {
-    const { draftMeta, draftItems } = get();
+    const { draftMeta, draftItems, editingMealId } = get();
     const createdAt = new Date(
       `${draftMeta.dateKey}T${String(draftMeta.hours).padStart(2, '0')}:${String(draftMeta.minutes).padStart(2, '0')}:00`,
     ).toISOString();
 
-    await mealRepository.createWithItems({
+    const payload = {
       type: draftMeta.type,
       date: draftMeta.dateKey,
       createdAt,
-      items: draftItems.map(({ id: _id, productName: _n, carbsPer100g: _c, carbs: _carbs, unitLabel: _l, ...item }) => item),
-    });
+      items: draftItems.map(
+        ({ id: _id, productName: _n, carbsPer100g: _c, carbs: _carbs, unitLabel: _l, ...item }) =>
+          item,
+      ),
+    };
+
+    if (editingMealId) {
+      await mealRepository.updateWithItems(editingMealId, payload);
+    } else {
+      await mealRepository.createWithItems(payload);
+    }
 
     get().resetDraft();
     await get().hydrateDay(draftMeta.dateKey);

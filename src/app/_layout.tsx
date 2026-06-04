@@ -23,6 +23,10 @@ export default function RootLayout() {
                   name="meal/create"
                   options={{ presentation: 'fullScreenModal' }}
                 />
+                <Stack.Screen
+                  name="meal/edit"
+                  options={{ presentation: 'fullScreenModal' }}
+                />
               </Stack>
               </TutorialHost>
             </BottomSheetModalProvider>

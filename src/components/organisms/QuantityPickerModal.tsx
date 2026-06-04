@@ -9,6 +9,7 @@ import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { Text } from '@/components/atoms/Text';
 import { useSettingsStore } from '@/store/settings.store';
+import type { MealDraftItem } from '@/store/meal.store';
 import type { Product } from '@/types/product';
 import { computeItemCarbs } from '@/utils/carbs';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
@@ -28,8 +29,18 @@ export type QuantityPickerConfirm = {
 type QuantityPickerModalProps = {
   visible: boolean;
   product: Product | null;
+  initialItem?: MealDraftItem | null;
   onClose: () => void;
   onConfirm: (payload: QuantityPickerConfirm) => void;
+};
+
+const resolveUnitFromItem = (item: MealDraftItem, options: UnitOption[]): UnitOption | null => {
+  if (item.unitType === 'grams') {
+    return options.find((opt) => opt.unitType === 'grams') ?? null;
+  }
+  return (
+    options.find((opt) => opt.unitType === 'custom' && opt.id === item.unitId) ?? null
+  );
 };
 
 type UnitOption = {
@@ -76,13 +87,15 @@ const ActionButton = styled.Pressable`
 export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   visible,
   product,
+  initialItem = null,
   onClose,
   onConfirm,
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const globalUnits = useSettingsStore((s) => s.globalUnits);
-  const { unitSystem, massUnit, massLabel, displayToGrams } = useMassDisplay();
+  const { unitSystem, massUnit, massLabel, displayToGrams, formatMassForInput } =
+    useMassDisplay();
 
   const unitOptions: UnitOption[] = useMemo(() => {
     if (!product) return [];
@@ -123,6 +136,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   const productKey = product
     ? product.id || product.eans[0] || product.name
     : null;
+  const initialItemKey = initialItem?.id ?? null;
 
   useEffect(() => {
     if (!visible) {
@@ -130,11 +144,35 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
       setQuantity(1);
       return;
     }
-    if (!defaultUnit) return;
+    if (!product || !defaultUnit) return;
+
+    if (initialItem && initialItem.productId === product.id) {
+      const unit = resolveUnitFromItem(initialItem, unitOptions) ?? defaultUnit;
+      setSelectedUnit(unit);
+      if (unit.unitType === 'grams') {
+        setGramsText(formatMassForInput(initialItem.quantity));
+        setQuantity(1);
+      } else {
+        setQuantity(Math.max(1, initialItem.quantity));
+        setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
+      }
+      return;
+    }
+
     setSelectedUnit(defaultUnit);
     setQuantity(1);
     setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
-  }, [visible, productKey, defaultUnit, unitSystem]);
+  }, [
+    visible,
+    productKey,
+    initialItemKey,
+    defaultUnit,
+    unitSystem,
+    unitOptions,
+    product,
+    initialItem,
+    formatMassForInput,
+  ]);
 
   if (!product) return null;
 
@@ -228,7 +266,9 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
               </Text>
 
               <ActionButton onPress={handleConfirm}>
-                <Text $variant="caption">{t('common.add')}</Text>
+                <Text $variant="caption">
+                  {initialItem ? t('common.save') : t('common.add')}
+                </Text>
               </ActionButton>
             </GlassPanel>
           </Pressable>

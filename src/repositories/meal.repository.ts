@@ -165,6 +165,48 @@ export const mealRepository = {
     return meal;
   },
 
+  async updateWithItems(mealId: string, input: CreateMealInput): Promise<Meal> {
+    const db = getDatabase();
+    const globalUnits = await globalUnitRepository.getAll();
+
+    const itemCarbs: number[] = [];
+    for (const item of input.items) {
+      const product = await productRepository.getById(item.productId);
+      if (!product) continue;
+      itemCarbs.push(computeMealItemCarbs(item, product, globalUnits));
+    }
+    const totalCarbs = sumCarbs(itemCarbs);
+
+    await db.withTransactionAsync(async () => {
+      await db.runAsync(
+        `UPDATE meals SET type = ?, date = ?, created_at = ?, total_carbs = ? WHERE id = ?`,
+        input.type,
+        input.date,
+        input.createdAt,
+        totalCarbs,
+        mealId,
+      );
+      await db.runAsync('DELETE FROM meal_items WHERE meal_id = ?', mealId);
+
+      for (const item of input.items) {
+        await db.runAsync(
+          `INSERT INTO meal_items (id, meal_id, product_id, quantity, unit_type, unit_id)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          generateId(),
+          mealId,
+          item.productId,
+          item.quantity,
+          item.unitType,
+          item.unitId ?? null,
+        );
+      }
+    });
+
+    const meal = await this.getById(mealId);
+    if (!meal) throw new Error('Failed to update meal');
+    return meal;
+  },
+
   async delete(id: string): Promise<void> {
     const db = getDatabase();
     await db.runAsync('DELETE FROM meals WHERE id = ?', id);
