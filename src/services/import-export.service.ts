@@ -10,10 +10,15 @@ import { productRepository } from '@/repositories/product.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import type { ExportPayload } from '@/types/exportPayload';
 import { usePreferencesStore } from '@/store/preferences.store';
+import {
+  clearProductImagesDirectory,
+  productsToExportProducts,
+  resolveImportedProductImageUrl,
+} from '@/services/productImage.service';
 import { normalizeExportProduct } from '@/utils/exportProduct';
 
-export const EXPORT_VERSION = 3;
-const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3] as const;
+export const EXPORT_VERSION = 4;
+const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3, 4] as const;
 
 export type ImportMode = 'merge' | 'replace';
 
@@ -25,7 +30,7 @@ export type ImportOptions = {
 export const buildExportPayload = async (): Promise<ExportPayload> => ({
   version: EXPORT_VERSION,
   exportedAt: new Date().toISOString(),
-  products: await productRepository.getAll(),
+  products: await productsToExportProducts(await productRepository.getAll()),
   meals: await mealRepository.getAllForExport(),
   globalUnits: await globalUnitRepository.getAll(),
   preferences: await appPreferencesRepository.get(),
@@ -50,6 +55,7 @@ export const deserializePayload = (data: Uint8Array): ExportPayload => {
 };
 
 export const clearUserDataTables = async (db: SQLiteDatabase): Promise<void> => {
+  clearProductImagesDirectory();
   await db.execAsync('DELETE FROM meal_items');
   await db.execAsync('DELETE FROM meals');
   await db.execAsync('DELETE FROM product_eans');
@@ -59,13 +65,14 @@ export const clearUserDataTables = async (db: SQLiteDatabase): Promise<void> => 
 };
 
 const insertProduct = async (db: SQLiteDatabase, product: ExportPayload['products'][0]) => {
+  const imageUrl = resolveImportedProductImageUrl(product);
   await db.runAsync(
     `INSERT INTO products (id, ean, name, carbs_per_100g, image_url, created_at)
      VALUES (?, NULL, ?, ?, ?, ?)`,
     product.id,
     product.name,
     product.carbsPer100g,
-    product.imageUrl ?? null,
+    imageUrl,
     new Date().toISOString(),
   );
   await productEanRepository.setForProduct(product.id, product.eans);
@@ -135,7 +142,8 @@ const mergePayload = async (db: SQLiteDatabase, payload: ExportPayload): Promise
     if (!existing) {
       await insertProduct(db, product);
     } else {
-      await productRepository.update(product);
+      const imageUrl = resolveImportedProductImageUrl(product);
+      await productRepository.update({ ...product, imageUrl });
       for (const unit of product.customUnits) {
         const existingUnits = await productUnitRepository.getByProductId(product.id);
         if (!existingUnits.find((u) => u.id === unit.id)) {
