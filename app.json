@@ -44,6 +44,14 @@
           "cameraPermission": "GlucoScan a besoin de la caméra pour scanner les codes-barres alimentaires.",
           "barcodeScannerEnabled": true
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "GlucoScan accède à vos photos pour ajouter une image à vos produits.",
+          "cameraPermission": "GlucoScan a besoin de la caméra pour photographier vos produits.",
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {
