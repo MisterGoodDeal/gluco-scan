@@ -3,9 +3,9 @@ import BottomSheet, {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import { SymbolView } from 'expo-symbols';
-import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable } from 'react-native';
+import { ActivityIndicator, Alert, Pressable } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
@@ -31,7 +31,18 @@ import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
 import { listRowDivider } from '@/styles/listRow';
+import {
+  deleteLocalProductImage,
+  deleteLocalProductImageById,
+  isLocalProductImage,
+  isRemoteProductImage,
+  addProductPhoto,
+  requestProductCameraPermission,
+  requestProductPhotoLibraryPermission,
+  type ProductPhotoSource,
+} from '@/services/productImage.service';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
+import { generateId } from '@/utils/id';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 type ProductFormSheetProps = {
@@ -64,11 +75,25 @@ const InputWrap = styled.View`
   flex: 1;
 `;
 
-const OffPreviewRow = styled.View`
+const PhotoRow = styled.View`
   flex-direction: row;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${({ theme }) => theme.spacing.md}px;
+  margin-top: ${({ theme }) => theme.spacing.xs}px;
+`;
+
+const PhotoActions = styled.View`
+  flex: 1;
+  gap: ${({ theme }) => theme.spacing.xs}px;
+`;
+
+const PhotoButton = styled(Pressable)`
+  align-self: flex-start;
+  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.radius.sm}px;
+  background-color: ${({ theme }) => theme.colors.accentMuted};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
 const UnitsSection = styled.View`
@@ -157,6 +182,12 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   const [unitModalVisible, setUnitModalVisible] = useState(false);
   const [editingUnit, setEditingUnit] = useState<ProductUnit | null>(null);
+  const draftProductIdRef = useRef<string | null>(null);
+
+  const getFormProductId = useCallback(
+    () => product?.id ?? (draftProductIdRef.current ??= generateId()),
+    [product?.id],
+  );
 
   const renderBackdrop = useCallback(
     (props: ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -166,7 +197,10 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   );
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      draftProductIdRef.current = null;
+      return;
+    }
     setEans(product?.eans ?? []);
     setName(product?.name ?? '');
     setImageUrl(product?.imageUrl ?? null);
@@ -180,15 +214,83 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   }, [visible, product]);
 
   const handleDismiss = useCallback(() => {
+    if (!product) {
+      const draftId = draftProductIdRef.current;
+      if (draftId) deleteLocalProductImageById(draftId);
+    }
     onClose();
-  }, [onClose]);
+  }, [onClose, product]);
 
   const applyOffPartial = useCallback((partial: PartialOffProduct) => {
     if (partial.name) setName(partial.name);
     if (partial.carbsPer100g != null) {
       setCarbsText(String(partial.carbsPer100g).replace('.', ','));
     }
-    if (partial.imageUrl) setImageUrl(partial.imageUrl);
+    if (partial.imageUrl) {
+      setImageUrl((current) => {
+        if (current && isLocalProductImage(current)) {
+          deleteLocalProductImage(current);
+        }
+        return partial.imageUrl!;
+      });
+    }
+  }, []);
+
+  const applyPickedPhoto = useCallback(
+    (path: string) => {
+      setImageUrl((current) => {
+        if (current && isLocalProductImage(current)) {
+          deleteLocalProductImage(current);
+        }
+        return path;
+      });
+      triggerNotificationSuccess();
+    },
+    [],
+  );
+
+  const pickPhotoFromSource = useCallback(
+    async (source: ProductPhotoSource) => {
+      const granted =
+        source === 'camera'
+          ? await requestProductCameraPermission()
+          : await requestProductPhotoLibraryPermission();
+      if (!granted) {
+        showError(
+          source === 'camera'
+            ? t('products.photoCameraPermissionDenied')
+            : t('products.photoPermissionDenied'),
+        );
+        return;
+      }
+      const path = await addProductPhoto(getFormProductId(), source);
+      if (!path) return;
+      applyPickedPhoto(path);
+    },
+    [applyPickedPhoto, getFormProductId, showError, t],
+  );
+
+  const handlePickPhoto = useCallback(() => {
+    Alert.alert(t('products.photoSourceTitle'), undefined, [
+      {
+        text: t('products.photoFromCamera'),
+        onPress: () => void pickPhotoFromSource('camera'),
+      },
+      {
+        text: t('products.photoFromGallery'),
+        onPress: () => void pickPhotoFromSource('library'),
+      },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
+  }, [pickPhotoFromSource, t]);
+
+  const handleRemovePhoto = useCallback(() => {
+    setImageUrl((current) => {
+      if (current && isLocalProductImage(current)) {
+        deleteLocalProductImage(current);
+      }
+      return null;
+    });
   }, []);
 
   const fetchFromOff = useCallback(
@@ -282,6 +384,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     }
 
     setIsSaving(true);
+    const productId = getFormProductId();
     try {
       if (product) {
         const updated: Product = {
@@ -308,6 +411,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         }
       } else {
         const created = await create({
+          id: productId,
           name: trimmedName,
           carbsPer100g: carbs,
           eans,
@@ -405,14 +509,39 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             <InputNumber value={carbsText} onChangeText={setCarbsText} />
           </Field>
 
-          {imageUrl ? (
-            <OffPreviewRow>
-              <ProductImage uri={imageUrl} size={44} />
-              <Text $variant="caption" $color="textSecondary" style={{ flex: 1 }}>
-                {t('modal.importOff')}
-              </Text>
-            </OffPreviewRow>
-          ) : null}
+          <Field>
+            <Text $variant="caption" $color="textSecondary">
+              {t('products.photo')}
+            </Text>
+            <PhotoRow>
+              {imageUrl ? <ProductImage uri={imageUrl} size={64} /> : null}
+              <PhotoActions>
+                <PhotoButton
+                  onPress={handlePickPhoto}
+                  accessibilityLabel={imageUrl ? t('products.changePhoto') : t('products.addPhoto')}>
+                  <Text $variant="caption" $color="accent">
+                    {imageUrl ? t('products.changePhoto') : t('products.addPhoto')}
+                  </Text>
+                </PhotoButton>
+                {imageUrl ? (
+                  <PhotoButton
+                    onPress={handleRemovePhoto}
+                    accessibilityLabel={t('products.removePhotoA11y')}>
+                    <Text $variant="caption" $color="error">
+                      {t('products.removePhoto')}
+                    </Text>
+                  </PhotoButton>
+                ) : null}
+                {imageUrl ? (
+                  <Text $variant="caption" $color="textSecondary">
+                    {isRemoteProductImage(imageUrl)
+                      ? t('products.photoFromOff')
+                      : t('products.photoCustom')}
+                  </Text>
+                ) : null}
+              </PhotoActions>
+            </PhotoRow>
+          </Field>
 
           <UnitsSection>
             <SectionTitleRow>

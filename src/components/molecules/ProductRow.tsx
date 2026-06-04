@@ -7,6 +7,7 @@ import styled, { useTheme } from 'styled-components/native';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { ProductImage } from '@/components/atoms/ProductImage';
+import { resolveProductImageUri } from '@/services/productImage.service';
 import { Text } from '@/components/atoms/Text';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
@@ -96,12 +97,12 @@ export const ProductRow: FC<ProductRowProps> = memo(
       );
     }
 
-    const showImage = Boolean(product.imageUrl);
+    const showImage = resolveProductImageUri(product.imageUrl) != null;
 
     return (
       <GlassPanel blurTarget={blurTarget}>
         <Row>
-          {showImage && <ProductImage uri={product.imageUrl!} />}
+          {showImage && <ProductImage uri={product.imageUrl} />}
           <Info
             onPress={() => onEdit(product)}
             accessibilityRole="button"
