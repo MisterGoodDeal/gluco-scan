@@ -61,6 +61,18 @@ export type TranslationSchema = {
     refreshFromOffA11y: string;
     refreshNoEan: string;
     refreshNoData: string;
+    photo: string;
+    addPhoto: string;
+    changePhoto: string;
+    removePhoto: string;
+    removePhotoA11y: string;
+    photoSourceTitle: string;
+    photoFromCamera: string;
+    photoFromGallery: string;
+    photoFromOff: string;
+    photoCustom: string;
+    photoPermissionDenied: string;
+    photoCameraPermissionDenied: string;
   };
   meals: {
     title: string;
@@ -245,6 +257,18 @@ export const fr: TranslationSchema = {
     refreshFromOffA11y: 'Actualiser depuis Open Food Facts',
     refreshNoEan: 'Ajoutez un code EAN pour actualiser les informations.',
     refreshNoData: 'Aucune donnée trouvée sur Open Food Facts pour ce code.',
+    photo: 'Photo',
+    addPhoto: 'Ajouter une photo',
+    changePhoto: 'Changer la photo',
+    removePhoto: 'Supprimer',
+    removePhotoA11y: 'Supprimer la photo du produit',
+    photoSourceTitle: 'Ajouter une photo',
+    photoFromCamera: 'Prendre une photo',
+    photoFromGallery: 'Choisir dans la galerie',
+    photoFromOff: 'Image Open Food Facts',
+    photoCustom: 'Photo personnelle',
+    photoPermissionDenied: 'Autorisez l’accès à vos photos pour ajouter une image.',
+    photoCameraPermissionDenied: 'Autorisez l’accès à la caméra pour prendre une photo.',
   },
   meals: {
     title: 'Mes repas',
