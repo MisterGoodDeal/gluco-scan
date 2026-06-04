@@ -19,6 +19,7 @@ import { mealRepository } from '@/repositories/meal.repository';
 import type { Meal } from '@/types/meal';
 import { addDays, toDateKey } from '@/utils/date';
 import { Screen } from '@/styles/global';
+import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 const TitleRow = styled.View`
   flex-direction: row;
@@ -83,8 +84,13 @@ export const MealsTabLayout: FC = () => {
 
   const handleMealDelete = useCallback(
     async (mealId: string) => {
-      await mealRepository.delete(mealId);
-      refreshMeals();
+      try {
+        await mealRepository.delete(mealId);
+        triggerNotificationSuccess();
+        refreshMeals();
+      } catch {
+        triggerNotificationError();
+      }
     },
     [refreshMeals],
   );

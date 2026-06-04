@@ -15,6 +15,7 @@ import { computeItemCarbs } from '@/utils/carbs';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { defaultDisplayMassQuantity } from '@/utils/mass';
 import { formatDecimal } from '@/utils/format';
+import { triggerNotificationSuccess } from '@/utils/haptics';
 
 export type QuantityPickerConfirm = {
   quantity: number;
@@ -208,6 +209,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
       carbs,
       unitLabel: activeUnit.abbreviation,
     });
+    triggerNotificationSuccess();
     onClose();
   };
 

@@ -24,6 +24,7 @@ import { TUTORIAL_FEATURED_PRODUCT_ID } from '@/constants/tutorial';
 import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
 import { Screen } from '@/styles/global';
+import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 const TitleRow = styled.View`
   flex-direction: row;
@@ -133,9 +134,13 @@ export const ProductsTabLayout: FC = () => {
             products={filteredProducts}
             compact={compactList}
             blurTarget={blurTargetRef}
-            contentInsetTop={headerHeight}
+            contentInsetTop={headerHeight + theme.spacing.sm}
             onEdit={openEdit}
-            onDelete={(id) => void remove(id)}
+            onDelete={(id) => {
+              void remove(id)
+                .then(() => triggerNotificationSuccess())
+                .catch(() => triggerNotificationError());
+            }}
             refreshing={isLoading}
             onRefresh={() => void loadProducts()}
           />

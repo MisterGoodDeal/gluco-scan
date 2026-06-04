@@ -30,6 +30,7 @@ import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { Screen as AppScreen } from '@/styles/global';
+import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 import { listRowDivider } from '@/styles/listRow';
 
 const Section = styled.View`
@@ -116,10 +117,16 @@ export const SettingsTabLayout: FC = () => {
   };
 
   const handleSaveUnit = async (data: Omit<GlobalUnit, 'id'> | GlobalUnit) => {
-    if ('id' in data) {
-      await updateUnit(data);
-    } else {
-      await createUnit(data);
+    try {
+      if ('id' in data) {
+        await updateUnit(data);
+      } else {
+        await createUnit(data);
+      }
+      triggerNotificationSuccess();
+    } catch (error) {
+      triggerNotificationError();
+      throw error;
     }
   };
 
@@ -131,8 +138,10 @@ export const SettingsTabLayout: FC = () => {
     setExporting(true);
     try {
       await exportToGsFile();
+      triggerNotificationSuccess();
       Alert.alert(t('settings.exportSuccess'));
     } catch {
+      triggerNotificationError();
       Alert.alert(t('settings.importError'));
     } finally {
       setExporting(false);
@@ -156,8 +165,10 @@ export const SettingsTabLayout: FC = () => {
       const bytes = await file.bytes();
       await importFromGsBytes(bytes, { mode: 'merge' });
       await hydrate();
+      triggerNotificationSuccess();
       Alert.alert(t('settings.importSuccess'));
     } catch {
+      triggerNotificationError();
       Alert.alert(t('settings.importError'));
     } finally {
       setImporting(false);
@@ -237,7 +248,11 @@ export const SettingsTabLayout: FC = () => {
                         {
                           text: t('common.delete'),
                           style: 'destructive',
-                          onPress: () => void removeUnit(unit.id),
+                          onPress: () => {
+                            void removeUnit(unit.id)
+                              .then(() => triggerNotificationSuccess())
+                              .catch(() => triggerNotificationError());
+                          },
                         },
                       ])
                     }>

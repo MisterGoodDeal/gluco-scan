@@ -19,6 +19,7 @@ import { Text } from '@/components/atoms/Text';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { parseManualCarbs } from '@/utils/ean';
+import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 import { generateId } from '@/utils/id';
 import { topScreenSpace } from '@/utils/screen';
 
@@ -80,7 +81,10 @@ export const ProductUnitFormModal: FC<ProductUnitFormModalProps> = ({
 
   const handleSave = () => {
     const displayValue = parseManualCarbs(gramsText);
-    if (!name.trim() || !abbreviation.trim() || displayValue === null) return;
+    if (!name.trim() || !abbreviation.trim() || displayValue === null) {
+      triggerNotificationError();
+      return;
+    }
     const grams = displayToGrams(displayValue);
     setIsSaving(true);
     try {
@@ -90,6 +94,7 @@ export const ProductUnitFormModal: FC<ProductUnitFormModalProps> = ({
         abbreviation: abbreviation.trim(),
         equivalentInGrams: grams,
       });
+      triggerNotificationSuccess();
       onClose();
     } finally {
       setIsSaving(false);

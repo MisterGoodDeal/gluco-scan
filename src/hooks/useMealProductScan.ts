@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
 
 import { SCAN_COOLDOWN_MS } from '@/constants/api';
@@ -18,6 +17,11 @@ import {
 import type { Product } from '@/types/product';
 import { createScanDebouncer } from '@/utils/debounce';
 import { isValidEan, normalizeEan } from '@/utils/ean';
+import {
+  triggerNotificationError,
+  triggerNotificationSuccess,
+  triggerNotificationWarning,
+} from '@/utils/haptics';
 
 export type MealScanResult =
   | { kind: 'existing'; product: Product }
@@ -54,7 +58,7 @@ export const useMealProductScan = () => {
     } catch (err) {
       if (err instanceof OffRateLimitError) {
         setWarning(getErrorMessage(err));
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        triggerNotificationWarning();
       }
       try {
         const partial = await fetchOffPartialByEAN(normalizedEan);
@@ -74,9 +78,10 @@ export const useMealProductScan = () => {
       }
       if (err instanceof ProductNotFoundError) {
         setError(i18n.t('meals.productNotFoundOff'));
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        triggerNotificationError();
       } else if (!(err instanceof OffRateLimitError)) {
         setError(getErrorMessage(err));
+        triggerNotificationError();
       }
       return null;
     }
@@ -87,6 +92,7 @@ export const useMealProductScan = () => {
       const ean = rawEan.trim();
       if (!isValidEan(ean)) {
         setError(getErrorMessage(new InvalidBarcodeError()));
+        triggerNotificationError();
         return null;
       }
       if (inFlightRef.current || !debouncerRef.current.canScan(ean)) return null;
@@ -100,7 +106,7 @@ export const useMealProductScan = () => {
       try {
         const result = await resolveForMeal(ean);
         if (result) {
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          triggerNotificationSuccess();
         }
         return result;
       } finally {

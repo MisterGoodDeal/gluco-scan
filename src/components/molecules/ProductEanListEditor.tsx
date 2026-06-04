@@ -8,6 +8,7 @@ import { Text } from '@/components/atoms/Text';
 import { EanScanField } from '@/components/molecules/EanScanField';
 import { listRowDivider } from '@/styles/listRow';
 import { isValidEan } from '@/utils/ean';
+import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 type ProductEanListEditorProps = {
   eans: string[];
@@ -56,14 +57,17 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
     if (!trimmed) return false;
     if (!isValidEan(trimmed)) {
       setManualError(t('modal.invalidEan'));
+      triggerNotificationError();
       return false;
     }
     if (eans.includes(trimmed)) {
       setManualError(t('products.duplicateEan'));
+      triggerNotificationError();
       return false;
     }
     onChange([...eans, trimmed]);
     setManualError(null);
+    triggerNotificationSuccess();
     return true;
   };
 
@@ -76,6 +80,7 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
   const handleScan = (ean: string) => {
     if (eans.includes(ean)) {
       setManualError(t('products.duplicateEan'));
+      triggerNotificationError();
       return;
     }
     setManualError(null);

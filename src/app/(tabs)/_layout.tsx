@@ -5,9 +5,16 @@ import { useTheme } from 'styled-components/native';
 
 import { TabBarIcon } from '@/components/atoms/TabBarIcon';
 import { TabBarBackground } from '@/components/navigation/TabBarBackground';
+import { triggerImpactLight } from '@/utils/haptics';
 
 export const unstable_settings = {
   initialRouteName: 'meals/index',
+};
+
+const hapticTabListeners = {
+  tabPress: () => {
+    triggerImpactLight();
+  },
 };
 
 export default function TabsLayout() {
@@ -35,6 +42,7 @@ export default function TabsLayout() {
       }}>
       <Tabs.Screen
         name="products"
+        listeners={hapticTabListeners}
         options={{
           title: t('tabs.products'),
           tabBarIcon: ({ color }) => (
@@ -47,6 +55,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="meals/index"
+        listeners={hapticTabListeners}
         options={{
           title: t('tabs.meals'),
           tabBarIcon: ({ color }) => (
@@ -56,6 +65,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="settings"
+        listeners={hapticTabListeners}
         options={{
           title: t('tabs.settings'),
           tabBarIcon: ({ color }) => (

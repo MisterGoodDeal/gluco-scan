@@ -32,6 +32,7 @@ import { TutorialStatus } from '@/types/tutorial';
 import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
 import { listRowDivider } from '@/styles/listRow';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
+import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 type ProductFormSheetProps = {
   visible: boolean;
@@ -146,6 +147,11 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const [carbsText, setCarbsText] = useState('');
   const [units, setUnits] = useState<ProductUnit[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const showError = useCallback((message: string) => {
+    setError(message);
+    triggerNotificationError();
+  }, []);
   const [isSaving, setIsSaving] = useState(false);
   const [isLookupLoading, setIsLookupLoading] = useState(false);
 
@@ -196,19 +202,20 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           partial.carbsPer100g != null ||
           Boolean(partial.imageUrl);
         if (!hasData) {
-          setError(t('products.refreshNoData'));
+          showError(t('products.refreshNoData'));
           return false;
         }
         applyOffPartial(partial);
+        triggerNotificationSuccess();
         return true;
       } catch (err) {
-        setError(getErrorMessage(err));
+        showError(getErrorMessage(err));
         return false;
       } finally {
         setIsLookupLoading(false);
       }
     },
-    [applyOffPartial, t],
+    [applyOffPartial, showError, t],
   );
 
   const handleLookup = async (scannedEan: string) => {
@@ -218,7 +225,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const handleRefreshFromOff = async () => {
     const ean = eans.find((code) => isValidEan(code));
     if (!ean) {
-      setError(t('products.refreshNoEan'));
+      showError(t('products.refreshNoEan'));
       return;
     }
     await fetchFromOff(ean);
@@ -255,22 +262,22 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     const trimmedName = name.trim();
     const carbs = parseManualCarbs(carbsText);
     if (!trimmedName) {
-      setError(t('modal.nameRequired'));
+      showError(t('modal.nameRequired'));
       return;
     }
     if (carbs === null) {
-      setError(t('modal.invalidCarbs'));
+      showError(t('modal.invalidCarbs'));
       return;
     }
     for (const code of eans) {
       if (!isValidEan(code)) {
-        setError(t('modal.invalidEan'));
+        showError(t('modal.invalidEan'));
         return;
       }
     }
     const conflict = await productEanRepository.findConflicts(eans, product?.id);
     if (conflict) {
-      setError(t('products.eanTaken', { ean: conflict }));
+      showError(t('products.eanTaken', { ean: conflict }));
       return;
     }
 
@@ -310,7 +317,10 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           await productUnitRepository.create(created.id, unit);
         }
       }
+      triggerNotificationSuccess();
       onClose();
+    } catch (err) {
+      showError(getErrorMessage(err));
     } finally {
       setIsSaving(false);
     }

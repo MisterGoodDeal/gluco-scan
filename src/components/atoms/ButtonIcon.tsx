@@ -2,6 +2,8 @@ import { type FC, type ReactNode } from 'react';
 import { type AccessibilityState } from 'react-native';
 import styled from 'styled-components/native';
 
+import { HapticPressable } from '@/components/atoms/HapticPressable';
+
 type ButtonIconProps = {
   onPress: () => void;
   children: ReactNode;
@@ -9,7 +11,7 @@ type ButtonIconProps = {
   accessibilityState?: AccessibilityState;
 };
 
-const Pressable = styled.Pressable`
+const Pressable = styled(HapticPressable)`
   width: 40px;
   height: 40px;
   border-radius: ${({ theme }) => theme.radius.sm}px;

@@ -1,5 +1,4 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as Haptics from 'expo-haptics';
 import { SymbolView } from 'expo-symbols';
 import { type FC, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +9,7 @@ import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { isValidEan } from '@/utils/ean';
+import { triggerImpactLight, triggerNotificationError } from '@/utils/haptics';
 
 type EanScanFieldProps = {
   value?: string;
@@ -76,6 +76,7 @@ export const EanScanField: FC<EanScanFieldProps> = ({
       const result = await requestPermission();
       if (!result.granted) {
         setScanError(t('modal.cameraRequired'));
+        triggerNotificationError();
         return;
       }
     }
@@ -88,13 +89,14 @@ export const EanScanField: FC<EanScanFieldProps> = ({
       const ean = data.trim();
       if (!isValidEan(ean)) {
         setScanError(t('modal.invalidBarcode'));
+        triggerNotificationError();
         return;
       }
 
       setScanError(null);
       setIsScanning(false);
       onScan(ean);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      triggerImpactLight();
     },
     [onScan, t],
   );

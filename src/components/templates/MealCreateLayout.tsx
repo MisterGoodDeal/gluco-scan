@@ -2,11 +2,13 @@ import { SymbolView } from 'expo-symbols';
 import { router, useLocalSearchParams } from 'expo-router';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
+import { HapticPressable } from '@/components/atoms/HapticPressable';
+import { HapticTouchableOpacity } from '@/components/atoms/HapticTouchableOpacity';
 import { TutorialMealCreateBanner } from '@/components/organisms/TutorialMealCreateBanner';
 import { PickerField } from '@/components/atoms/PickerField';
 import { Text } from '@/components/atoms/Text';
@@ -37,6 +39,7 @@ import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { listRowDivider } from '@/styles/listRow';
 import { hp } from '@/utils/screen';
+import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
 
 const Header = styled(ScreenHeaderBar)`
@@ -71,7 +74,7 @@ const NavRow = styled.View`
   padding: ${({ theme }) => theme.spacing.md}px;
 `;
 
-const ActionButton = styled.Pressable<{ $primary?: boolean }>`
+const ActionButton = styled(HapticPressable)<{ $primary?: boolean }>`
   padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
   border-radius: ${({ theme }) => theme.radius.sm}px;
   background-color: ${({ theme, $primary }) =>
@@ -87,7 +90,7 @@ const ScannerSection = styled.View`
   overflow: hidden;
 `;
 
-const SearchTrigger = styled.Pressable`
+const SearchTrigger = styled(HapticPressable)`
   flex-direction: row;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm}px;
@@ -112,7 +115,7 @@ const ItemRow = styled.View<{ $isLast?: boolean }>`
   ${listRowDivider}
 `;
 
-const ItemTouchable = styled(TouchableOpacity)`
+const ItemTouchable = styled(HapticTouchableOpacity)`
   flex: 1;
   margin-right: ${({ theme }) => theme.spacing.sm}px;
   padding-vertical: ${({ theme }) => theme.spacing.xs}px;
@@ -223,10 +226,17 @@ export const MealCreateLayout: FC = () => {
 
   const handleSave = async () => {
     if (draftItems.length === 0) {
+      triggerNotificationError();
       Alert.alert(t('meals.noItems'));
       return;
     }
-    await saveMeal();
+    try {
+      await saveMeal();
+      triggerNotificationSuccess();
+    } catch {
+      triggerNotificationError();
+      return;
+    }
     if (!isEditing) {
       setMealCreateValidated(true);
       if (tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create') {
@@ -257,9 +267,9 @@ export const MealCreateLayout: FC = () => {
           })}
         </Text>
       </ItemTouchable>
-      <Pressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
+      <HapticPressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
         <Text $color="error">×</Text>
-      </Pressable>
+      </HapticPressable>
     </ItemRow>
   );
 
@@ -267,7 +277,7 @@ export const MealCreateLayout: FC = () => {
     <Screen>
       <BackgroundGradient />
       <Header>
-        <Pressable
+        <HapticPressable
           onPress={() => {
             resetDraft();
             router.back();
@@ -275,7 +285,7 @@ export const MealCreateLayout: FC = () => {
           <Text $variant="body" $color="accent">
             {t('common.cancel')}
           </Text>
-        </Pressable>
+        </HapticPressable>
         <Text $variant="subtitle">
           {isEditing ? t('meals.editTitle') : t('meals.createTitle')}
         </Text>

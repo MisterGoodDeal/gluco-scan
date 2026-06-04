@@ -20,6 +20,7 @@ import type { GlobalUnit } from '@/types/globalUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { parseManualCarbs } from '@/utils/ean';
 import { topScreenSpace } from '@/utils/screen';
+import { triggerNotificationError } from '@/utils/haptics';
 
 type GlobalUnitFormModalProps = {
   visible: boolean;
@@ -79,7 +80,10 @@ export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
 
   const handleSave = async () => {
     const displayValue = parseManualCarbs(gramsText);
-    if (!name.trim() || !abbreviation.trim() || displayValue === null) return;
+    if (!name.trim() || !abbreviation.trim() || displayValue === null) {
+      triggerNotificationError();
+      return;
+    }
     const grams = displayToGrams(displayValue);
     setIsSaving(true);
     try {
