@@ -15,6 +15,8 @@ import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReport
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
+import { ProductTagFilterBar } from '@/components/molecules/ProductTagFilterBar';
+import type { ProductTagFilter } from '@/constants/product-tag-filters';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useProductStore } from '@/store/product.store';
 import { useTutorialStore } from '@/store/tutorial.store';
@@ -23,6 +25,7 @@ import { productRepository } from '@/repositories/product.repository';
 import { TUTORIAL_FEATURED_PRODUCT_ID } from '@/constants/tutorial';
 import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
+import { productMatchesTagFilter } from '@/utils/productTagFilter';
 import { Screen } from '@/styles/global';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
@@ -66,9 +69,14 @@ export const ProductsTabLayout: FC = () => {
   const remove = useProductStore((s) => s.remove);
   const filteredProducts = useProductStore((s) => {
     const trimmed = s.query.trim().toLowerCase();
-    if (!trimmed) return s.products;
-    return s.products.filter((p) => productMatchesQuery(p, trimmed));
+    return s.products.filter((product) => {
+      const matchesQuery = !trimmed || productMatchesQuery(product, trimmed);
+      const matchesTag = productMatchesTagFilter(product, s.tagFilter);
+      return matchesQuery && matchesTag;
+    });
   });
+  const tagFilter = useProductStore((s) => s.tagFilter);
+  const setTagFilter = useProductStore((s) => s.setTagFilter);
 
   const tutorialStatus = useTutorialStore((s) => s.status);
   const openProductId = useTutorialStore((s) => s.openProductId);
@@ -178,6 +186,7 @@ export const ProductsTabLayout: FC = () => {
               />
             </ButtonIcon>
           </SearchRow>
+          <ProductTagFilterBar value={tagFilter} onChange={setTagFilter} />
         </BlurScreenHeader>
       </BlurTargetView>
       <ProductFormSheet

@@ -9,6 +9,7 @@ import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { ProductImage } from '@/components/atoms/ProductImage';
 import { resolveProductImageUri } from '@/services/productImage.service';
 import { Text } from '@/components/atoms/Text';
+import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
 
@@ -70,6 +71,7 @@ export const ProductRow: FC<ProductRowProps> = memo(
               <Text $variant="body" numberOfLines={1} style={{ flexShrink: 1 }}>
                 {product.name}
               </Text>
+              <TagChipList tags={product.tags} variant="compact" />
               <Text $variant="caption" $color="textSecondary" numberOfLines={1}>
                 {carbsLabel}
               </Text>
@@ -108,6 +110,7 @@ export const ProductRow: FC<ProductRowProps> = memo(
             accessibilityRole="button"
             accessibilityLabel={t('products.editA11y')}>
             <Text $variant="subtitle">{product.name}</Text>
+            <TagChipList tags={product.tags} variant="compact" />
             <Text $variant="caption" $color="textSecondary">
               {carbsLabel}
             </Text>

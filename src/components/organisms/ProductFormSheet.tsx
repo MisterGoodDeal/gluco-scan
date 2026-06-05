@@ -15,6 +15,8 @@ import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { ProductEanListEditor } from '@/components/molecules/ProductEanListEditor';
 import { ProductUnitFormModal } from '@/components/organisms/ProductUnitFormModal';
+import { TagSelector } from '@/components/molecules/TagSelector';
+import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import { getErrorMessage } from '@/services/errors';
@@ -24,6 +26,7 @@ import {
 } from '@/services/openFoodFacts.service';
 import { useProductStore } from '@/store/product.store';
 import type { Product } from '@/types/product';
+import type { ProductTag } from '@/types/productTag';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
@@ -42,6 +45,10 @@ import {
   type ProductPhotoSource,
 } from '@/services/productImage.service';
 import { isValidEan, parseManualCarbs } from '@/utils/ean';
+import { convertRawToCooked } from '@/utils/cooking/convertRawToCooked';
+import { getCookingFactor } from '@/utils/cooking/getCookingFactor';
+import { hasCookingConversion } from '@/utils/cooking/hasCookingConversion';
+import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import { generateId } from '@/utils/id';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
@@ -171,7 +178,11 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [carbsText, setCarbsText] = useState('');
   const [units, setUnits] = useState<ProductUnit[]>([]);
+  const [tags, setTags] = useState<ProductTag[]>([]);
+  const [tagsTouched, setTagsTouched] = useState(false);
+  const [cookingFactorText, setCookingFactorText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const userConversions = useCookingConversionStore((s) => s.conversions);
 
   const showError = useCallback((message: string) => {
     setError(message);
@@ -208,6 +219,11 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       product?.carbsPer100g != null ? String(product.carbsPer100g).replace('.', ',') : '',
     );
     setUnits(product?.customUnits ?? []);
+    setTags(product?.tags ?? []);
+    setTagsTouched(false);
+    setCookingFactorText(
+      product?.customCookingFactor != null ? String(product.customCookingFactor).replace('.', ',') : '',
+    );
     setError(null);
     setUnitModalVisible(false);
     setEditingUnit(null);
@@ -234,7 +250,10 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         return partial.imageUrl!;
       });
     }
-  }, []);
+    if (!tagsTouched && partial.tags && partial.tags.length > 0) {
+      setTags(partial.tags);
+    }
+  }, [tagsTouched]);
 
   const applyPickedPhoto = useCallback(
     (path: string) => {
@@ -335,6 +354,23 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   const canRefreshFromOff = eans.some((code) => isValidEan(code));
 
+  const previewProduct = useMemo(
+    (): Product => ({
+      id: getFormProductId(),
+      eans,
+      name,
+      carbsPer100g: parseManualCarbs(carbsText) ?? 0,
+      imageUrl,
+      tags,
+      customCookingFactor: parseManualCarbs(cookingFactorText),
+      customUnits: units,
+    }),
+    [carbsText, cookingFactorText, eans, getFormProductId, imageUrl, name, tags, units],
+  );
+
+  const showCookingSection = hasCookingConversion(previewProduct, userConversions);
+  const resolvedCookingFactor = getCookingFactor(previewProduct, userConversions);
+
   const openAddUnit = () => {
     setEditingUnit(null);
     setUnitModalVisible(true);
@@ -393,6 +429,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           name: trimmedName,
           carbsPer100g: carbs,
           imageUrl,
+          tags,
+          customCookingFactor: parseManualCarbs(cookingFactorText),
           customUnits: units,
         };
         await update(updated);
@@ -416,6 +454,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           carbsPer100g: carbs,
           eans,
           imageUrl,
+          tags,
+          customCookingFactor: parseManualCarbs(cookingFactorText),
         });
         for (const unit of units) {
           await productUnitRepository.create(created.id, unit);
@@ -508,6 +548,40 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             </Text>
             <InputNumber value={carbsText} onChangeText={setCarbsText} />
           </Field>
+
+          <Field>
+            <Text $variant="caption" $color="textSecondary">
+              {t('products.tagsSection')}
+            </Text>
+            <TagSelector
+              value={tags}
+              onChange={(nextTags) => {
+                setTagsTouched(true);
+                setTags(nextTags);
+              }}
+            />
+          </Field>
+
+          {showCookingSection && resolvedCookingFactor != null ? (
+            <Field>
+              <Text $variant="caption" $color="textSecondary">
+                {t('products.cookingConversion')}
+              </Text>
+              <TagChipList tags={tags} variant="expanded" />
+              <Text $variant="caption" $color="textSecondary" style={{ marginTop: 8 }}>
+                {t('products.cookingFactor')}
+              </Text>
+              <InputNumber value={cookingFactorText} onChangeText={setCookingFactorText} />
+              <Text $variant="caption" $color="textSecondary" style={{ marginTop: 8 }}>
+                {t('products.cookingConversionPreview', {
+                  raw: '100',
+                  rawUnit: t('common.gramsUnit'),
+                  cooked: String(convertRawToCooked(100, resolvedCookingFactor)).replace('.', ','),
+                  cookedUnit: t('common.gramsUnit'),
+                })}
+              </Text>
+            </Field>
+          ) : null}
 
           <Field>
             <Text $variant="caption" $color="textSecondary">

@@ -3,6 +3,8 @@ import { create } from 'zustand';
 
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
+import type { ProductTagFilter } from '@/constants/product-tag-filters';
+import type { ProductTag } from '@/types/productTag';
 import { productMatchesQuery } from '@/utils/productSearch';
 
 const storage = createMMKV({ id: 'glucoscan-settings' });
@@ -13,10 +15,12 @@ const readCompactList = (): boolean => storage.getBoolean(COMPACT_LIST_KEY) ?? f
 type ProductStore = {
   products: Product[];
   query: string;
+  tagFilter: ProductTagFilter;
   compactList: boolean;
   isLoading: boolean;
   hydrate: () => Promise<void>;
   setQuery: (query: string) => void;
+  setTagFilter: (filter: ProductTagFilter) => void;
   toggleCompactList: () => void;
   getFiltered: () => Product[];
   create: (data: {
@@ -25,6 +29,8 @@ type ProductStore = {
     carbsPer100g: number;
     eans?: string[];
     imageUrl?: string | null;
+    tags?: ProductTag[];
+    customCookingFactor?: number | null;
   }) => Promise<Product>;
   update: (product: Product) => Promise<void>;
   remove: (id: string) => Promise<void>;
@@ -33,6 +39,7 @@ type ProductStore = {
 export const useProductStore = create<ProductStore>((set, get) => ({
   products: [],
   query: '',
+  tagFilter: 'all',
   compactList: readCompactList(),
   isLoading: false,
 
@@ -53,6 +60,8 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   },
 
   setQuery: (query) => set({ query }),
+
+  setTagFilter: (tagFilter) => set({ tagFilter }),
 
   getFiltered: () => {
     const { products, query } = get();
