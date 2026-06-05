@@ -1,11 +1,14 @@
-import BottomSheet, {
+import {
   BottomSheetBackdrop,
+  BottomSheetModal,
   BottomSheetScrollView,
+  type BottomSheetModal as BottomSheetModalType,
 } from '@gorhom/bottom-sheet';
 import { SymbolView } from 'expo-symbols';
 import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
@@ -29,7 +32,8 @@ import type { Product } from '@/types/product';
 import type { ProductTag } from '@/types/productTag';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
-import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
+import { useBottomSheetModalVisibility } from '@/hooks/useBottomSheetModalVisibility';
+import { getBottomSheetProps, getBottomSheetScrollPadding } from '@/components/navigation/bottomSheet';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
@@ -161,7 +165,10 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const { t } = useTranslation();
   const { formatEquivalentMass } = useMassDisplay();
   const theme = useTheme();
-  const snapPoints = useMemo(() => ['88%'], []);
+  const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetModalType>(null);
+  const { markDismissed } = useBottomSheetModalVisibility(sheetRef, visible);
+  const snapPoints = useMemo(() => ['90%'], []);
   const tutorialStatus = useTutorialStore((s) => s.status);
   const tutorialStep = useTutorialStore((s) => s.currentStep);
   const productFormStepIndex = getTutorialInlineStepIndex('product-form');
@@ -230,12 +237,13 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   }, [visible, product]);
 
   const handleDismiss = useCallback(() => {
+    markDismissed();
     if (!product) {
       const draftId = draftProductIdRef.current;
       if (draftId) deleteLocalProductImageById(draftId);
     }
     onClose();
-  }, [onClose, product]);
+  }, [markDismissed, onClose, product]);
 
   const applyOffPartial = useCallback((partial: PartialOffProduct) => {
     if (partial.name) setName(partial.name);
@@ -470,15 +478,13 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     }
   };
 
-  if (!visible) return null;
-
   return (
     <>
-      <BottomSheet
-        index={0}
+      <BottomSheetModal
+        ref={sheetRef}
         snapPoints={snapPoints}
         enablePanDownToClose={!showTutorialBanner}
-        onClose={handleDismiss}
+        onDismiss={handleDismiss}
         backdropComponent={renderBackdrop}
         {...getBottomSheetProps(theme)}
         keyboardBehavior="interactive"
@@ -488,6 +494,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             paddingHorizontal: theme.spacing.lg,
+            ...getBottomSheetScrollPadding(insets.bottom, theme.spacing.lg),
           }}>
           <SheetHeader>
             <Text $variant="subtitle">
@@ -667,7 +674,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             </ActionButton>
           </FooterActions>
         </BottomSheetScrollView>
-      </BottomSheet>
+      </BottomSheetModal>
 
       <ProductUnitFormModal
         visible={unitModalVisible}

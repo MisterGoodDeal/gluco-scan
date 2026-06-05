@@ -1,18 +1,25 @@
-import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  type BottomSheetModal as BottomSheetModalType,
+} from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
-import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 
 import { ProductImage } from '@/components/atoms/ProductImage';
 import { Text } from '@/components/atoms/Text';
 import { MealItemConversionLine } from '@/components/molecules/MealItemConversionLine';
+import { getBottomSheetProps, getBottomSheetScrollPadding } from '@/components/navigation/bottomSheet';
+import { useBottomSheetModalVisibility } from '@/hooks/useBottomSheetModalVisibility';
 import type { Meal } from '@/types/meal';
 import { formatTimeLabel } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
 import { getCurrentLocale } from '@/i18n';
 import { listRowDivider } from '@/styles/listRow';
-import { getBottomSheetProps } from '@/components/navigation/bottomSheet';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
@@ -47,7 +54,11 @@ const EditButton = styled.Pressable`
 export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const snapPoints = useMemo(() => ['50%', '85%'], []);
+  const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetModalType>(null);
+  const isOpen = meal !== null;
+  const { markDismissed } = useBottomSheetModalVisibility(sheetRef, isOpen);
+  const snapPoints = useMemo(() => ['50%', '92%'], []);
   const locale = getCurrentLocale();
   const [productsById, setProductsById] = useState<Record<string, Product>>({});
 
@@ -57,6 +68,11 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
     ),
     [],
   );
+
+  const handleDismiss = useCallback(() => {
+    markDismissed();
+    onClose();
+  }, [markDismissed, onClose]);
 
   useEffect(() => {
     if (!meal) {
@@ -78,50 +94,54 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
     })();
   }, [meal]);
 
-  if (!meal) return null;
-
   return (
-    <BottomSheet
-      index={0}
+    <BottomSheetModal
+      ref={sheetRef}
       snapPoints={snapPoints}
       enablePanDownToClose
-      onClose={onClose}
+      onDismiss={handleDismiss}
       backdropComponent={renderBackdrop}
       {...getBottomSheetProps(theme)}>
-      <BottomSheetScrollView style={{ padding: theme.spacing.lg }}>
-        <Text $variant="subtitle">{t(getMealTypeLabelKey(meal.type))}</Text>
-        <Text $variant="caption" $color="textSecondary">
-          {formatTimeLabel(meal.createdAt, locale)}
-        </Text>
-        <Text $variant="caption" $color="textSecondary" style={{ marginBottom: 8 }}>
-          {t('meals.itemCount', { count: meal.items.length })}
-        </Text>
-        {meal.items.map((item, index) => (
-          <Row key={item.id} $isLast={index === meal.items.length - 1}>
-            <ItemInfo>
-              <MealItemConversionLine
-                item={item}
-                product={productsById[item.productId] ?? { tags: [], customCookingFactor: null }}
-              />
-            </ItemInfo>
-            {item.imageUrl ? <ProductImage uri={item.imageUrl} size={64} /> : null}
-          </Row>
-        ))}
-        <Text $variant="title" $color="accent" style={{ marginTop: 16 }}>
-          {t('meals.mealTotal')}: {formatDecimal(meal.totalCarbs)} g
-        </Text>
-        <EditButton
-          onPress={() => {
-            onClose();
-            router.push(`/meal/edit?mealId=${meal.id}`);
-          }}
-          accessibilityRole="button"
-          accessibilityLabel={t('meals.editMealA11y')}>
-          <Text $variant="caption" $color="accent">
-            {t('meals.editTitle')}
+      {meal ? (
+        <BottomSheetScrollView
+          contentContainerStyle={{
+            padding: theme.spacing.lg,
+            ...getBottomSheetScrollPadding(insets.bottom, theme.spacing.lg),
+          }}>
+          <Text $variant="subtitle">{t(getMealTypeLabelKey(meal.type))}</Text>
+          <Text $variant="caption" $color="textSecondary">
+            {formatTimeLabel(meal.createdAt, locale)}
           </Text>
-        </EditButton>
-      </BottomSheetScrollView>
-    </BottomSheet>
+          <Text $variant="caption" $color="textSecondary" style={{ marginBottom: 8 }}>
+            {t('meals.itemCount', { count: meal.items.length })}
+          </Text>
+          {meal.items.map((item, index) => (
+            <Row key={item.id} $isLast={index === meal.items.length - 1}>
+              <ItemInfo>
+                <MealItemConversionLine
+                  item={item}
+                  product={productsById[item.productId] ?? { tags: [], customCookingFactor: null }}
+                />
+              </ItemInfo>
+              {item.imageUrl ? <ProductImage uri={item.imageUrl} size={64} /> : null}
+            </Row>
+          ))}
+          <Text $variant="title" $color="accent" style={{ marginTop: 16 }}>
+            {t('meals.mealTotal')}: {formatDecimal(meal.totalCarbs)} g
+          </Text>
+          <EditButton
+            onPress={() => {
+              onClose();
+              router.push(`/meal/edit?mealId=${meal.id}`);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('meals.editMealA11y')}>
+            <Text $variant="caption" $color="accent">
+              {t('meals.editTitle')}
+            </Text>
+          </EditButton>
+        </BottomSheetScrollView>
+      ) : null}
+    </BottomSheetModal>
   );
 };
