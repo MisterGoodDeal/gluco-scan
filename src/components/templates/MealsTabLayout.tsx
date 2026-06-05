@@ -12,6 +12,7 @@ import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { Text } from '@/components/atoms/Text';
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
+import { MealDetailSheet } from '@/components/organisms/MealDetailSheet';
 import { MealsDayPager } from '@/components/organisms/MealsDayPager';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useMealStore } from '@/store/meal.store';
@@ -46,6 +47,7 @@ export const MealsTabLayout: FC = () => {
   const [mealsByDate, setMealsByDate] = useState<Record<string, Meal[]>>({});
   const [totalsByDate, setTotalsByDate] = useState<Record<string, number>>({});
   const [scrollToDateKey, setScrollToDateKey] = useState<string | null>(null);
+  const [detailMeal, setDetailMeal] = useState<Meal | null>(null);
 
   const loadWindow = useCallback(async (center: string) => {
     const half = 15;
@@ -107,7 +109,7 @@ export const MealsTabLayout: FC = () => {
             totalsByDate={totalsByDate}
             headerInset={headerHeight}
             onDateChange={handleDateChange}
-            onMealPress={(meal) => router.push(`/meal/edit?mealId=${meal.id}`)}
+            onMealPress={(meal) => setDetailMeal(meal)}
             onMealDelete={(id) => void handleMealDelete(id)}
             scrollToDateKey={scrollToDateKey}
             onScrollToDateDone={() => setScrollToDateKey(null)}
@@ -146,6 +148,7 @@ export const MealsTabLayout: FC = () => {
           </TutorialAnchor>
         </BlurScreenHeader>
       </BlurTargetView>
+      <MealDetailSheet meal={detailMeal} onClose={() => setDetailMeal(null)} />
     </Screen>
   );
 };

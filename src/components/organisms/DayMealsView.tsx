@@ -101,13 +101,19 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
           {sortedMeals.map((meal, index) => (
             <MealRow key={meal.id} $isLast={index === sortedMeals.length - 1}>
               <MealContent>
-                <MealInfo onPress={() => onMealPress(meal)}>
+                <MealInfo
+                  onPress={() => onMealPress(meal)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('meals.viewDetailsA11y')}>
                   <Text $variant="body">
                     {t(getMealTypeLabelKey(meal.type))} ·{' '}
                     {formatTimeLabel(meal.createdAt, locale)}
                   </Text>
                   <Text $variant="caption" $color="accent">
                     {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
+                  </Text>
+                  <Text $variant="caption" $color="textSecondary">
+                    {t('meals.itemCount', { count: meal.items.length })}
                   </Text>
                   <MealItemThumbnails items={meal.items} size={28} />
                 </MealInfo>
