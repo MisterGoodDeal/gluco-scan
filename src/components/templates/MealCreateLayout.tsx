@@ -33,9 +33,8 @@ import { TutorialStatus } from '@/types/tutorial';
 import type { Product } from '@/types/product';
 import { generateId } from '@/utils/id';
 import { formatDateLabel } from '@/utils/date';
-import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { formatDecimal } from '@/utils/format';
-import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
+import { MealItemConversionLine } from '@/components/molecules/MealItemConversionLine';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { listRowDivider } from '@/styles/listRow';
 import { hp } from '@/utils/screen';
@@ -126,7 +125,6 @@ export const MealCreateLayout: FC = () => {
   const { mealId } = useLocalSearchParams<{ mealId?: string }>();
   const isEditing = Boolean(mealId);
   const { t } = useTranslation();
-  const { formatMassValue, massUnit } = useMassDisplay();
   const locale = getCurrentLocale();
   const step = useMealStore((s) => s.step);
   const setStep = useMealStore((s) => s.setStep);
@@ -175,6 +173,7 @@ export const MealCreateLayout: FC = () => {
       name: result.off.name,
       carbsPer100g: result.off.carbsPer100g,
       imageUrl: result.off.imageUrl ?? null,
+      tags: result.off.tags,
       customUnits: [],
     });
   };
@@ -253,19 +252,13 @@ export const MealCreateLayout: FC = () => {
         accessibilityRole="button"
         accessibilityLabel={t('meals.editItemA11y', { name: item.productName })}
         onPress={() => void openEditItem(item)}>
-        <Text $variant="body">
-          {t('meals.itemLinePortion', {
-            name: item.productName,
-            portion: formatMealItemQuantity(
-              item.quantity,
-              item.unitType,
-              item.unitLabel,
-              formatMassValue,
-              massUnit,
-            ),
-            carbs: formatDecimal(item.carbs),
-          })}
-        </Text>
+        <MealItemConversionLine
+          item={{
+            ...item,
+            productName: item.productName,
+          }}
+          product={{ tags: item.productTags, customCookingFactor: null }}
+        />
       </ItemTouchable>
       <HapticPressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
         <Text $color="error">×</Text>

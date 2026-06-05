@@ -9,9 +9,12 @@ import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { Text } from '@/components/atoms/Text';
 import { useSettingsStore } from '@/store/settings.store';
+import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import type { MealDraftItem } from '@/store/meal.store';
 import type { Product } from '@/types/product';
-import { computeItemCarbs } from '@/utils/carbs';
+import type { MealItemQuantityType } from '@/types/mealItem';
+import { computeMealItemCarbsWithCooking } from '@/utils/carbs';
+import { hasCookingConversion } from '@/utils/cooking/hasCookingConversion';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { defaultDisplayMassQuantity } from '@/utils/mass';
 import { formatDecimal } from '@/utils/format';
@@ -21,10 +24,13 @@ export type QuantityPickerConfirm = {
   quantity: number;
   unitType: 'grams' | 'custom';
   unitId?: string;
+  quantityType?: MealItemQuantityType;
+  rawEquivalentQuantity: number;
   productName: string;
   carbsPer100g: number;
   carbs: number;
   unitLabel: string;
+  productTags: Product['tags'];
 };
 
 type QuantityPickerModalProps = {
@@ -58,6 +64,17 @@ const Row = styled.View`
   justify-content: center;
   gap: ${({ theme }) => theme.spacing.md}px;
   margin: ${({ theme }) => theme.spacing.lg}px 0;
+`;
+
+const WeighingChip = styled.Pressable<{ $selected?: boolean }>`
+  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.radius.sm}px;
+  border-width: 1px;
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.accent : theme.colors.glass.border};
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.accentMuted : theme.colors.glass.background};
+  margin: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const UnitChip = styled.Pressable<{ $selected?: boolean }>`
@@ -95,6 +112,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   const { t } = useTranslation();
   const theme = useTheme();
   const globalUnits = useSettingsStore((s) => s.globalUnits);
+  const userConversions = useCookingConversionStore((s) => s.conversions);
   const { unitSystem, massUnit, massLabel, displayToGrams, formatMassForInput } =
     useMassDisplay();
 
@@ -132,6 +150,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
 
   const [selectedUnit, setSelectedUnit] = useState<UnitOption | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [quantityType, setQuantityType] = useState<MealItemQuantityType>('cooked');
   const [gramsText, setGramsText] = useState(() => String(defaultDisplayMassQuantity(unitSystem)));
 
   const productKey = product
@@ -143,6 +162,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
     if (!visible) {
       setSelectedUnit(null);
       setQuantity(1);
+      setQuantityType('cooked');
       return;
     }
     if (!product || !defaultUnit) return;
@@ -157,11 +177,13 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
         setQuantity(Math.max(1, initialItem.quantity));
         setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
       }
+      setQuantityType(initialItem.quantityType ?? 'raw');
       return;
     }
 
     setSelectedUnit(defaultUnit);
     setQuantity(1);
+    setQuantityType('cooked');
     setGramsText(String(defaultDisplayMassQuantity(unitSystem)));
   }, [
     visible,
@@ -188,15 +210,22 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   const isGrams = activeUnit?.unitType === 'grams';
   const parsedDisplay = parseFloat(gramsText.replace(',', '.')) || 0;
   const qty = isGrams ? displayToGrams(parsedDisplay) : quantity;
+  const cookingEligible =
+    isGrams && hasCookingConversion(product, userConversions);
 
-  const carbs = activeUnit
-    ? computeItemCarbs(
-        qty,
-        activeUnit.unitType,
-        product.carbsPer100g,
-        activeUnit.equivalentInGrams,
+  const carbsResult = activeUnit
+    ? computeMealItemCarbsWithCooking(
+        {
+          quantity: qty,
+          unitType: activeUnit.unitType,
+          unitId: activeUnit.unitType === 'custom' ? activeUnit.id : undefined,
+          quantityType: cookingEligible ? quantityType : 'raw',
+        },
+        product,
+        globalUnits,
+        userConversions,
       )
-    : 0;
+    : { carbs: 0, rawEquivalentQuantity: 0, quantityType: 'raw' as const };
 
   const handleConfirm = () => {
     if (!activeUnit) return;
@@ -204,10 +233,13 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
       quantity: qty,
       unitType: activeUnit.unitType,
       unitId: activeUnit.unitType === 'custom' ? activeUnit.id : undefined,
+      quantityType: carbsResult.quantityType,
+      rawEquivalentQuantity: carbsResult.rawEquivalentQuantity,
       productName: product.name,
       carbsPer100g: product.carbsPer100g,
-      carbs,
+      carbs: carbsResult.carbs,
       unitLabel: activeUnit.abbreviation,
+      productTags: product.tags,
     });
     triggerNotificationSuccess();
     onClose();
@@ -239,6 +271,26 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
                 ))}
               </Chips>
 
+              {cookingEligible ? (
+                <>
+                  <Text $variant="caption" $color="textSecondary" style={{ textAlign: 'center' }}>
+                    {t('meals.weighingType')}
+                  </Text>
+                  <Chips>
+                    <WeighingChip
+                      $selected={quantityType === 'raw'}
+                      onPress={() => setQuantityType('raw')}>
+                      <Text $variant="caption">{t('meals.weighingRaw')}</Text>
+                    </WeighingChip>
+                    <WeighingChip
+                      $selected={quantityType === 'cooked'}
+                      onPress={() => setQuantityType('cooked')}>
+                      <Text $variant="caption">{t('meals.weighingCooked')}</Text>
+                    </WeighingChip>
+                  </Chips>
+                </>
+              ) : null}
+
               {isGrams ? (
                 <InputNumber
                   value={gramsText}
@@ -264,7 +316,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
               )}
 
               <Text $variant="body" $color="accent" style={{ textAlign: 'center' }}>
-                {formatDecimal(carbs)} g
+                {formatDecimal(carbsResult.carbs)} g
               </Text>
 
               <ActionButton onPress={handleConfirm}>

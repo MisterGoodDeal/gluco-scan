@@ -3,7 +3,8 @@ import { create } from 'zustand';
 import { mealRepository } from '@/repositories/meal.repository';
 import { productRepository } from '@/repositories/product.repository';
 import type { Meal } from '@/types/meal';
-import type { MealItem } from '@/types/mealItem';
+import type { MealItem, MealItemQuantityType } from '@/types/mealItem';
+import type { ProductTag } from '@/types/productTag';
 import { MealType } from '@/types/mealType';
 import { toDateKey } from '@/utils/date';
 import { inferMealTypeFromTime } from '@/utils/mealType';
@@ -21,6 +22,9 @@ export type MealDraftItem = Omit<MealItem, 'id'> & {
   carbsPer100g: number;
   carbs: number;
   unitLabel: string;
+  quantityType?: MealItemQuantityType;
+  rawEquivalentQuantity: number;
+  productTags: ProductTag[];
 };
 
 type MealStore = {
@@ -124,10 +128,13 @@ export const useMealStore = create<MealStore>((set, get) => ({
         quantity: item.quantity,
         unitType: item.unitType,
         unitId: item.unitId,
+        quantityType: item.quantityType,
+        rawEquivalentQuantity: item.rawEquivalentQuantity ?? item.quantity,
         productName: item.productName ?? product?.name ?? '',
         carbsPer100g: product?.carbsPer100g ?? 0,
         carbs: item.carbs ?? 0,
         unitLabel: item.unitLabel ?? 'g',
+        productTags: product?.tags ?? [],
       });
     }
 
@@ -164,8 +171,14 @@ export const useMealStore = create<MealStore>((set, get) => ({
       date: draftMeta.dateKey,
       createdAt,
       items: draftItems.map(
-        ({ id: _id, productName: _n, carbsPer100g: _c, carbs: _carbs, unitLabel: _l, ...item }) =>
-          item,
+        ({
+          id: _id,
+          productName: _n,
+          carbsPer100g: _c,
+          unitLabel: _l,
+          productTags: _t,
+          ...item
+        }) => item,
       ),
     };
 
