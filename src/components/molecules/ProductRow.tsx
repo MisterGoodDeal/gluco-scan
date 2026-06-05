@@ -46,11 +46,6 @@ const Actions = styled.View`
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-const ActionLabel = styled(Text)`
-  font-size: 18px;
-  line-height: 20px;
-`;
-
 export const ProductRow: FC<ProductRowProps> = memo(
   ({ product, compact = false, blurTarget, onEdit, onDelete }) => {
     const { t } = useTranslation();
@@ -87,7 +82,9 @@ export const ProductRow: FC<ProductRowProps> = memo(
               <ButtonIcon
                 onPress={() => onDelete(product.id)}
                 accessibilityLabel={t('products.deleteA11y')}>
-                <ActionLabel $color="error">×</ActionLabel>
+                <View pointerEvents="none">
+                  <FaIcon name="xmark" size={16} color={theme.colors.error} />
+                </View>
               </ButtonIcon>
             </Actions>
           </Row>
@@ -132,7 +129,9 @@ export const ProductRow: FC<ProductRowProps> = memo(
             <ButtonIcon
               onPress={() => onDelete(product.id)}
               accessibilityLabel={t('products.deleteA11y')}>
-              <ActionLabel $color="error">×</ActionLabel>
+              <View pointerEvents="none">
+                <FaIcon name="xmark" size={18} color={theme.colors.error} />
+              </View>
             </ButtonIcon>
           </Actions>
         </Row>

@@ -1,7 +1,8 @@
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { type FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
@@ -45,6 +46,7 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
   onScan,
 }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [manualEan, setManualEan] = useState('');
   const [manualError, setManualError] = useState<string | null>(null);
 
@@ -97,7 +99,7 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
               {ean}
             </Text>
             <Pressable onPress={() => removeEan(ean)} hitSlop={8} accessibilityLabel={t('common.delete')}>
-              <Text $color="error">×</Text>
+              <FaIcon name="xmark" size={16} color={theme.colors.error} />
             </Pressable>
           </EanRow>
         ))

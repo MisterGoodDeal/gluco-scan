@@ -261,7 +261,7 @@ export const MealCreateLayout: FC = () => {
         />
       </ItemTouchable>
       <HapticPressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
-        <Text $color="error">×</Text>
+        <FaIcon name="xmark" size={18} color={theme.colors.error} />
       </HapticPressable>
     </ItemRow>
   );

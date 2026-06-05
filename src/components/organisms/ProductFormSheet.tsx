@@ -644,7 +644,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                     </Text>
                   </UnitInfo>
                   <Pressable onPress={() => removeUnit(unit.id)} hitSlop={8}>
-                    <Text $color="error">×</Text>
+                    <FaIcon name="xmark" size={16} color={theme.colors.error} />
                   </Pressable>
                 </UnitRow>
               ))

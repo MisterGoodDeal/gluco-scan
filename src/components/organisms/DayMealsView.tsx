@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
@@ -46,11 +47,6 @@ const MealContent = styled.View`
 
 const MealInfo = styled.Pressable`
   gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const DeleteLabel = styled(Text)`
-  font-size: 18px;
-  line-height: 20px;
 `;
 
 const EmptyState = styled.View`
@@ -121,7 +117,7 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
               <ButtonIcon
                 onPress={() => onMealDelete(meal.id)}
                 accessibilityLabel={t('meals.deleteA11y')}>
-                <DeleteLabel $color="error">×</DeleteLabel>
+                <FaIcon name="xmark" size={18} color={theme.colors.error} />
               </ButtonIcon>
             </MealRow>
           ))}

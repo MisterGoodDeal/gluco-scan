@@ -1,3 +1,4 @@
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { BlurTargetView } from 'expo-blur';
 import Constants from 'expo-constants';
 import * as DocumentPicker from 'expo-document-picker';
@@ -6,7 +7,7 @@ import { useFocusEffect } from 'expo-router';
 import { type FC, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { PickerField } from '@/components/atoms/PickerField';
@@ -74,6 +75,7 @@ const ActionButton = styled.Pressable<{ $primary?: boolean }>`
 
 export const SettingsTabLayout: FC = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const blurTargetRef = useRef<View>(null);
   const { headerHeight, onHeaderLayout } = useBlurHeaderInset(0);
   const hydrate = useSettingsStore((s) => s.hydrate);
@@ -268,7 +270,7 @@ export const SettingsTabLayout: FC = () => {
                         },
                       ])
                     }>
-                    <Text $color="error">×</Text>
+                    <FaIcon name="xmark" size={16} color={theme.colors.error} />
                   </Pressable>
                 </UnitRow>
               ))}

@@ -51,6 +51,7 @@ export const FA_ICONS = {
   tag: icon(0xf02b),
   utensils: icon(0xf2e7),
   wheat: icon(0xf72d),
+  xmark: icon(0xf00d),
 } as const;
 
 export type FaIconName = keyof typeof FA_ICONS;
