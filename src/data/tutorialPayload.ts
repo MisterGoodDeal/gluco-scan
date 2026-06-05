@@ -6,9 +6,14 @@ const today = toDateKey(new Date());
 const day = (offset: number) => addDays(today, offset);
 
 export const TUTORIAL_PAYLOAD: ExportPayload = {
-  version: 3,
+  version: 5,
   exportedAt: new Date().toISOString(),
   metadata: { tutorial: true },
+  cookingConversions: [
+    { tag: 'pasta', cookedFactor: 2.5 },
+    { tag: 'rice', cookedFactor: 3 },
+    { tag: 'bread', cookedFactor: 1 },
+  ],
   preferences: {
     theme: 'light',
     locale: 'fr',
@@ -25,6 +30,7 @@ export const TUTORIAL_PAYLOAD: ExportPayload = {
       eans: ['8076802085031'],
       name: 'Pâtes Barilla',
       carbsPer100g: 71,
+      tags: ['starch', 'pasta'],
       imageUrl: null,
       customUnits: [
         {
@@ -40,6 +46,7 @@ export const TUTORIAL_PAYLOAD: ExportPayload = {
       eans: ['3560071081245'],
       name: 'Riz Basmati',
       carbsPer100g: 78,
+      tags: ['starch', 'rice'],
       imageUrl: null,
       customUnits: [],
     },
@@ -48,6 +55,7 @@ export const TUTORIAL_PAYLOAD: ExportPayload = {
       eans: ['0000000000017'],
       name: 'Banane',
       carbsPer100g: 23,
+      tags: ['fruit'],
       imageUrl: null,
       customUnits: [
         {
@@ -63,6 +71,7 @@ export const TUTORIAL_PAYLOAD: ExportPayload = {
       eans: ['5449000000996'],
       name: 'Coca-Cola',
       carbsPer100g: 10.6,
+      tags: ['drink', 'sweet'],
       imageUrl: null,
       customUnits: [
         {
@@ -78,6 +87,7 @@ export const TUTORIAL_PAYLOAD: ExportPayload = {
       eans: ['3250390001104'],
       name: 'Pain complet',
       carbsPer100g: 43,
+      tags: ['starch', 'bread'],
       imageUrl: null,
       customUnits: [
         {

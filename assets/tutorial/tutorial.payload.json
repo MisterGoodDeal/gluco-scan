@@ -1,9 +1,23 @@
 {
-  "version": 3,
-  "exportedAt": "2026-06-01T22:16:06.255Z",
+  "version": 5,
+  "exportedAt": "2026-06-05T19:12:44.332Z",
   "metadata": {
     "tutorial": true
   },
+  "cookingConversions": [
+    {
+      "tag": "pasta",
+      "cookedFactor": 2.5
+    },
+    {
+      "tag": "rice",
+      "cookedFactor": 3
+    },
+    {
+      "tag": "bread",
+      "cookedFactor": 1
+    }
+  ],
   "preferences": {
     "theme": "light",
     "locale": "fr",
@@ -37,6 +51,10 @@
       ],
       "name": "Pâtes Barilla",
       "carbsPer100g": 71,
+      "tags": [
+        "starch",
+        "pasta"
+      ],
       "imageUrl": null,
       "customUnits": [
         {
@@ -54,6 +72,10 @@
       ],
       "name": "Riz Basmati",
       "carbsPer100g": 78,
+      "tags": [
+        "starch",
+        "rice"
+      ],
       "imageUrl": null,
       "customUnits": []
     },
@@ -64,6 +86,9 @@
       ],
       "name": "Banane",
       "carbsPer100g": 23,
+      "tags": [
+        "fruit"
+      ],
       "imageUrl": null,
       "customUnits": [
         {
@@ -81,6 +106,10 @@
       ],
       "name": "Coca-Cola",
       "carbsPer100g": 10.6,
+      "tags": [
+        "drink",
+        "sweet"
+      ],
       "imageUrl": null,
       "customUnits": [
         {
@@ -98,6 +127,10 @@
       ],
       "name": "Pain complet",
       "carbsPer100g": 43,
+      "tags": [
+        "starch",
+        "bread"
+      ],
       "imageUrl": null,
       "customUnits": [
         {
@@ -113,8 +146,8 @@
     {
       "id": "tut-meal-1",
       "type": "breakfast",
-      "date": "2026-05-30",
-      "createdAt": "2026-05-30T06:15:00.000Z",
+      "date": "2026-06-02",
+      "createdAt": "2026-06-02T06:15:00.000Z",
       "totalCarbs": 27.6,
       "items": [
         {
@@ -136,8 +169,8 @@
     {
       "id": "tut-meal-2",
       "type": "lunch",
-      "date": "2026-05-31",
-      "createdAt": "2026-05-31T10:30:00.000Z",
+      "date": "2026-06-03",
+      "createdAt": "2026-06-03T10:30:00.000Z",
       "totalCarbs": 56.8,
       "items": [
         {
@@ -152,8 +185,8 @@
     {
       "id": "tut-meal-3",
       "type": "snack",
-      "date": "2026-06-01",
-      "createdAt": "2026-06-01T14:00:00.000Z",
+      "date": "2026-06-04",
+      "createdAt": "2026-06-04T14:00:00.000Z",
       "totalCarbs": 35,
       "items": [
         {
@@ -168,8 +201,8 @@
     {
       "id": "tut-meal-4",
       "type": "dinner",
-      "date": "2026-06-02",
-      "createdAt": "2026-06-02T17:45:00.000Z",
+      "date": "2026-06-05",
+      "createdAt": "2026-06-05T17:45:00.000Z",
       "totalCarbs": 156,
       "items": [
         {

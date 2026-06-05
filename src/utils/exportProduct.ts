@@ -12,6 +12,8 @@ export const normalizeExportProduct = (product: LegacyExportProduct): ExportProd
   return {
     ...rest,
     eans: product.eans ?? (product.ean ? [product.ean] : []),
+    tags: product.tags ?? [],
+    customCookingFactor: product.customCookingFactor ?? null,
     imageUrl: product.imageUrl ?? null,
     imageData: product.imageData,
     imageMime: product.imageMime,

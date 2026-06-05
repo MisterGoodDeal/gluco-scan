@@ -3,22 +3,26 @@ import { gzipSync, gunzipSync, strToU8, strFromU8 } from 'fflate';
 
 import { getDatabase } from '@/database/client';
 import { appPreferencesRepository } from '@/repositories/appPreferences.repository';
+import { cookingConversionRepository } from '@/repositories/cookingConversion.repository';
 import { globalUnitRepository } from '@/repositories/globalUnit.repository';
 import { mealRepository } from '@/repositories/meal.repository';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import type { ExportPayload } from '@/types/exportPayload';
+import type { MealItem } from '@/types/mealItem';
 import { usePreferencesStore } from '@/store/preferences.store';
+import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import {
   clearProductImagesDirectory,
   productsToExportProducts,
   resolveImportedProductImageUrl,
 } from '@/services/productImage.service';
 import { normalizeExportProduct } from '@/utils/exportProduct';
+import { computeMealItemCarbsWithCooking } from '@/utils/carbs';
 
-export const EXPORT_VERSION = 4;
-const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3, 4] as const;
+export const EXPORT_VERSION = 5;
+const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3, 4, 5] as const;
 
 export type ImportMode = 'merge' | 'replace';
 
@@ -33,6 +37,7 @@ export const buildExportPayload = async (): Promise<ExportPayload> => ({
   products: await productsToExportProducts(await productRepository.getAll()),
   meals: await mealRepository.getAllForExport(),
   globalUnits: await globalUnitRepository.getAll(),
+  cookingConversions: await cookingConversionRepository.getAll(),
   preferences: await appPreferencesRepository.get(),
 });
 
@@ -44,13 +49,14 @@ export const serializePayload = (payload: ExportPayload): Uint8Array => {
 export const deserializePayload = (data: Uint8Array): ExportPayload => {
   const json = strFromU8(gunzipSync(data));
   const parsed = JSON.parse(json) as ExportPayload;
-  if (!SUPPORTED_EXPORT_VERSIONS.includes(parsed.version as 1 | 2 | 3)) {
+  if (!SUPPORTED_EXPORT_VERSIONS.includes(parsed.version as 1 | 2 | 3 | 4 | 5)) {
     throw new Error('Unsupported export version');
   }
   return {
     ...parsed,
     version: EXPORT_VERSION,
     products: parsed.products.map(normalizeExportProduct),
+    cookingConversions: parsed.cookingConversions,
   };
 };
 
@@ -62,17 +68,23 @@ export const clearUserDataTables = async (db: SQLiteDatabase): Promise<void> => 
   await db.execAsync('DELETE FROM product_units');
   await db.execAsync('DELETE FROM products');
   await db.execAsync('DELETE FROM global_units');
+  await db.execAsync('DELETE FROM cooking_conversions');
 };
+
+const serializeTags = (tags: ExportPayload['products'][0]['tags']): string =>
+  JSON.stringify(tags ?? []);
 
 const insertProduct = async (db: SQLiteDatabase, product: ExportPayload['products'][0]) => {
   const imageUrl = resolveImportedProductImageUrl(product);
   await db.runAsync(
-    `INSERT INTO products (id, ean, name, carbs_per_100g, image_url, created_at)
-     VALUES (?, NULL, ?, ?, ?, ?)`,
+    `INSERT INTO products (id, ean, name, carbs_per_100g, image_url, tags, custom_cooking_factor, created_at)
+     VALUES (?, NULL, ?, ?, ?, ?, ?, ?)`,
     product.id,
     product.name,
     product.carbsPer100g,
     imageUrl,
+    serializeTags(product.tags),
+    product.customCookingFactor ?? null,
     new Date().toISOString(),
   );
   await productEanRepository.setForProduct(product.id, product.eans);
@@ -101,6 +113,58 @@ const insertGlobalUnit = async (db: SQLiteDatabase, unit: ExportPayload['globalU
   );
 };
 
+const normalizeImportedMealItem = async (
+  item: MealItem,
+): Promise<{
+  quantityType: MealItem['quantityType'];
+  rawEquivalentQuantity: number;
+  carbs: number;
+}> => {
+  if (
+    item.carbs != null &&
+    item.rawEquivalentQuantity != null &&
+    item.quantityType != null
+  ) {
+    return {
+      quantityType: item.quantityType,
+      rawEquivalentQuantity: item.rawEquivalentQuantity,
+      carbs: item.carbs,
+    };
+  }
+
+  const [product, globalUnits, userConversions] = await Promise.all([
+    productRepository.getById(item.productId),
+    globalUnitRepository.getAll(),
+    cookingConversionRepository.getAll(),
+  ]);
+
+  if (!product) {
+    return {
+      quantityType: item.quantityType ?? 'raw',
+      rawEquivalentQuantity: item.rawEquivalentQuantity ?? item.quantity,
+      carbs: item.carbs ?? 0,
+    };
+  }
+
+  const computed = computeMealItemCarbsWithCooking(
+    {
+      quantity: item.quantity,
+      unitType: item.unitType,
+      unitId: item.unitId,
+      quantityType: item.quantityType ?? 'raw',
+    },
+    product,
+    globalUnits,
+    userConversions,
+  );
+
+  return {
+    quantityType: item.quantityType ?? computed.quantityType,
+    rawEquivalentQuantity: item.rawEquivalentQuantity ?? computed.rawEquivalentQuantity,
+    carbs: item.carbs ?? computed.carbs,
+  };
+};
+
 const insertMeal = async (db: SQLiteDatabase, meal: ExportPayload['meals'][0]) => {
   await db.runAsync(
     `INSERT INTO meals (id, type, date, created_at, total_carbs) VALUES (?, ?, ?, ?, ?)`,
@@ -111,16 +175,35 @@ const insertMeal = async (db: SQLiteDatabase, meal: ExportPayload['meals'][0]) =
     meal.totalCarbs,
   );
   for (const item of meal.items) {
+    const normalized = await normalizeImportedMealItem(item);
     await db.runAsync(
-      `INSERT INTO meal_items (id, meal_id, product_id, quantity, unit_type, unit_id)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO meal_items (id, meal_id, product_id, quantity, unit_type, unit_id, quantity_type, raw_equivalent_quantity, carbs)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       item.id,
       meal.id,
       item.productId,
       item.quantity,
       item.unitType,
       item.unitId ?? null,
+      normalized.quantityType ?? 'raw',
+      normalized.rawEquivalentQuantity,
+      normalized.carbs,
     );
+  }
+};
+
+const importCookingConversions = async (
+  payload: ExportPayload,
+  mode: ImportMode,
+): Promise<void> => {
+  if (mode === 'replace') {
+    await cookingConversionRepository.seedDefaults();
+  }
+
+  if (!payload.cookingConversions?.length) return;
+
+  for (const conversion of payload.cookingConversions) {
+    await cookingConversionRepository.upsert(conversion);
   }
 };
 
@@ -131,6 +214,7 @@ const insertFullPayload = async (db: SQLiteDatabase, payload: ExportPayload): Pr
   for (const unit of payload.globalUnits) {
     await insertGlobalUnit(db, unit);
   }
+  await importCookingConversions(payload, 'replace');
   for (const meal of payload.meals) {
     await insertMeal(db, meal);
   }
@@ -143,7 +227,11 @@ const mergePayload = async (db: SQLiteDatabase, payload: ExportPayload): Promise
       await insertProduct(db, product);
     } else {
       const imageUrl = resolveImportedProductImageUrl(product);
-      await productRepository.update({ ...product, imageUrl });
+      await productRepository.update({
+        ...product,
+        imageUrl,
+        tags: product.tags ?? [],
+      });
       for (const unit of product.customUnits) {
         const existingUnits = await productUnitRepository.getByProductId(product.id);
         if (!existingUnits.find((u) => u.id === unit.id)) {
@@ -167,6 +255,8 @@ const mergePayload = async (db: SQLiteDatabase, payload: ExportPayload): Promise
       await insertGlobalUnit(db, unit);
     }
   }
+
+  await importCookingConversions(payload, 'merge');
 
   for (const meal of payload.meals) {
     const existing = await mealRepository.getById(meal.id);
@@ -196,6 +286,8 @@ export const importPayload = async (
   if (payload.preferences && !options.skipPreferences) {
     await usePreferencesStore.getState().applyImported(payload.preferences);
   }
+
+  await useCookingConversionStore.getState().hydrate();
 };
 
 export const importFromGsBytes = async (
