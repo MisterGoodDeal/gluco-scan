@@ -17,6 +17,7 @@ type ProductTagFilterBarProps = {
 
 const Bar = styled(ScrollView)`
   flex-grow: 0;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const Row = styled.View`
