@@ -3,13 +3,19 @@ import type { ProductTag } from '@/types/productTag';
 import { convertRawToCooked } from '@/utils/cooking/convertRawToCooked';
 import { getCookingFactor } from '@/utils/cooking/getCookingFactor';
 import { hasCookingConversion } from '@/utils/cooking/hasCookingConversion';
+import { formatMealItemQuantity } from '@/utils/formatMealItemQuantity';
 import type { Product } from '@/types/product';
 import type { CookingConversion } from '@/types/cookingConversion';
 
 export type FormatMealItemConversionParams = {
   item: Pick<
     MealItem,
-    'quantity' | 'unitType' | 'quantityType' | 'rawEquivalentQuantity' | 'carbs'
+    | 'quantity'
+    | 'unitType'
+    | 'unitLabel'
+    | 'quantityType'
+    | 'rawEquivalentQuantity'
+    | 'carbs'
   >;
   product?: Pick<Product, 'tags' | 'customCookingFactor'> | null;
   formatMassValue: (grams: number) => string;
@@ -26,6 +32,34 @@ export const formatMealItemConversion = ({
   userConversions = [],
   t,
 }: FormatMealItemConversionParams) => {
+  const carbsLine = t('common.carbs', {
+    value:
+      item.carbs != null
+        ? item.carbs.toFixed(1).replace('.', ',')
+        : '0',
+  });
+
+  if (item.unitType === 'custom') {
+    const quantityPart = formatMealItemQuantity(
+      item.quantity,
+      item.unitType,
+      item.unitLabel,
+      formatMassValue,
+      massUnit,
+    );
+    const primaryLine =
+      item.rawEquivalentQuantity != null && item.rawEquivalentQuantity > 0
+        ? `${quantityPart} (${formatMassValue(item.rawEquivalentQuantity)} ${massUnit})`
+        : quantityPart;
+
+    return {
+      primaryLine,
+      equivalentLine: null,
+      carbsLine,
+      productTags: product?.tags ?? ([] as ProductTag[]),
+    };
+  }
+
   const quantityType: MealItemQuantityType = item.quantityType ?? 'raw';
   const showConversion =
     item.unitType === 'grams' &&
@@ -61,13 +95,6 @@ export const formatMealItemConversion = ({
       }
     }
   }
-
-  const carbsLine = t('common.carbs', {
-    value:
-      item.carbs != null
-        ? item.carbs.toFixed(1).replace('.', ',')
-        : '0',
-  });
 
   return {
     primaryLine,
