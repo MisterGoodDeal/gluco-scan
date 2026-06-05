@@ -9,6 +9,7 @@ import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { isValidEan } from '@/utils/ean';
+import { primaryButtonStyles } from '@/styles/button';
 import { triggerImpactLight, triggerNotificationError } from '@/utils/haptics';
 
 type EanScanFieldProps = {
@@ -48,9 +49,7 @@ const PermissionHint = styled.View`
 
 const PermissionButton = styled.Pressable`
   align-self: flex-start;
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accent};
+  ${primaryButtonStyles}
 `;
 
 export const EanScanField: FC<EanScanFieldProps> = ({

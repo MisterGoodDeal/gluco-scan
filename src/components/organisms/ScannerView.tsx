@@ -6,6 +6,7 @@ import styled, { useTheme } from 'styled-components/native';
 
 import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
+import { primaryButtonStyles } from '@/styles/button';
 import { hp, topScreenSpace } from '@/utils/screen';
 
 type ScannerViewProps = {
@@ -106,9 +107,7 @@ const PermissionContainer = styled.View<{ $fill?: boolean }>`
 `;
 
 const PermissionButton = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accent};
+  ${primaryButtonStyles}
 `;
 
 export const ScannerView: FC<ScannerViewProps> = ({

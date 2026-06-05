@@ -16,6 +16,7 @@ import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
+import { actionButtonStyles } from '@/styles/button';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { parseManualCarbs } from '@/utils/ean';
@@ -50,12 +51,7 @@ const FooterActions = styled.View`
 `;
 
 const ActionButton = styled.Pressable<{ $primary?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme, $primary }) =>
-    $primary ? theme.colors.accent : theme.colors.glass.background};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${actionButtonStyles}
 `;
 
 export const ProductUnitFormModal: FC<ProductUnitFormModalProps> = ({

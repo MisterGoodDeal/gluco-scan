@@ -34,6 +34,7 @@ import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { Screen as AppScreen } from '@/styles/global';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
+import { actionButtonStyles, mutedButtonStyles } from '@/styles/button';
 import { listRowDivider } from '@/styles/listRow';
 
 const Section = styled.View`
@@ -56,20 +57,11 @@ const UnitRow = styled.View<{ $isLast?: boolean }>`
 `;
 
 const AddButton = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accentMuted};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${mutedButtonStyles}
 `;
 
 const ActionButton = styled.Pressable<{ $primary?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme, $primary }) =>
-    $primary ? theme.colors.accent : theme.colors.glass.background};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${actionButtonStyles}
   margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 

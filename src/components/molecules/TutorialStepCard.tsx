@@ -5,6 +5,7 @@ import styled, { useTheme } from 'styled-components/native';
 
 import { Text } from '@/components/atoms/Text';
 import { TUTORIAL_STEPS } from '@/config/tutorialSteps';
+import { actionButtonStyles } from '@/styles/button';
 import { useTutorialStore } from '@/store/tutorial.store';
 
 const Card = styled.View`
@@ -30,14 +31,11 @@ const ActionsEnd = styled.View`
 `;
 
 const ActionButton = styled.Pressable<{ $primary?: boolean; $disabled?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
+  ${actionButtonStyles}
   background-color: ${({ theme, $primary, $disabled }) => {
     if ($disabled && $primary) return theme.colors.glass.background;
     return $primary ? theme.colors.accent : theme.colors.glass.background;
   }};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
   opacity: ${({ $disabled }) => ($disabled ? 0.55 : 1)};
 `;
 

@@ -25,6 +25,7 @@ import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
 import { productMatchesTagFilters } from '@/utils/productTagFilter';
 import { Screen } from '@/styles/global';
+import { mutedButtonStyles } from '@/styles/button';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 const TitleRow = styled.View`
@@ -46,11 +47,7 @@ const SearchField = styled.View`
 `;
 
 const AddButton = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accentMuted};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${mutedButtonStyles}
 `;
 
 export const ProductsTabLayout: FC = () => {

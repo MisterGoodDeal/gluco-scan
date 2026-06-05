@@ -5,6 +5,7 @@ import styled, { useTheme } from 'styled-components/native';
 
 import { Text } from '@/components/atoms/Text';
 import { useTutorialStore } from '@/store/tutorial.store';
+import { actionButtonStyles } from '@/styles/button';
 import { TutorialStatus } from '@/types/tutorial';
 
 const Backdrop = styled.View`
@@ -33,12 +34,7 @@ const Actions = styled.View`
 `;
 
 const ActionButton = styled(Pressable)<{ $primary?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme, $primary }) =>
-    $primary ? theme.colors.accent : theme.colors.glass.background};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${actionButtonStyles}
 `;
 
 export const TutorialWelcomeModal: FC = () => {

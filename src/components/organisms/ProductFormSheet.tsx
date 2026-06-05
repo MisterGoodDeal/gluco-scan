@@ -38,6 +38,7 @@ import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
 import { listRowDivider } from '@/styles/listRow';
+import { actionButtonStyles, mutedButtonStyles } from '@/styles/button';
 import {
   deleteLocalProductImage,
   deleteLocalProductImageById,
@@ -100,11 +101,7 @@ const PhotoActions = styled.View`
 
 const PhotoButton = styled(Pressable)`
   align-self: flex-start;
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accentMuted};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${mutedButtonStyles}
 `;
 
 const UnitsSection = styled.View`
@@ -132,11 +129,7 @@ const UnitInfo = styled(Pressable)`
 `;
 
 const AddUnitButton = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accentMuted};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${mutedButtonStyles}
 `;
 
 const FooterActions = styled.View`
@@ -149,12 +142,7 @@ const FooterActions = styled.View`
 `;
 
 const ActionButton = styled.Pressable<{ $primary?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme, $primary }) =>
-    $primary ? theme.colors.accent : theme.colors.glass.background};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${actionButtonStyles}
 `;
 
 export const ProductFormSheet: FC<ProductFormSheetProps> = ({

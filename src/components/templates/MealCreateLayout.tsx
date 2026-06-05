@@ -37,6 +37,7 @@ import { formatDecimal } from '@/utils/format';
 import { MealItemConversionLine } from '@/components/molecules/MealItemConversionLine';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { listRowDivider } from '@/styles/listRow';
+import { actionButtonStyles } from '@/styles/button';
 import { hp } from '@/utils/screen';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 import { Screen, ScreenHeaderBar } from '@/styles/global';
@@ -74,12 +75,7 @@ const NavRow = styled.View`
 `;
 
 const ActionButton = styled(HapticPressable)<{ $primary?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme, $primary }) =>
-    $primary ? theme.colors.accent : theme.colors.glass.background};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${actionButtonStyles}
 `;
 
 const ScannerSection = styled.View`

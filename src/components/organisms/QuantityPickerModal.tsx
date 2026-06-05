@@ -19,6 +19,7 @@ import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { defaultDisplayMassQuantity } from '@/utils/mass';
 import { formatDecimal } from '@/utils/format';
 import { triggerNotificationSuccess } from '@/utils/haptics';
+import { primaryButtonStyles } from '@/styles/button';
 
 export type QuantityPickerConfirm = {
   quantity: number;
@@ -95,9 +96,7 @@ const Chips = styled.View`
 `;
 
 const ActionButton = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accent};
+  ${primaryButtonStyles}
   align-self: center;
   margin-top: ${({ theme }) => theme.spacing.md}px;
 `;

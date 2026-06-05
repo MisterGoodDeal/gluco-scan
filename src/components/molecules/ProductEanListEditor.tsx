@@ -8,6 +8,7 @@ import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { EanScanField } from '@/components/molecules/EanScanField';
 import { listRowDivider } from '@/styles/listRow';
+import { mutedButtonStyles } from '@/styles/button';
 import { isValidEan } from '@/utils/ean';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
@@ -33,11 +34,7 @@ const ManualRow = styled.View`
 `;
 
 const AddManualButton = styled.Pressable`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.accentMuted};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
+  ${mutedButtonStyles}
 `;
 
 export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
