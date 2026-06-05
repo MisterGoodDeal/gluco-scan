@@ -7,12 +7,16 @@ import {
   ProductNotFoundError,
 } from '@/services/errors';
 import { consumeOffApiCall } from '@/services/offRateLimiter';
+import { mapOffCategoriesToTags } from '@/utils/tag-mapper/mapOffCategoriesToTags';
+import type { ProductTag } from '@/types/productTag';
 
 export type OffProductResult = {
   ean: string;
   name: string;
   carbsPer100g: number;
   imageUrl?: string;
+  categoriesTags?: string[];
+  tags: ProductTag[];
 };
 
 type OffNutriments = {
@@ -20,10 +24,20 @@ type OffNutriments = {
   carbohydrates?: number;
 };
 
+type OffImages = {
+  front?: {
+    small?: {
+      url?: string;
+    };
+  };
+};
+
 type OffProduct = {
   product_name?: string;
   nutriments?: OffNutriments;
   image_front_small_url?: string;
+  images?: OffImages;
+  categories_tags?: string[];
 };
 
 type OffResponse = {
@@ -31,7 +45,7 @@ type OffResponse = {
   product?: OffProduct;
 };
 
-const OFF_FIELDS = 'product_name,nutriments,image_front_small_url';
+const OFF_FIELDS = 'product_name,nutriments,images,categories_tags,image_front_small_url';
 
 const parseCarbs = (nutriments?: OffNutriments): number | null => {
   const carbs = nutriments?.carbohydrates_100g ?? nutriments?.carbohydrates;
@@ -40,8 +54,22 @@ const parseCarbs = (nutriments?: OffNutriments): number | null => {
 };
 
 const parseImageUrl = (product: OffProduct): string | undefined => {
+  const fromImages = product.images?.front?.small?.url?.trim();
+  if (fromImages) return fromImages;
   const url = product.image_front_small_url?.trim();
   return url || undefined;
+};
+
+const buildOffResult = (ean: string, product: OffProduct): OffProductResult => {
+  const categoriesTags = product.categories_tags ?? [];
+  return {
+    ean,
+    name: product.product_name?.trim() || i18n.t('products.unknownProduct'),
+    carbsPer100g: parseCarbs(product.nutriments)!,
+    imageUrl: parseImageUrl(product),
+    categoriesTags,
+    tags: mapOffCategoriesToTags(categoriesTags),
+  };
 };
 
 export const fetchProductByEAN = async (ean: string): Promise<OffProductResult> => {
@@ -79,12 +107,7 @@ export const fetchProductByEAN = async (ean: string): Promise<OffProductResult> 
     throw new MissingNutrimentsError(ean);
   }
 
-  return {
-    ean,
-    name: data.product.product_name?.trim() || i18n.t('products.unknownProduct'),
-    carbsPer100g,
-    imageUrl: parseImageUrl(data.product),
-  };
+  return buildOffResult(ean, data.product);
 };
 
 export type PartialOffProduct = {
@@ -92,6 +115,8 @@ export type PartialOffProduct = {
   name?: string;
   carbsPer100g?: number;
   imageUrl?: string;
+  categoriesTags?: string[];
+  tags?: ProductTag[];
 };
 
 export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProduct> => {
@@ -112,12 +137,15 @@ export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProdu
 
     const carbsPer100g = parseCarbs(data.product.nutriments);
     const name = data.product.product_name?.trim();
+    const categoriesTags = data.product.categories_tags ?? [];
 
     return {
       ean,
       name: name || undefined,
       carbsPer100g: carbsPer100g ?? undefined,
       imageUrl: parseImageUrl(data.product),
+      categoriesTags,
+      tags: mapOffCategoriesToTags(categoriesTags),
     };
   } catch (error) {
     if (error instanceof OffRateLimitError) throw error;

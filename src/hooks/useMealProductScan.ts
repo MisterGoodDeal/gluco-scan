@@ -37,6 +37,7 @@ export const persistOffProduct = async (off: OffProductResult): Promise<Product>
     carbsPer100g: off.carbsPer100g,
     eans: [ean],
     imageUrl: off.imageUrl,
+    tags: off.tags,
   });
 };
 
@@ -70,6 +71,8 @@ export const useMealProductScan = () => {
               name: partial.name,
               carbsPer100g: partial.carbsPer100g,
               imageUrl: partial.imageUrl,
+              categoriesTags: partial.categoriesTags,
+              tags: partial.tags ?? [],
             },
           };
         }
