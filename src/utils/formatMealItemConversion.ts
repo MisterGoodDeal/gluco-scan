@@ -61,14 +61,13 @@ export const formatMealItemConversion = ({
   }
 
   const quantityType: MealItemQuantityType = item.quantityType ?? 'raw';
-  const showConversion =
+  const cookingEligible =
     item.unitType === 'grams' &&
     product != null &&
-    hasCookingConversion(product, userConversions) &&
-    item.rawEquivalentQuantity != null;
+    hasCookingConversion(product, userConversions);
 
-  const primaryLine =
-    quantityType === 'cooked'
+  const primaryLine = cookingEligible
+    ? quantityType === 'cooked'
       ? t('meals.quantityCooked', {
           value: formatMassValue(item.quantity),
           unit: massUnit,
@@ -76,10 +75,20 @@ export const formatMealItemConversion = ({
       : t('meals.quantityRaw', {
           value: formatMassValue(item.quantity),
           unit: massUnit,
-        });
+        })
+    : formatMealItemQuantity(
+        item.quantity,
+        'grams',
+        undefined,
+        formatMassValue,
+        massUnit,
+      );
 
   let equivalentLine: string | null = null;
-  if (showConversion && item.rawEquivalentQuantity != null) {
+  if (
+    cookingEligible &&
+    item.rawEquivalentQuantity != null
+  ) {
     if (quantityType === 'cooked') {
       equivalentLine = t('meals.rawEquivalent', {
         value: formatMassValue(item.rawEquivalentQuantity),
