@@ -15,6 +15,7 @@ import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { Text } from '@/components/atoms/Text';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
+import { CookingConversionSettings } from '@/components/molecules/CookingConversionSettings';
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
@@ -25,6 +26,7 @@ import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
 import { usePreferencesStore } from '@/store/preferences.store';
 import { useSettingsStore } from '@/store/settings.store';
+import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
 import { useTutorialStore } from '@/store/tutorial.store';
@@ -75,6 +77,7 @@ export const SettingsTabLayout: FC = () => {
   const blurTargetRef = useRef<View>(null);
   const { headerHeight, onHeaderLayout } = useBlurHeaderInset(0);
   const hydrate = useSettingsStore((s) => s.hydrate);
+  const hydrateCookingConversions = useCookingConversionStore((s) => s.hydrate);
   const globalUnits = useSettingsStore((s) => s.globalUnits);
   const createUnit = useSettingsStore((s) => s.createUnit);
   const updateUnit = useSettingsStore((s) => s.updateUnit);
@@ -98,7 +101,8 @@ export const SettingsTabLayout: FC = () => {
   useFocusEffect(
     useCallback(() => {
       void hydrate();
-    }, [hydrate]),
+      void hydrateCookingConversions();
+    }, [hydrate, hydrateCookingConversions]),
   );
 
   const openAddUnit = () => {
@@ -165,6 +169,7 @@ export const SettingsTabLayout: FC = () => {
       const bytes = await file.bytes();
       await importFromGsBytes(bytes, { mode: 'merge' });
       await hydrate();
+      await hydrateCookingConversions();
       triggerNotificationSuccess();
       Alert.alert(t('settings.importSuccess'));
     } catch {
@@ -199,6 +204,13 @@ export const SettingsTabLayout: FC = () => {
               {t('settings.unitsDescription')}
             </Text>
             <UnitSystemPicker />
+          </Section>
+
+          <Section>
+            <Text $variant="body">{t('settings.cookingConversions')}</Text>
+            <GlassPanel blurTarget={blurTargetRef}>
+              <CookingConversionSettings />
+            </GlassPanel>
           </Section>
 
           <Section>
