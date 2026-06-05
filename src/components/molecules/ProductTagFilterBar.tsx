@@ -5,14 +5,13 @@ import styled from 'styled-components/native';
 
 import { TagChip } from '@/components/molecules/tag-chip/TagChip';
 import { Text } from '@/components/atoms/Text';
-import {
-  PRODUCT_TAG_FILTERS,
-  type ProductTagFilter,
-} from '@/constants/product-tag-filters';
+import { PRODUCT_TAG_FILTERS } from '@/constants/product-tag-filters';
+import type { ProductTag } from '@/types/productTag';
 
 type ProductTagFilterBarProps = {
-  value: ProductTagFilter;
-  onChange: (filter: ProductTagFilter) => void;
+  value: ProductTag[];
+  onToggle: (tag: ProductTag) => void;
+  onClear: () => void;
 };
 
 const Bar = styled(ScrollView)`
@@ -36,31 +35,36 @@ const AllChip = styled.Pressable<{ $selected?: boolean }>`
     $selected ? theme.colors.accentMuted : theme.colors.glass.background};
 `;
 
-export const ProductTagFilterBar: FC<ProductTagFilterBarProps> = ({ value, onChange }) => {
+export const ProductTagFilterBar: FC<ProductTagFilterBarProps> = ({
+  value,
+  onToggle,
+  onClear,
+}) => {
   const { t } = useTranslation();
+  const showAll = value.length === 0;
 
   return (
     <Bar horizontal showsHorizontalScrollIndicator={false}>
       <Row>
         <AllChip
-          $selected={value === 'all'}
-          onPress={() => onChange('all')}
+          $selected={showAll}
+          onPress={onClear}
           accessibilityRole="button"
-          accessibilityState={{ selected: value === 'all' }}>
+          accessibilityState={{ selected: showAll }}>
           <Text
             $variant="caption"
-            $color={value === 'all' ? 'accent' : 'textSecondary'}
-            style={{ fontWeight: value === 'all' ? '600' : '500' }}>
+            $color={showAll ? 'accent' : 'textSecondary'}
+            style={{ fontWeight: showAll ? '600' : '500' }}>
             {t('products.filterAll')}
           </Text>
         </AllChip>
-        {PRODUCT_TAG_FILTERS.filter((filter) => filter !== 'all').map((filter) => (
+        {PRODUCT_TAG_FILTERS.map((filter) => (
           <TagChip
             key={filter}
             tag={filter}
             variant="expanded"
-            selected={value === filter}
-            onPress={() => onChange(filter)}
+            selected={value.includes(filter)}
+            onPress={() => onToggle(filter)}
           />
         ))}
       </Row>

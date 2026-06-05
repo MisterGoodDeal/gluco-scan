@@ -3,10 +3,9 @@ import { create } from 'zustand';
 
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
-import type { ProductTagFilter } from '@/constants/product-tag-filters';
 import type { ProductTag } from '@/types/productTag';
 import { productMatchesQuery } from '@/utils/productSearch';
-import { productMatchesTagFilter } from '@/utils/productTagFilter';
+import { productMatchesTagFilters } from '@/utils/productTagFilter';
 
 const storage = createMMKV({ id: 'glucoscan-settings' });
 const COMPACT_LIST_KEY = 'products_compact_list';
@@ -16,12 +15,13 @@ const readCompactList = (): boolean => storage.getBoolean(COMPACT_LIST_KEY) ?? f
 type ProductStore = {
   products: Product[];
   query: string;
-  tagFilter: ProductTagFilter;
+  tagFilters: ProductTag[];
   compactList: boolean;
   isLoading: boolean;
   hydrate: () => Promise<void>;
   setQuery: (query: string) => void;
-  setTagFilter: (filter: ProductTagFilter) => void;
+  toggleTagFilter: (tag: ProductTag) => void;
+  clearTagFilters: () => void;
   toggleCompactList: () => void;
   getFiltered: () => Product[];
   create: (data: {
@@ -40,7 +40,7 @@ type ProductStore = {
 export const useProductStore = create<ProductStore>((set, get) => ({
   products: [],
   query: '',
-  tagFilter: 'all',
+  tagFilters: [],
   compactList: readCompactList(),
   isLoading: false,
 
@@ -62,14 +62,21 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
   setQuery: (query) => set({ query }),
 
-  setTagFilter: (tagFilter) => set({ tagFilter }),
+  toggleTagFilter: (tag) =>
+    set((state) => ({
+      tagFilters: state.tagFilters.includes(tag)
+        ? state.tagFilters.filter((t) => t !== tag)
+        : [...state.tagFilters, tag],
+    })),
+
+  clearTagFilters: () => set({ tagFilters: [] }),
 
   getFiltered: () => {
-    const { products, query, tagFilter } = get();
+    const { products, query, tagFilters } = get();
     const trimmed = query.trim().toLowerCase();
     return products.filter((product) => {
       const matchesQuery = !trimmed || productMatchesQuery(product, trimmed);
-      const matchesTag = productMatchesTagFilter(product, tagFilter);
+      const matchesTag = productMatchesTagFilters(product, tagFilters);
       return matchesQuery && matchesTag;
     });
   },

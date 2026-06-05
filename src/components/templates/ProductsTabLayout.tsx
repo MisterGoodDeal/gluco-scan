@@ -16,16 +16,14 @@ import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
 import { ProductTagFilterBar } from '@/components/molecules/ProductTagFilterBar';
-import type { ProductTagFilter } from '@/constants/product-tag-filters';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useProductStore } from '@/store/product.store';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { productRepository } from '@/repositories/product.repository';
-import { TUTORIAL_FEATURED_PRODUCT_ID } from '@/constants/tutorial';
 import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
-import { productMatchesTagFilter } from '@/utils/productTagFilter';
+import { productMatchesTagFilters } from '@/utils/productTagFilter';
 import { Screen } from '@/styles/global';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
@@ -64,9 +62,10 @@ export const ProductsTabLayout: FC = () => {
   const isLoading = useProductStore((s) => s.isLoading);
   const query = useProductStore((s) => s.query);
   const products = useProductStore((s) => s.products);
-  const tagFilter = useProductStore((s) => s.tagFilter);
+  const tagFilters = useProductStore((s) => s.tagFilters);
   const setQuery = useProductStore((s) => s.setQuery);
-  const setTagFilter = useProductStore((s) => s.setTagFilter);
+  const toggleTagFilter = useProductStore((s) => s.toggleTagFilter);
+  const clearTagFilters = useProductStore((s) => s.clearTagFilters);
   const compactList = useProductStore((s) => s.compactList);
   const toggleCompactList = useProductStore((s) => s.toggleCompactList);
   const remove = useProductStore((s) => s.remove);
@@ -74,10 +73,10 @@ export const ProductsTabLayout: FC = () => {
     const trimmed = query.trim().toLowerCase();
     return products.filter((product) => {
       const matchesQuery = !trimmed || productMatchesQuery(product, trimmed);
-      const matchesTag = productMatchesTagFilter(product, tagFilter);
+      const matchesTag = productMatchesTagFilters(product, tagFilters);
       return matchesQuery && matchesTag;
     });
-  }, [products, query, tagFilter]);
+  }, [products, query, tagFilters]);
 
   const tutorialStatus = useTutorialStore((s) => s.status);
   const openProductId = useTutorialStore((s) => s.openProductId);
@@ -187,7 +186,11 @@ export const ProductsTabLayout: FC = () => {
               />
             </ButtonIcon>
           </SearchRow>
-          <ProductTagFilterBar value={tagFilter} onChange={setTagFilter} />
+          <ProductTagFilterBar
+            value={tagFilters}
+            onToggle={toggleTagFilter}
+            onClear={clearTagFilters}
+          />
         </BlurScreenHeader>
       </BlurTargetView>
       <ProductFormSheet

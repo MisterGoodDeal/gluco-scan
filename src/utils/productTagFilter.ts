@@ -1,11 +1,10 @@
 import type { Product } from '@/types/product';
-import type { ProductTagFilter } from '@/constants/product-tag-filters';
+import type { ProductTag } from '@/types/productTag';
 
-export const productMatchesTagFilter = (
+export const productMatchesTagFilters = (
   product: Product,
-  filter: ProductTagFilter,
+  filters: ProductTag[],
 ): boolean => {
-  if (filter === 'all') return true;
-  if (filter === 'starch') return product.tags.includes('starch');
-  return product.tags.includes(filter);
+  if (filters.length === 0) return true;
+  return filters.some((filter) => product.tags.includes(filter));
 };
