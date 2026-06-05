@@ -73,6 +73,35 @@ export type TranslationSchema = {
     photoCustom: string;
     photoPermissionDenied: string;
     photoCameraPermissionDenied: string;
+    tagsSection: string;
+    cookingConversion: string;
+    cookingFactor: string;
+    cookingConversionPreview: string;
+    filterAll: string;
+  };
+  tags: {
+    starch: string;
+    pasta: string;
+    rice: string;
+    potato: string;
+    semolina: string;
+    couscous: string;
+    quinoa: string;
+    bulgur: string;
+    lentils: string;
+    chickpeas: string;
+    beans: string;
+    bread: string;
+    cereal: string;
+    fruit: string;
+    vegetable: string;
+    protein: string;
+    dairy: string;
+    dessert: string;
+    drink: string;
+    snack: string;
+    sweet: string;
+    other: string;
   };
   meals: {
     title: string;
@@ -111,6 +140,16 @@ export type TranslationSchema = {
     itemLinePortion: string;
     deleteA11y: string;
     goToTodayA11y: string;
+    weighingType: string;
+    weighingRaw: string;
+    weighingCooked: string;
+    quantityCooked: string;
+    quantityRaw: string;
+    rawEquivalent: string;
+    cookedEquivalent: string;
+    itemCount: string;
+    editMealA11y: string;
+    viewDetailsA11y: string;
   };
   settings: {
     title: string;
@@ -137,6 +176,8 @@ export type TranslationSchema = {
     exportSuccess: string;
     importSuccess: string;
     importError: string;
+    cookingConversions: string;
+    cookingConversionsHint: string;
   };
   modal: {
     eanLabel: string;
@@ -269,6 +310,35 @@ export const fr: TranslationSchema = {
     photoCustom: 'Photo personnelle',
     photoPermissionDenied: 'Autorisez l’accès à vos photos pour ajouter une image.',
     photoCameraPermissionDenied: 'Autorisez l’accès à la caméra pour prendre une photo.',
+    tagsSection: 'Tags',
+    cookingConversion: 'Conversion cuisson',
+    cookingFactor: 'Facteur cuisson',
+    cookingConversionPreview: '{{raw}} {{rawUnit}} cru = {{cooked}} {{cookedUnit}} cuit',
+    filterAll: 'Tous',
+  },
+  tags: {
+    starch: 'Féculent',
+    pasta: 'Pâtes',
+    rice: 'Riz',
+    potato: 'Pomme de terre',
+    semolina: 'Semoule',
+    couscous: 'Couscous',
+    quinoa: 'Quinoa',
+    bulgur: 'Boulgour',
+    lentils: 'Lentilles',
+    chickpeas: 'Pois chiches',
+    beans: 'Haricots',
+    bread: 'Pain',
+    cereal: 'Céréales',
+    fruit: 'Fruit',
+    vegetable: 'Légume',
+    protein: 'Protéine',
+    dairy: 'Produit laitier',
+    dessert: 'Dessert',
+    drink: 'Boisson',
+    snack: 'Snack',
+    sweet: 'Sucré',
+    other: 'Autre',
   },
   meals: {
     title: 'Mes repas',
@@ -308,6 +378,16 @@ export const fr: TranslationSchema = {
     itemLinePortion: '{{name}} — {{portion}} ({{carbs}} g)',
     deleteA11y: 'Supprimer le repas',
     goToTodayA11y: "Revenir aux repas du jour",
+    weighingType: 'Type de pesée',
+    weighingRaw: 'Cru',
+    weighingCooked: 'Cuit',
+    quantityCooked: '{{value}} {{unit}} cuits',
+    quantityRaw: '{{value}} {{unit}} crus',
+    rawEquivalent: '≈ {{value}} {{unit}} crus',
+    cookedEquivalent: '≈ {{value}} {{unit}} cuits',
+    itemCount: '{{count}} aliments',
+    editMealA11y: 'Modifier le repas',
+    viewDetailsA11y: 'Voir le détail du repas',
   },
   settings: {
     title: 'Paramètres',
@@ -334,6 +414,8 @@ export const fr: TranslationSchema = {
     exportSuccess: 'Export réussi',
     importSuccess: 'Import réussi',
     importError: 'Import impossible',
+    cookingConversions: 'Conversions de cuisson',
+    cookingConversionsHint: 'Affecte uniquement les futurs repas.',
   },
   tutorial: {
     welcome: {
