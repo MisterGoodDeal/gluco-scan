@@ -1,10 +1,9 @@
-import type { SymbolViewProps } from 'expo-symbols';
-
+import type { FaIconName } from '@/constants/fontAwesome';
 import type { ProductTag } from '@/types/productTag';
 
 export interface ProductTagMetadata {
   tag: ProductTag;
-  icon: SymbolViewProps['name'];
+  icon: FaIconName;
   color: string;
   translationKey: `tags.${ProductTag}`;
 }
@@ -12,133 +11,133 @@ export interface ProductTagMetadata {
 export const PRODUCT_TAGS: ProductTagMetadata[] = [
   {
     tag: 'starch',
-    icon: { ios: 'leaf.fill', android: 'grass' },
+    icon: 'wheat',
     color: '#D4A373',
     translationKey: 'tags.starch',
   },
   {
     tag: 'pasta',
-    icon: { ios: 'fork.knife', android: 'restaurant' },
+    icon: 'plate-wheat',
     color: '#F4A261',
     translationKey: 'tags.pasta',
   },
   {
     tag: 'rice',
-    icon: { ios: 'leaf', android: 'eco' },
+    icon: 'bowl-rice',
     color: '#E9C46A',
     translationKey: 'tags.rice',
   },
   {
     tag: 'potato',
-    icon: { ios: 'carrot.fill', android: 'nutrition' },
+    icon: 'pumpkin',
     color: '#C89F68',
     translationKey: 'tags.potato',
   },
   {
     tag: 'semolina',
-    icon: { ios: 'circle.grid.2x2.fill', android: 'grain' },
+    icon: 'cookie',
     color: '#E7B95A',
     translationKey: 'tags.semolina',
   },
   {
     tag: 'couscous',
-    icon: { ios: 'circle.grid.2x2', android: 'grain' },
+    icon: 'stroopwafel',
     color: '#E7B95A',
     translationKey: 'tags.couscous',
   },
   {
     tag: 'quinoa',
-    icon: { ios: 'circle.grid.3x3.fill', android: 'spa' },
+    icon: 'bowl-food',
     color: '#D9A05B',
     translationKey: 'tags.quinoa',
   },
   {
     tag: 'bulgur',
-    icon: { ios: 'circle.grid.3x3', android: 'spa' },
+    icon: 'bowl-scoop',
     color: '#D6A15C',
     translationKey: 'tags.bulgur',
   },
   {
     tag: 'lentils',
-    icon: { ios: 'circle.fill', android: 'lens' },
+    icon: 'cloud-meatball',
     color: '#8E7C68',
     translationKey: 'tags.lentils',
   },
   {
     tag: 'chickpeas',
-    icon: { ios: 'circle.circle.fill', android: 'adjust' },
+    icon: 'falafel',
     color: '#D9B26F',
     translationKey: 'tags.chickpeas',
   },
   {
     tag: 'beans',
-    icon: { ios: 'oval.fill', android: 'lens' },
+    icon: 'seedling',
     color: '#A66A4C',
     translationKey: 'tags.beans',
   },
   {
     tag: 'bread',
-    icon: { ios: 'square.fill', android: 'bakery_dining' },
+    icon: 'bread-loaf',
     color: '#D4A373',
     translationKey: 'tags.bread',
   },
   {
     tag: 'cereal',
-    icon: { ios: 'square.grid.2x2.fill', android: 'breakfast_dining' },
+    icon: 'jar-wheat',
     color: '#E7B95A',
     translationKey: 'tags.cereal',
   },
   {
     tag: 'fruit',
-    icon: { ios: 'apple.logo', android: 'local_grocery_store' },
+    icon: 'apple-whole',
     color: '#EF476F',
     translationKey: 'tags.fruit',
   },
   {
     tag: 'vegetable',
-    icon: { ios: 'carrot', android: 'eco' },
+    icon: 'carrot',
     color: '#2A9D8F',
     translationKey: 'tags.vegetable',
   },
   {
     tag: 'protein',
-    icon: { ios: 'flame.fill', android: 'local_fire_department' },
+    icon: 'steak',
     color: '#E76F51',
     translationKey: 'tags.protein',
   },
   {
     tag: 'dairy',
-    icon: { ios: 'cup.and.saucer.fill', android: 'local_cafe' },
+    icon: 'cheese-swiss',
     color: '#8ECAE6',
     translationKey: 'tags.dairy',
   },
   {
     tag: 'dessert',
-    icon: { ios: 'birthday.cake.fill', android: 'cake' },
+    icon: 'cake-slice',
     color: '#FF70A6',
     translationKey: 'tags.dessert',
   },
   {
     tag: 'drink',
-    icon: { ios: 'drop.fill', android: 'water_drop' },
+    icon: 'cup-straw-swoosh',
     color: '#219EBC',
     translationKey: 'tags.drink',
   },
   {
     tag: 'snack',
-    icon: { ios: 'takeoutbag.and.cup.and.straw.fill', android: 'fastfood' },
+    icon: 'sandwich',
     color: '#F9844A',
     translationKey: 'tags.snack',
   },
   {
     tag: 'sweet',
-    icon: { ios: 'heart.fill', android: 'favorite' },
+    icon: 'lollipop',
     color: '#FF5D8F',
     translationKey: 'tags.sweet',
   },
   {
     tag: 'other',
-    icon: { ios: 'tag.fill', android: 'label' },
+    icon: 'tag',
     color: '#9CA3AF',
     translationKey: 'tags.other',
   },
