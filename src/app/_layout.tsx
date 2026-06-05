@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { FontProvider } from '@/components/providers/FontProvider';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { DatabaseGate } from '@/components/organisms/DatabaseGate';
 import { TutorialHost } from '@/components/providers/TutorialHost';
@@ -12,7 +13,8 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AppThemeProvider>
+        <FontProvider>
+          <AppThemeProvider>
           <DatabaseGate>
             <BottomSheetModalProvider>
               <TutorialHost>
@@ -31,7 +33,8 @@ export default function RootLayout() {
               </TutorialHost>
             </BottomSheetModalProvider>
           </DatabaseGate>
-        </AppThemeProvider>
+          </AppThemeProvider>
+        </FontProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
