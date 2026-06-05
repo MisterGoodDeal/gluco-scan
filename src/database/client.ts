@@ -1,12 +1,5 @@
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 
-import { migrateFromMmkvIfNeeded } from '@/database/migrateFromMmkv';
-import { migrateSettingsFromMmkvIfNeeded } from '@/database/migrateSettingsFromMmkv';
-import { runMigrations } from '@/database/migrations';
-import { runTutorialRecoveryIfNeeded } from '@/services/tutorial-recovery.service';
-import { hydrateAppPreferences } from '@/store/preferences.store';
-import { useCookingConversionStore } from '@/store/cookingConversion.store';
-
 const DB_NAME = 'glucoscan.db';
 
 let dbInstance: SQLiteDatabase | null = null;
@@ -19,12 +12,8 @@ export const initDatabase = async (): Promise<SQLiteDatabase> => {
   initPromise = (async () => {
     const db = await openDatabaseAsync(DB_NAME);
     dbInstance = db;
-    await runMigrations(db);
-    await runTutorialRecoveryIfNeeded();
-    await migrateFromMmkvIfNeeded(db);
-    await migrateSettingsFromMmkvIfNeeded(db);
-    await hydrateAppPreferences();
-    await useCookingConversionStore.getState().hydrate();
+    const { bootstrapDatabase } = await import('@/database/bootstrap');
+    await bootstrapDatabase(db);
     return db;
   })();
 

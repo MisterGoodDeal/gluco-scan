@@ -2,9 +2,8 @@ import { createMMKV } from 'react-native-mmkv';
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { productEanRepository } from '@/repositories/productEan.repository';
 import { generateId } from '@/utils/id';
-import { isValidEan } from '@/utils/ean';
+import { isValidEan, normalizeEan } from '@/utils/ean';
 
 const CACHE_PREFIX = 'product:';
 const MIGRATION_FLAG = 'migration_v2_done';
@@ -40,7 +39,12 @@ export const migrateFromMmkvIfNeeded = async (db: SQLiteDatabase): Promise<void>
       );
       const ean = legacy.ean?.trim();
       if (ean && isValidEan(ean)) {
-        await productEanRepository.setForProduct(id, [ean]);
+        await db.runAsync(
+          'INSERT INTO product_eans (id, product_id, ean) VALUES (?, ?, ?)',
+          generateId(),
+          id,
+          normalizeEan(ean),
+        );
       }
     } catch {
       continue;
