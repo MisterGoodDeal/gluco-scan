@@ -1,4 +1,5 @@
 import type { AppPreferences } from '@/types/appPreferences';
+import type { CookingConversion } from '@/types/cookingConversion';
 import type { GlobalUnit } from '@/types/globalUnit';
 import type { Meal } from '@/types/meal';
 import type { Product } from '@/types/product';
@@ -14,6 +15,7 @@ export interface ExportPayload {
   products: ExportProduct[];
   meals: Meal[];
   globalUnits: GlobalUnit[];
+  cookingConversions?: CookingConversion[];
   preferences?: AppPreferences;
   metadata?: {
     tutorial?: boolean;

@@ -1,3 +1,4 @@
+import type { ProductTag } from '@/types/productTag';
 import type { ProductUnit } from '@/types/productUnit';
 
 export interface Product {
@@ -6,6 +7,8 @@ export interface Product {
   name: string;
   carbsPer100g: number;
   imageUrl?: string | null;
+  tags: ProductTag[];
+  customCookingFactor?: number | null;
   customUnits: ProductUnit[];
   usageCount?: number;
 }
