@@ -1,0 +1,58 @@
+export const FA_FONT_FAMILY = 'FontAwesomeSolid';
+
+const icon = (codepoint: number): string => String.fromCodePoint(codepoint);
+
+export const FA_ICONS = {
+  'apple-whole': icon(0xf5d1),
+  'arrows-rotate': icon(0xf021),
+  barcode: icon(0xf02a),
+  bone: icon(0xf5d7),
+  'bowl-rice': icon(0xe2eb),
+  'bowl-food': icon(0xe4c6),
+  'bowl-scoop': icon(0xe3de),
+  'bread-slice': icon(0xf7ec),
+  'bread-loaf': icon(0xf7eb),
+  box: icon(0xf466),
+  'cake-slice': icon(0xe3e5),
+  calendar: icon(0xf133),
+  'candy-cane': icon(0xf786),
+  carrot: icon(0xf787),
+  check: icon(0xf00c),
+  cheese: icon(0xf7ef),
+  'cheese-swiss': icon(0xf7f0),
+  'cloud-meatball': icon(0xf73b),
+  cookie: icon(0xf563),
+  'crate-apple': icon(0xf6b1),
+  'cup-straw-swoosh': icon(0xe364),
+  'drumstick-bite': icon(0xf6d7),
+  egg: icon(0xf7fb),
+  falafel: icon(0xe40a),
+  fish: icon(0xf578),
+  gear: icon(0xf013),
+  'grip-lines': icon(0xf7a4),
+  hamburger: icon(0xf805),
+  hotdog: icon(0xf80f),
+  'ice-cream': icon(0xf810),
+  'jar-wheat': icon(0xe517),
+  lemon: icon(0xf094),
+  list: icon(0xf03a),
+  lollipop: icon(0xe424),
+  'magnifying-glass': icon(0xf002),
+  pen: icon(0xf304),
+  'pepper-hot': icon(0xf816),
+  'pizza-slice': icon(0xf818),
+  'plate-wheat': icon(0xe55a),
+  plus: icon(0xf067),
+  pumpkin: icon(0xf707),
+  seedling: icon(0xf4d8),
+  sandwich: icon(0xf81f),
+  steak: icon(0xf824),
+  stroopwafel: icon(0xf551),
+  tag: icon(0xf02b),
+  utensils: icon(0xf2e7),
+  wheat: icon(0xf72d),
+} as const;
+
+export type FaIconName = keyof typeof FA_ICONS;
+
+export const faIconChar = (name: FaIconName): string => FA_ICONS[name];
