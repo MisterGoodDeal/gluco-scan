@@ -165,6 +165,9 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     tutorialStatus === TutorialStatus.RUNNING &&
     tutorialStep === productFormStepIndex;
 
+  const isEditing = product != null;
+  const sheetTitle = isEditing ? t('products.editProduct') : t('products.addProduct');
+
   const create = useProductStore((s) => s.create);
   const update = useProductStore((s) => s.update);
 
@@ -232,6 +235,10 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     }
     onClose();
   }, [markDismissed, onClose, product]);
+
+  const requestDismiss = useCallback(() => {
+    sheetRef.current?.dismiss();
+  }, []);
 
   const applyOffPartial = useCallback((partial: PartialOffProduct) => {
     if (partial.name) setName(partial.name);
@@ -458,7 +465,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         }
       }
       triggerNotificationSuccess();
-      onClose();
+      requestDismiss();
     } catch (err) {
       showError(getErrorMessage(err));
     } finally {
@@ -485,10 +492,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             ...getBottomSheetScrollPadding(insets.bottom, theme.spacing.lg),
           }}>
           <SheetHeader>
-            <Text $variant="subtitle">
-              {product ? t('products.editProduct') : t('products.addProduct')}
-            </Text>
-            <Pressable onPress={handleDismiss} hitSlop={8}>
+            <Text $variant="subtitle">{sheetTitle}</Text>
+            <Pressable onPress={requestDismiss} hitSlop={8}>
               <Text $variant="body" $color="accent">
                 {t('common.cancel')}
               </Text>
@@ -646,7 +651,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           )}
 
           <FooterActions>
-            <ActionButton onPress={handleDismiss} disabled={isSaving}>
+            <ActionButton onPress={requestDismiss} disabled={isSaving}>
               <Text $variant="caption">{t('common.cancel')}</Text>
             </ActionButton>
             <ActionButton $primary onPress={handleSave} disabled={isSaving}>
