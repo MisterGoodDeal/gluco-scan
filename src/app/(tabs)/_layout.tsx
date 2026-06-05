@@ -45,7 +45,7 @@ export default function TabsLayout() {
         listeners={hapticTabListeners}
         options={{
           title: t('tabs.products'),
-          tabBarIcon: ({ color }) => <TabBarIcon name="box" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="basket-shopping" color={color} />,
         }}
       />
       <Tabs.Screen

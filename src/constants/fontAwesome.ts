@@ -6,6 +6,7 @@ export const FA_ICONS = {
   'apple-whole': icon(0xf5d1),
   'arrows-rotate': icon(0xf021),
   barcode: icon(0xf02a),
+  'basket-shopping': icon(0xf291),
   bone: icon(0xf5d7),
   'bowl-rice': icon(0xe2eb),
   'bowl-food': icon(0xe4c6),
