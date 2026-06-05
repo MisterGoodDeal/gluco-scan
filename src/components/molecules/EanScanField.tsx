@@ -5,23 +5,19 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import { ButtonIcon } from '@/components/atoms/ButtonIcon';
-import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
-import { isValidEan } from '@/utils/ean';
-import { primaryButtonStyles } from '@/styles/button';
+import { mutedButtonStyles, primaryButtonStyles } from '@/styles/button';
 import { triggerImpactLight, triggerNotificationError } from '@/utils/haptics';
 
 type EanScanFieldProps = {
-  value?: string;
   onScan: (ean: string) => void;
-  placeholder?: string;
 };
 
-const Row = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
+const ScanButton = styled.Pressable`
+  align-self: flex-start;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  ${mutedButtonStyles}
+  gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const ScannerContainer = styled.View`
@@ -52,11 +48,7 @@ const PermissionButton = styled.Pressable`
   ${primaryButtonStyles}
 `;
 
-export const EanScanField: FC<EanScanFieldProps> = ({
-  value = '',
-  onScan,
-  placeholder,
-}) => {
+export const EanScanField: FC<EanScanFieldProps> = ({ onScan }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
@@ -102,29 +94,22 @@ export const EanScanField: FC<EanScanFieldProps> = ({
 
   return (
     <>
-      <Row>
-        <SearchInput
-          value={value}
-          editable={false}
-          mono
-          flex
-          placeholder={placeholder ?? t('modal.scanPlaceholder')}
-        />
-        <ButtonIcon
-          onPress={handleToggleScan}
-          accessibilityLabel={
-            isScanning ? t('modal.stopScanA11y') : t('modal.scanEanA11y')
-          }>
-          {isScanning ? (
-            <ActivityIndicator color={theme.colors.accent} size="small" />
-          ) : (
-            <FaIcon name="barcode" size={20} color={theme.colors.accent} />
-          )}
-        </ButtonIcon>
-      </Row>
+      <ScanButton
+        onPress={handleToggleScan}
+        accessibilityLabel={isScanning ? t('modal.stopScanA11y') : t('modal.scanEanA11y')}
+        accessibilityRole="button">
+        {isScanning ? (
+          <ActivityIndicator color={theme.colors.accent} size="small" />
+        ) : (
+          <FaIcon name="barcode" size={16} color={theme.colors.accent} />
+        )}
+        <Text $variant="caption" $color="accent">
+          {isScanning ? t('modal.stopScanA11y') : t('modal.scanPlaceholder')}
+        </Text>
+      </ScanButton>
 
       {scanError && (
-        <Text $variant="caption" $color="error">
+        <Text $variant="caption" $color="error" style={{ marginTop: 4 }}>
           {scanError}
         </Text>
       )}

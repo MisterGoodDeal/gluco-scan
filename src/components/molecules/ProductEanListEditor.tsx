@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { EanScanField } from '@/components/molecules/EanScanField';
 import { listRowDivider } from '@/styles/listRow';
-import { mutedButtonStyles } from '@/styles/button';
-import { isValidEan } from '@/utils/ean';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 type ProductEanListEditorProps = {
@@ -26,17 +23,6 @@ const EanRow = styled.View<{ $isLast?: boolean }>`
   ${listRowDivider}
 `;
 
-const ManualRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const AddManualButton = styled.Pressable`
-  ${mutedButtonStyles}
-`;
-
 export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
   eans,
   onChange,
@@ -44,47 +30,22 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const [manualEan, setManualEan] = useState('');
-  const [manualError, setManualError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const removeEan = (ean: string) => {
     onChange(eans.filter((e) => e !== ean));
   };
 
-  const addEan = (raw: string) => {
-    const trimmed = raw.trim();
-    if (!trimmed) return false;
-    if (!isValidEan(trimmed)) {
-      setManualError(t('modal.invalidEan'));
-      triggerNotificationError();
-      return false;
-    }
-    if (eans.includes(trimmed)) {
-      setManualError(t('products.duplicateEan'));
-      triggerNotificationError();
-      return false;
-    }
-    onChange([...eans, trimmed]);
-    setManualError(null);
-    triggerNotificationSuccess();
-    return true;
-  };
-
-  const handleManualAdd = () => {
-    if (addEan(manualEan)) {
-      setManualEan('');
-    }
-  };
-
   const handleScan = (ean: string) => {
     if (eans.includes(ean)) {
-      setManualError(t('products.duplicateEan'));
+      setError(t('products.duplicateEan'));
       triggerNotificationError();
       return;
     }
-    setManualError(null);
+    setError(null);
     onChange([...eans, ean]);
     onScan(ean);
+    triggerNotificationSuccess();
   };
 
   return (
@@ -108,28 +69,9 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
 
       <EanScanField onScan={handleScan} />
 
-      <ManualRow>
-        <SearchInput
-          value={manualEan}
-          onChangeText={(text) => {
-            setManualEan(text);
-            setManualError(null);
-          }}
-          placeholder={t('modal.scanPlaceholder')}
-          mono
-          flex
-          keyboardType="number-pad"
-        />
-        <AddManualButton onPress={handleManualAdd} accessibilityLabel={t('products.addEan')}>
-          <Text $variant="caption" $color="accent">
-            {t('common.add')}
-          </Text>
-        </AddManualButton>
-      </ManualRow>
-
-      {manualError && (
+      {error && (
         <Text $variant="caption" $color="error" style={{ marginTop: 4 }}>
-          {manualError}
+          {error}
         </Text>
       )}
     </>
