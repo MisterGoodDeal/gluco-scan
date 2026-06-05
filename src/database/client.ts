@@ -5,6 +5,7 @@ import { migrateSettingsFromMmkvIfNeeded } from '@/database/migrateSettingsFromM
 import { runMigrations } from '@/database/migrations';
 import { runTutorialRecoveryIfNeeded } from '@/services/tutorial-recovery.service';
 import { hydrateAppPreferences } from '@/store/preferences.store';
+import { useCookingConversionStore } from '@/store/cookingConversion.store';
 
 const DB_NAME = 'glucoscan.db';
 
@@ -17,12 +18,13 @@ export const initDatabase = async (): Promise<SQLiteDatabase> => {
 
   initPromise = (async () => {
     const db = await openDatabaseAsync(DB_NAME);
-    await runMigrations(db);
     dbInstance = db;
+    await runMigrations(db);
     await runTutorialRecoveryIfNeeded();
     await migrateFromMmkvIfNeeded(db);
     await migrateSettingsFromMmkvIfNeeded(db);
     await hydrateAppPreferences();
+    await useCookingConversionStore.getState().hydrate();
     return db;
   })();
 
