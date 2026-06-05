@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -85,11 +85,7 @@ export const TagPickerSheet: FC<TagPickerSheetProps> = ({
                       </TagLabel>
                       {selected ? (
                         <View pointerEvents="none">
-                          <SymbolView
-                            name={{ ios: 'checkmark', android: 'check' }}
-                            size={18}
-                            tintColor={theme.colors.accent}
-                          />
+                          <FaIcon name="check" size={18} color={theme.colors.accent} />
                         </View>
                       ) : null}
                     </TagRow>

@@ -45,12 +45,7 @@ export default function TabsLayout() {
         listeners={hapticTabListeners}
         options={{
           title: t('tabs.products'),
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon
-              name={{ ios: 'shippingbox', android: 'inventory_2' }}
-              color={color}
-            />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="box" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -58,9 +53,7 @@ export default function TabsLayout() {
         listeners={hapticTabListeners}
         options={{
           title: t('tabs.meals'),
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name={{ ios: 'fork.knife', android: 'restaurant' }} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="utensils" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -68,9 +61,7 @@ export default function TabsLayout() {
         listeners={hapticTabListeners}
         options={{
           title: t('tabs.settings'),
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name={{ ios: 'gearshape', android: 'settings' }} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
         }}
       />
     </Tabs>

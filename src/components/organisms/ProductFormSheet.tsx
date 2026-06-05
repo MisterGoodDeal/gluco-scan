@@ -4,7 +4,7 @@ import {
   BottomSheetScrollView,
   type BottomSheetModal as BottomSheetModalType,
 } from '@gorhom/bottom-sheet';
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable } from 'react-native';
@@ -537,12 +537,10 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                 {isLookupLoading ? (
                   <ActivityIndicator color={theme.colors.accent} size="small" />
                 ) : (
-                  <SymbolView
-                    name={{ ios: 'arrow.clockwise', android: 'refresh' }}
+                  <FaIcon
+                    name="arrows-rotate"
                     size={18}
-                    tintColor={
-                      canRefreshFromOff ? theme.colors.accent : theme.colors.textSecondary
-                    }
+                    color={canRefreshFromOff ? theme.colors.accent : theme.colors.textSecondary}
                   />
                 )}
               </ButtonIcon>

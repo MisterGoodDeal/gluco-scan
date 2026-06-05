@@ -1,13 +1,15 @@
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { type FC } from 'react';
 import { type ColorValue } from 'react-native';
 
+import { FaIcon } from '@/components/atoms/FaIcon';
+import type { FaIconName } from '@/constants/fontAwesome';
+
 type TabBarIconProps = {
-  name: SymbolViewProps['name'];
+  name: FaIconName;
   color: ColorValue;
   size?: number;
 };
 
 export const TabBarIcon: FC<TabBarIconProps> = ({ name, color, size = 22 }) => (
-  <SymbolView name={name} size={size} tintColor={color} />
+  <FaIcon name={name} size={size} color={color} />
 );

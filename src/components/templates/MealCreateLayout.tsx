@@ -1,4 +1,4 @@
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -349,11 +349,7 @@ export const MealCreateLayout: FC = () => {
             <SearchTrigger
               onPress={() => setSearchVisible(true)}
               accessibilityLabel={t('meals.searchProduct')}>
-              <SymbolView
-                name="magnifyingglass"
-                size={18}
-                tintColor={theme.colors.textSecondary}
-              />
+              <FaIcon name="magnifying-glass" size={18} color={theme.colors.textSecondary} />
               <Text $variant="body" $color="textSecondary" style={{ flex: 1 }}>
                 {t('meals.searchSpotlightPlaceholder')}
               </Text>

@@ -1,5 +1,5 @@
 import { BlurTargetView } from 'expo-blur';
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { useFocusEffect } from 'expo-router';
 import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -176,13 +176,10 @@ export const ProductsTabLayout: FC = () => {
                 compactList ? t('products.compactListOnA11y') : t('products.compactListOffA11y')
               }
               accessibilityState={{ selected: compactList }}>
-              <SymbolView
-                name={{
-                  ios: compactList ? 'rectangle.expand.vertical' : 'rectangle.compress.vertical',
-                  android: compactList ? 'view_agenda' : 'view_compact',
-                }}
+              <FaIcon
+                name={compactList ? 'grip-lines' : 'list'}
                 size={20}
-                tintColor={compactList ? theme.colors.accent : theme.colors.textSecondary}
+                color={compactList ? theme.colors.accent : theme.colors.textSecondary}
               />
             </ButtonIcon>
           </SearchRow>

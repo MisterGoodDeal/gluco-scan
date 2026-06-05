@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -131,11 +131,7 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
           <Overlay>
             <SearchBarWrap>
             <SearchRow>
-              <SymbolView
-                name="magnifyingglass"
-                size={20}
-                tintColor={theme.colors.textSecondary}
-              />
+              <FaIcon name="magnifying-glass" size={20} color={theme.colors.textSecondary} />
               <View style={{ flex: 1 }}>
                 <SearchInput
                   value={query}
@@ -152,13 +148,10 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                   compactList ? t('products.compactListOnA11y') : t('products.compactListOffA11y')
                 }
                 accessibilityState={{ selected: compactList }}>
-                <SymbolView
-                  name={{
-                    ios: compactList ? 'rectangle.expand.vertical' : 'rectangle.compress.vertical',
-                    android: compactList ? 'view_agenda' : 'view_compact',
-                  }}
+                <FaIcon
+                  name={compactList ? 'grip-lines' : 'list'}
                   size={18}
-                  tintColor={compactList ? theme.colors.accent : theme.colors.textSecondary}
+                  color={compactList ? theme.colors.accent : theme.colors.textSecondary}
                 />
               </ButtonIcon>
               <Pressable onPress={onClose} hitSlop={8}>

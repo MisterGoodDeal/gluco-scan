@@ -1,5 +1,5 @@
 import { BlurTargetView } from 'expo-blur';
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { router, useFocusEffect } from 'expo-router';
 import { type FC, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -123,10 +123,10 @@ export const MealsTabLayout: FC = () => {
               <ButtonIcon
                 onPress={handleGoToToday}
                 accessibilityLabel={t('meals.goToTodayA11y')}>
-                <SymbolView
-                  name={{ ios: 'calendar', android: 'calendar_today' }}
+                <FaIcon
+                  name="calendar"
                   size={20}
-                  tintColor={
+                  color={
                     selectedDate === todayKey ? theme.colors.accent : theme.colors.textSecondary
                   }
                 />
@@ -137,11 +137,7 @@ export const MealsTabLayout: FC = () => {
                   router.push('/meal/create');
                 }}
                 accessibilityLabel={t('meals.addMeal')}>
-                <SymbolView
-                  name={{ ios: 'plus', android: 'add' }}
-                  size={22}
-                  tintColor={theme.colors.accent}
-                />
+                <FaIcon name="plus" size={22} color={theme.colors.accent} />
               </ButtonIcon>
             </HeaderActions>
           </TitleRow>

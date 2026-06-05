@@ -1,5 +1,5 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { type FC, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
@@ -119,11 +119,7 @@ export const EanScanField: FC<EanScanFieldProps> = ({
           {isScanning ? (
             <ActivityIndicator color={theme.colors.accent} size="small" />
           ) : (
-            <SymbolView
-              name={{ ios: 'barcode.viewfinder', android: 'barcode_scanner' }}
-              size={20}
-              tintColor={theme.colors.accent}
-            />
+            <FaIcon name="barcode" size={20} color={theme.colors.accent} />
           )}
         </ButtonIcon>
       </Row>

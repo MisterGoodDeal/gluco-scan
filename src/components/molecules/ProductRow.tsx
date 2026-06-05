@@ -1,4 +1,4 @@
-import { SymbolView } from 'expo-symbols';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { memo, type FC, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
@@ -81,11 +81,7 @@ export const ProductRow: FC<ProductRowProps> = memo(
                 onPress={() => onEdit(product)}
                 accessibilityLabel={t('products.editA11y')}>
                 <View pointerEvents="none">
-                  <SymbolView
-                    name={{ ios: 'pencil', android: 'edit' }}
-                    size={16}
-                    tintColor={theme.colors.textSecondary}
-                  />
+                  <FaIcon name="pen" size={16} color={theme.colors.textSecondary} />
                 </View>
               </ButtonIcon>
               <ButtonIcon
@@ -130,11 +126,7 @@ export const ProductRow: FC<ProductRowProps> = memo(
               onPress={() => onEdit(product)}
               accessibilityLabel={t('products.editA11y')}>
               <View pointerEvents="none">
-                <SymbolView
-                  name={{ ios: 'pencil', android: 'edit' }}
-                  size={18}
-                  tintColor={theme.colors.textSecondary}
-                />
+                <FaIcon name="pen" size={18} color={theme.colors.textSecondary} />
               </View>
             </ButtonIcon>
             <ButtonIcon
