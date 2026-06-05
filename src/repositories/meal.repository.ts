@@ -1,10 +1,14 @@
 import { getDatabase } from '@/database/client';
+import { cookingConversionRepository } from '@/repositories/cookingConversion.repository';
 import { globalUnitRepository } from '@/repositories/globalUnit.repository';
 import { productRepository } from '@/repositories/product.repository';
 import type { Meal } from '@/types/meal';
-import type { MealItem } from '@/types/mealItem';
+import type { MealItem, MealItemQuantityType } from '@/types/mealItem';
 import type { MealType } from '@/types/mealType';
-import { computeMealItemCarbs, sumCarbs } from '@/utils/carbs';
+import {
+  computeMealItemCarbsWithCooking,
+  sumCarbs,
+} from '@/utils/carbs';
 import { generateId } from '@/utils/id';
 
 type MealRow = {
@@ -22,32 +26,44 @@ type MealItemRow = {
   quantity: number;
   unit_type: string;
   unit_id: string | null;
+  quantity_type: string;
+  raw_equivalent_quantity: number | null;
+  carbs: number | null;
 };
 
 const mapMealItemRow = async (
   row: MealItemRow,
   globalUnits: Awaited<ReturnType<typeof globalUnitRepository.getAll>>,
+  userConversions: Awaited<ReturnType<typeof cookingConversionRepository.getAll>>,
 ): Promise<MealItem> => {
   const product = await productRepository.getById(row.product_id);
   const unitType = row.unit_type as MealItem['unitType'];
+  const quantityType = row.quantity_type as MealItemQuantityType;
   let unitLabel = 'g';
   if (unitType === 'custom' && row.unit_id && product) {
     const pu = product.customUnits.find((u) => u.id === row.unit_id);
     const gu = globalUnits.find((u) => u.id === row.unit_id);
     unitLabel = pu?.abbreviation ?? gu?.abbreviation ?? '';
   }
-  const carbs =
-    product != null
-      ? computeMealItemCarbs(
-          {
-            quantity: row.quantity,
-            unitType,
-            unitId: row.unit_id ?? undefined,
-          },
-          product,
-          globalUnits,
-        )
-      : 0;
+
+  let carbs = row.carbs ?? undefined;
+  let rawEquivalentQuantity = row.raw_equivalent_quantity ?? undefined;
+
+  if (carbs == null && product != null) {
+    const computed = computeMealItemCarbsWithCooking(
+      {
+        quantity: row.quantity,
+        unitType,
+        unitId: row.unit_id ?? undefined,
+        quantityType,
+      },
+      product,
+      globalUnits,
+      userConversions,
+    );
+    carbs = computed.carbs;
+    rawEquivalentQuantity = computed.rawEquivalentQuantity;
+  }
 
   return {
     id: row.id,
@@ -55,23 +71,28 @@ const mapMealItemRow = async (
     quantity: row.quantity,
     unitType,
     unitId: row.unit_id ?? undefined,
+    quantityType,
+    rawEquivalentQuantity,
     productName: product?.name,
     imageUrl: product?.imageUrl ?? null,
-    carbs,
+    carbs: carbs ?? 0,
     unitLabel,
   };
 };
 
 const loadMealWithItems = async (row: MealRow): Promise<Meal> => {
   const db = getDatabase();
-  const globalUnits = await globalUnitRepository.getAll();
+  const [globalUnits, userConversions] = await Promise.all([
+    globalUnitRepository.getAll(),
+    cookingConversionRepository.getAll(),
+  ]);
   const itemRows = await db.getAllAsync<MealItemRow>(
     'SELECT * FROM meal_items WHERE meal_id = ?',
     row.id,
   );
   const items: MealItem[] = [];
   for (const itemRow of itemRows) {
-    items.push(await mapMealItemRow(itemRow, globalUnits));
+    items.push(await mapMealItemRow(itemRow, globalUnits, userConversions));
   }
   return {
     id: row.id,
@@ -122,18 +143,39 @@ export const mealRepository = {
 
   async createWithItems(input: CreateMealInput): Promise<Meal> {
     const db = getDatabase();
-    const globalUnits = await globalUnitRepository.getAll();
+    const [globalUnits, userConversions] = await Promise.all([
+      globalUnitRepository.getAll(),
+      cookingConversionRepository.getAll(),
+    ]);
     const mealId = generateId();
 
-    const itemCarbs: number[] = [];
+    const computedItems: Array<{
+      item: Omit<MealItem, 'id'>;
+      carbs: number;
+      rawEquivalentQuantity: number;
+      quantityType: MealItemQuantityType;
+    }> = [];
+
     for (const item of input.items) {
       const product = await productRepository.getById(item.productId);
       if (!product) continue;
-      itemCarbs.push(
-        computeMealItemCarbs(item, product, globalUnits),
-      );
+
+      const result =
+        item.carbs != null && item.rawEquivalentQuantity != null
+          ? {
+              carbs: item.carbs,
+              rawEquivalentQuantity: item.rawEquivalentQuantity,
+              quantityType: item.quantityType ?? 'raw',
+            }
+          : computeMealItemCarbsWithCooking(item, product, globalUnits, userConversions);
+
+      computedItems.push({
+        item,
+        ...result,
+      });
     }
-    const totalCarbs = sumCarbs(itemCarbs);
+
+    const totalCarbs = sumCarbs(computedItems.map((entry) => entry.carbs));
 
     await db.withTransactionAsync(async () => {
       await db.runAsync(
@@ -146,16 +188,19 @@ export const mealRepository = {
         totalCarbs,
       );
 
-      for (const item of input.items) {
+      for (const { item, carbs, rawEquivalentQuantity, quantityType } of computedItems) {
         await db.runAsync(
-          `INSERT INTO meal_items (id, meal_id, product_id, quantity, unit_type, unit_id)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO meal_items (id, meal_id, product_id, quantity, unit_type, unit_id, quantity_type, raw_equivalent_quantity, carbs)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           generateId(),
           mealId,
           item.productId,
           item.quantity,
           item.unitType,
           item.unitId ?? null,
+          quantityType,
+          rawEquivalentQuantity,
+          carbs,
         );
       }
     });
@@ -167,15 +212,38 @@ export const mealRepository = {
 
   async updateWithItems(mealId: string, input: CreateMealInput): Promise<Meal> {
     const db = getDatabase();
-    const globalUnits = await globalUnitRepository.getAll();
+    const [globalUnits, userConversions] = await Promise.all([
+      globalUnitRepository.getAll(),
+      cookingConversionRepository.getAll(),
+    ]);
 
-    const itemCarbs: number[] = [];
+    const computedItems: Array<{
+      item: Omit<MealItem, 'id'>;
+      carbs: number;
+      rawEquivalentQuantity: number;
+      quantityType: MealItemQuantityType;
+    }> = [];
+
     for (const item of input.items) {
       const product = await productRepository.getById(item.productId);
       if (!product) continue;
-      itemCarbs.push(computeMealItemCarbs(item, product, globalUnits));
+
+      const result =
+        item.carbs != null && item.rawEquivalentQuantity != null
+          ? {
+              carbs: item.carbs,
+              rawEquivalentQuantity: item.rawEquivalentQuantity,
+              quantityType: item.quantityType ?? 'raw',
+            }
+          : computeMealItemCarbsWithCooking(item, product, globalUnits, userConversions);
+
+      computedItems.push({
+        item,
+        ...result,
+      });
     }
-    const totalCarbs = sumCarbs(itemCarbs);
+
+    const totalCarbs = sumCarbs(computedItems.map((entry) => entry.carbs));
 
     await db.withTransactionAsync(async () => {
       await db.runAsync(
@@ -188,16 +256,19 @@ export const mealRepository = {
       );
       await db.runAsync('DELETE FROM meal_items WHERE meal_id = ?', mealId);
 
-      for (const item of input.items) {
+      for (const { item, carbs, rawEquivalentQuantity, quantityType } of computedItems) {
         await db.runAsync(
-          `INSERT INTO meal_items (id, meal_id, product_id, quantity, unit_type, unit_id)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO meal_items (id, meal_id, product_id, quantity, unit_type, unit_id, quantity_type, raw_equivalent_quantity, carbs)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           generateId(),
           mealId,
           item.productId,
           item.quantity,
           item.unitType,
           item.unitId ?? null,
+          quantityType,
+          rawEquivalentQuantity,
+          carbs,
         );
       }
     });
