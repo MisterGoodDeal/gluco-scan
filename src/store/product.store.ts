@@ -6,6 +6,7 @@ import type { Product } from '@/types/product';
 import type { ProductTagFilter } from '@/constants/product-tag-filters';
 import type { ProductTag } from '@/types/productTag';
 import { productMatchesQuery } from '@/utils/productSearch';
+import { productMatchesTagFilter } from '@/utils/productTagFilter';
 
 const storage = createMMKV({ id: 'glucoscan-settings' });
 const COMPACT_LIST_KEY = 'products_compact_list';
@@ -64,10 +65,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   setTagFilter: (tagFilter) => set({ tagFilter }),
 
   getFiltered: () => {
-    const { products, query } = get();
+    const { products, query, tagFilter } = get();
     const trimmed = query.trim().toLowerCase();
-    if (!trimmed) return products;
-    return products.filter((p) => productMatchesQuery(p, trimmed));
+    return products.filter((product) => {
+      const matchesQuery = !trimmed || productMatchesQuery(product, trimmed);
+      const matchesTag = productMatchesTagFilter(product, tagFilter);
+      return matchesQuery && matchesTag;
+    });
   },
 
   create: async (data) => {

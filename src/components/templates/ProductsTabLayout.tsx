@@ -1,7 +1,7 @@
 import { BlurTargetView } from 'expo-blur';
 import { SymbolView } from 'expo-symbols';
 import { useFocusEffect } from 'expo-router';
-import { type FC, useCallback, useEffect, useRef, useState } from 'react';
+import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
@@ -63,20 +63,21 @@ export const ProductsTabLayout: FC = () => {
   const hydrate = useProductStore((s) => s.hydrate);
   const isLoading = useProductStore((s) => s.isLoading);
   const query = useProductStore((s) => s.query);
+  const products = useProductStore((s) => s.products);
+  const tagFilter = useProductStore((s) => s.tagFilter);
   const setQuery = useProductStore((s) => s.setQuery);
+  const setTagFilter = useProductStore((s) => s.setTagFilter);
   const compactList = useProductStore((s) => s.compactList);
   const toggleCompactList = useProductStore((s) => s.toggleCompactList);
   const remove = useProductStore((s) => s.remove);
-  const filteredProducts = useProductStore((s) => {
-    const trimmed = s.query.trim().toLowerCase();
-    return s.products.filter((product) => {
+  const filteredProducts = useMemo(() => {
+    const trimmed = query.trim().toLowerCase();
+    return products.filter((product) => {
       const matchesQuery = !trimmed || productMatchesQuery(product, trimmed);
-      const matchesTag = productMatchesTagFilter(product, s.tagFilter);
+      const matchesTag = productMatchesTagFilter(product, tagFilter);
       return matchesQuery && matchesTag;
     });
-  });
-  const tagFilter = useProductStore((s) => s.tagFilter);
-  const setTagFilter = useProductStore((s) => s.setTagFilter);
+  }, [products, query, tagFilter]);
 
   const tutorialStatus = useTutorialStore((s) => s.status);
   const openProductId = useTutorialStore((s) => s.openProductId);
