@@ -74,6 +74,7 @@ export type TranslationSchema = {
     photoPermissionDenied: string;
     photoCameraPermissionDenied: string;
     tagsSection: string;
+    tagsPlaceholder: string;
     cookingConversion: string;
     cookingFactor: string;
     cookingConversionPreview: string;
@@ -311,6 +312,7 @@ export const fr: TranslationSchema = {
     photoPermissionDenied: 'Autorisez l’accès à vos photos pour ajouter une image.',
     photoCameraPermissionDenied: 'Autorisez l’accès à la caméra pour prendre une photo.',
     tagsSection: 'Tags',
+    tagsPlaceholder: 'Sélectionner des tags',
     cookingConversion: 'Conversion cuisson',
     cookingFactor: 'Facteur cuisson',
     cookingConversionPreview: '{{raw}} {{rawUnit}} cru = {{cooked}} {{cookedUnit}} cuit',

@@ -76,6 +76,7 @@ export const en: TranslationSchema = {
     photoPermissionDenied: 'Allow photo library access to add an image.',
     photoCameraPermissionDenied: 'Allow camera access to take a photo.',
     tagsSection: 'Tags',
+    tagsPlaceholder: 'Select tags',
     cookingConversion: 'Cooking conversion',
     cookingFactor: 'Cooking factor',
     cookingConversionPreview: '{{raw}} {{rawUnit}} raw = {{cooked}} {{cookedUnit}} cooked',

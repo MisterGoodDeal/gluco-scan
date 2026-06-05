@@ -15,7 +15,7 @@ import { SearchInput } from '@/components/atoms/SearchInput';
 import { Text } from '@/components/atoms/Text';
 import { ProductEanListEditor } from '@/components/molecules/ProductEanListEditor';
 import { ProductUnitFormModal } from '@/components/organisms/ProductUnitFormModal';
-import { TagSelector } from '@/components/molecules/TagSelector';
+import { ProductTagPicker } from '@/components/molecules/ProductTagPicker';
 import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
@@ -553,7 +553,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             <Text $variant="caption" $color="textSecondary">
               {t('products.tagsSection')}
             </Text>
-            <TagSelector
+            <ProductTagPicker
               value={tags}
               onChange={(nextTags) => {
                 setTagsTouched(true);
