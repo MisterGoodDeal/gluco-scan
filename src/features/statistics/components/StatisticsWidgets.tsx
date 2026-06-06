@@ -128,8 +128,9 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, onHeatmap
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}>
         <VerticalBarChart
+          fillWidth
           data={stats.averageCarbsByMealType.map((entry) => ({
-            label: t(getMealTypeLabelKey(entry.type)).slice(0, 3),
+            label: t(getMealTypeLabelKey(entry.type)),
             value: entry.averageCarbs,
           }))}
         />
