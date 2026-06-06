@@ -285,6 +285,8 @@ export type TranslationSchema = {
     };
     heatmap: {
       dayTotal: string;
+      less: string;
+      more: string;
     };
     records: {
       highestMealLabel: string;
@@ -622,6 +624,8 @@ export const fr: TranslationSchema = {
     },
     heatmap: {
       dayTotal: 'Total : {{value}} g glucides',
+      less: 'Moins',
+      more: 'Plus',
     },
     records: {
       highestMealLabel: 'Repas le plus glucidique :',

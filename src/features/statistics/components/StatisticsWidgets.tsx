@@ -194,7 +194,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
 
       <StatisticsWidgetCard
         title={t('statistics.widgets.heatmap')}
-        empty={stats.heatmapDays.length === 0}
+        empty={!stats.heatmapDays.some((day) => day.carbs > 0)}
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}>
         <ContributionHeatmap values={stats.heatmapDays} onDayPress={onHeatmapDayPress} />

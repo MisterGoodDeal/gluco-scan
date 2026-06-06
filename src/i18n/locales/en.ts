@@ -307,6 +307,8 @@ export const en: TranslationSchema = {
     },
     heatmap: {
       dayTotal: 'Total: {{value}} g carbs',
+      less: 'Less',
+      more: 'More',
     },
     records: {
       highestMealLabel: 'Highest carb meal:',
