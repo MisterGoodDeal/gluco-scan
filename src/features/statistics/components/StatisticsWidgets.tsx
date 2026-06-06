@@ -205,7 +205,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, onHeatmap
         <Text $variant="title" $color="accent">
           {stats.consistency.score}%
         </Text>
-        <Text $variant="caption" $color="textSecondary">
+        <Text $variant="caption" $color="textSecondary" style={{ fontStyle: 'italic' }}>
           {t('statistics.consistency.description')}
         </Text>
       </StatisticsWidgetCard>
