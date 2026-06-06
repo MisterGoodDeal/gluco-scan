@@ -26,6 +26,7 @@ import { productMatchesQuery } from '@/utils/productSearch';
 import { productMatchesTagFilters } from '@/utils/productTagFilter';
 import { Screen } from '@/styles/global';
 import { mutedButtonStyles } from '@/styles/button';
+import { consumePendingAddProduct } from '@/features/widgets/deepLink/pendingAction';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 const TitleRow = styled.View`
@@ -111,6 +112,10 @@ export const ProductsTabLayout: FC = () => {
   useFocusEffect(
     useCallback(() => {
       void loadProducts();
+      if (consumePendingAddProduct()) {
+        setEditingProduct(null);
+        setIsModalOpen(true);
+      }
     }, [loadProducts]),
   );
 

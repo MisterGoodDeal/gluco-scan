@@ -8,6 +8,7 @@ import { FontProvider } from '@/components/providers/FontProvider';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { DatabaseGate } from '@/components/organisms/DatabaseGate';
 import { TutorialHost } from '@/components/providers/TutorialHost';
+import { WidgetBootstrap } from '@/features/widgets/components/WidgetBootstrap';
 
 export default function RootLayout() {
   return (
@@ -18,6 +19,7 @@ export default function RootLayout() {
           <DatabaseGate>
             <BottomSheetModalProvider>
               <TutorialHost>
+              <WidgetBootstrap />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="(tabs)" />
