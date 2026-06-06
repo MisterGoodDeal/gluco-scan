@@ -18,6 +18,7 @@ export const FA_ICONS = {
   calendar: icon(0xf133),
   'candy-cane': icon(0xf786),
   carrot: icon(0xf787),
+  'chart-line': icon(0xf201),
   check: icon(0xf00c),
   cheese: icon(0xf7ef),
   'cheese-swiss': icon(0xf7f0),

@@ -57,6 +57,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="statistics"
+        listeners={hapticTabListeners}
+        options={{
+          title: t('tabs.statistics'),
+          tabBarIcon: ({ color }) => <TabBarIcon name="chart-line" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         listeners={hapticTabListeners}
         options={{
