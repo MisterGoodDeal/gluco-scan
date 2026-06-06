@@ -7,31 +7,85 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02B24B54476446EE826E68AD /* Attributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A89CA1F787C4211BA92F02F /* Attributes.swift */; };
+		06BEEDB4579144EAB73C7A2C /* CarbWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2009F19836534B78B3263805 /* CarbWidget.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		1FD4B0DF83C2CC21415FB9F5 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6829D1154648D381AA8F3C69 /* ExpoModulesProvider.swift */; };
+		24896D8A46AA4C63931D0D39 /* WidgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC5FAD5A96F48BB8CFD1620 /* WidgetModels.swift */; };
+		2649121841914C04A825AD59 /* CarbWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 760A352718DF48058F3542FF /* CarbWidgetView.swift */; };
+		A1B2C3D4E5F6478990ABCDE1 /* WidgetL10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A748990ABCDEF1 /* WidgetL10n.swift */; };
+		3574F53AC1164134BEC5DF7F /* fa-solid-900.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8E60A5E6EFBE44EE9A566446 /* fa-solid-900.ttf */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
+		44473D48B42E4656BE3D14BB /* GlucoScanWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 89DCD37B944747CCAE15DE4A /* GlucoScanWidgets.appex */; };
+		580CD741C40E4AA0A3B85304 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C8AEF56EDBEF433EBC677FC6 /* Assets.xcassets */; };
+		76F96FE8A51B48C4B0462FBD /* CarbWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7DAC8EC341A4471B21C8A7B /* CarbWidgetBundle.swift */; };
 		823F54CCBD3823591BDE1EA5 /* libPods-glucoscan.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2516A5978030A846A188CBC4 /* libPods-glucoscan.a */; };
 		84DEBA0D6BC541FCB18E6E64 /* expo.icon in Resources */ = {isa = PBXBuildFile; fileRef = 435F1E06E731428D8C568960 /* expo.icon */; };
+		91E8BB311B4C4D959F591C91 /* WidgetStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101C635030A8477481E417E8 /* WidgetStorage.swift */; };
+		9A963145D31D64D3464EF004 /* libPods-GlucoScanWidgets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0624DB6F46327E2A065FDFF7 /* libPods-GlucoScanWidgets.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		EE4F6DC0627A442CAB359F7B /* CarbWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF88B7FAE220420A8CBA53C1 /* CarbWidgetProvider.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 		FCA37EEEC1B3E770B397F934 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 47CDC2C625AAF52AA5E73DA3 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		A6F02811B3A240658960D99D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F8E136381EFD425BA433E957;
+			remoteInfo = GlucoScanWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		92835291FB7545018A873449 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				44473D48B42E4656BE3D14BB /* GlucoScanWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		13B07F961A680F5B00A75B9A /* glucoscan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = glucoscan.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0624DB6F46327E2A065FDFF7 /* libPods-GlucoScanWidgets.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GlucoScanWidgets.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0AC5FAD5A96F48BB8CFD1620 /* WidgetModels.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = WidgetModels.swift; sourceTree = "<group>"; };
+		101C635030A8477481E417E8 /* WidgetStorage.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = WidgetStorage.swift; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* GlucoScan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GlucoScan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = glucoscan/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = glucoscan/Info.plist; sourceTree = "<group>"; };
+		2009F19836534B78B3263805 /* CarbWidget.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = CarbWidget.swift; sourceTree = "<group>"; };
 		2516A5978030A846A188CBC4 /* libPods-glucoscan.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-glucoscan.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		435F1E06E731428D8C568960 /* expo.icon */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = expo.icon; path = glucoscan/expo.icon; sourceTree = "<group>"; };
 		47CDC2C625AAF52AA5E73DA3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = glucoscan/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6829D1154648D381AA8F3C69 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-glucoscan/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		6DD6B04CBEE04D859F7790E9 /* Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		760A352718DF48058F3542FF /* CarbWidgetView.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = CarbWidgetView.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6A748990ABCDEF1 /* WidgetL10n.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = WidgetL10n.swift; sourceTree = "<group>"; };
+		8480BE3E7EC24D68803AEC47 /* GlucoScanWidgets.entitlements */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; path = GlucoScanWidgets.entitlements; sourceTree = "<group>"; };
+		89DCD37B944747CCAE15DE4A /* GlucoScanWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; fileEncoding = 9; includeInIndex = 0; path = GlucoScanWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A89CA1F787C4211BA92F02F /* Attributes.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = Attributes.swift; sourceTree = "<group>"; };
 		8E2BEDD4D33DA515A68ECDB4 /* Pods-glucoscan.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-glucoscan.debug.xcconfig"; path = "Target Support Files/Pods-glucoscan/Pods-glucoscan.debug.xcconfig"; sourceTree = "<group>"; };
+		8E60A5E6EFBE44EE9A566446 /* fa-solid-900.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "fa-solid-900.ttf"; path = "../assets/fonts/fa-solid-900.ttf"; sourceTree = "<group>"; };
+		99B459EE67FE42F6BDAAAF0B /* WidgetKit.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = glucoscan/SplashScreen.storyboard; sourceTree = "<group>"; };
+		B0C9250C722FB5E7DEFB070A /* Pods-GlucoScanWidgets.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GlucoScanWidgets.release.xcconfig"; path = "Target Support Files/Pods-GlucoScanWidgets/Pods-GlucoScanWidgets.release.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		C7DAC8EC341A4471B21C8A7B /* CarbWidgetBundle.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = CarbWidgetBundle.swift; sourceTree = "<group>"; };
+		C8AEF56EDBEF433EBC677FC6 /* Assets.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CA9A133CBA87259BE55731BD /* Pods-GlucoScanWidgets.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GlucoScanWidgets.debug.xcconfig"; path = "Target Support Files/Pods-GlucoScanWidgets/Pods-GlucoScanWidgets.debug.xcconfig"; sourceTree = "<group>"; };
 		D04F93D02CC1652E1511DB0E /* Pods-glucoscan.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-glucoscan.release.xcconfig"; path = "Target Support Files/Pods-glucoscan/Pods-glucoscan.release.xcconfig"; sourceTree = "<group>"; };
+		E504C477A21345358EAFA5AB /* SwiftUI.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = glucoscan/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* glucoscan-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "glucoscan-Bridging-Header.h"; path = "glucoscan/glucoscan-Bridging-Header.h"; sourceTree = "<group>"; };
+		FF88B7FAE220420A8CBA53C1 /* CarbWidgetProvider.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = CarbWidgetProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +94,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				823F54CCBD3823591BDE1EA5 /* libPods-glucoscan.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E5200C0E94C543D4B984547A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9A963145D31D64D3464EF004 /* libPods-GlucoScanWidgets.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,11 +123,32 @@
 			name = glucoscan;
 			sourceTree = "<group>";
 		};
+		29E2811DD0A148238CFB8A4F /* GlucoScanWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				8A89CA1F787C4211BA92F02F /* Attributes.swift */,
+				2009F19836534B78B3263805 /* CarbWidget.swift */,
+				C7DAC8EC341A4471B21C8A7B /* CarbWidgetBundle.swift */,
+				FF88B7FAE220420A8CBA53C1 /* CarbWidgetProvider.swift */,
+				760A352718DF48058F3542FF /* CarbWidgetView.swift */,
+				0AC5FAD5A96F48BB8CFD1620 /* WidgetModels.swift */,
+				101C635030A8477481E417E8 /* WidgetStorage.swift */,
+				B2C3D4E5F6A748990ABCDEF1 /* WidgetL10n.swift */,
+				6DD6B04CBEE04D859F7790E9 /* Info.plist */,
+				C8AEF56EDBEF433EBC677FC6 /* Assets.xcassets */,
+				8480BE3E7EC24D68803AEC47 /* GlucoScanWidgets.entitlements */,
+			);
+			path = GlucoScanWidgets;
+			sourceTree = "<group>";
+		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				2516A5978030A846A188CBC4 /* libPods-glucoscan.a */,
+				99B459EE67FE42F6BDAAAF0B /* WidgetKit.framework */,
+				E504C477A21345358EAFA5AB /* SwiftUI.framework */,
+				0624DB6F46327E2A065FDFF7 /* libPods-GlucoScanWidgets.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -94,6 +177,8 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D76E052A2B2DB647CED03F8E /* Pods */,
 				7060ABEC6FDD5CAE3690AD95 /* ExpoModulesProviders */,
+				29E2811DD0A148238CFB8A4F /* GlucoScanWidgets */,
+				AB81508BE16E4F94880E4A45 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -103,7 +188,8 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* glucoscan.app */,
+				13B07F961A680F5B00A75B9A /* GlucoScan.app */,
+				89DCD37B944747CCAE15DE4A /* GlucoScanWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -114,6 +200,14 @@
 				6829D1154648D381AA8F3C69 /* ExpoModulesProvider.swift */,
 			);
 			name = glucoscan;
+			sourceTree = "<group>";
+		};
+		AB81508BE16E4F94880E4A45 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8E60A5E6EFBE44EE9A566446 /* fa-solid-900.ttf */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -130,6 +224,8 @@
 			children = (
 				8E2BEDD4D33DA515A68ECDB4 /* Pods-glucoscan.debug.xcconfig */,
 				D04F93D02CC1652E1511DB0E /* Pods-glucoscan.release.xcconfig */,
+				CA9A133CBA87259BE55731BD /* Pods-GlucoScanWidgets.debug.xcconfig */,
+				B0C9250C722FB5E7DEFB070A /* Pods-GlucoScanWidgets.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -149,15 +245,35 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				7C7BA4625EF30EEC2545522D /* [CP] Embed Pods Frameworks */,
 				E9A2DD1B1A72007313E0CFF3 /* [CP] Copy Pods Resources */,
+				92835291FB7545018A873449 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E87B02A34E4D4C2896CF7A74 /* PBXTargetDependency */,
+			);
+			name = glucoscan;
+			productName = glucoscan;
+			productReference = 13B07F961A680F5B00A75B9A /* GlucoScan.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F8E136381EFD425BA433E957 /* GlucoScanWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7C86581DFD6F41DD8F8166B2 /* Build configuration list for PBXNativeTarget "GlucoScanWidgets" */;
+			buildPhases = (
+				35EFDE5CC542C09194BAB119 /* [CP] Check Pods Manifest.lock */,
+				9E5B2CD70DAF4A1BB5C63F6F /* Sources */,
+				E5200C0E94C543D4B984547A /* Frameworks */,
+				94A84A7E7B214F508B1EAAC0 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = glucoscan;
-			productName = glucoscan;
-			productReference = 13B07F961A680F5B00A75B9A /* glucoscan.app */;
-			productType = "com.apple.product-type.application";
+			name = GlucoScanWidgets;
+			productName = GlucoScanWidgets;
+			productReference = 89DCD37B944747CCAE15DE4A /* GlucoScanWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -170,6 +286,9 @@
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
 					};
+					F8E136381EFD425BA433E957 = {
+						LastSwiftMigration = 1250;
+					};
 				};
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "glucoscan" */;
@@ -178,6 +297,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				fr,
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
@@ -186,6 +306,7 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* glucoscan */,
+				F8E136381EFD425BA433E957 /* GlucoScanWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -200,6 +321,15 @@
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				84DEBA0D6BC541FCB18E6E64 /* expo.icon in Resources */,
 				FCA37EEEC1B3E770B397F934 /* PrivacyInfo.xcprivacy in Resources */,
+				3574F53AC1164134BEC5DF7F /* fa-solid-900.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94A84A7E7B214F508B1EAAC0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				580CD741C40E4AA0A3B85304 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +376,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-glucoscan/expo-configure-project.sh\"\n";
+		};
+		35EFDE5CC542C09194BAB119 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GlucoScanWidgets-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
 		};
 		7C7BA4625EF30EEC2545522D /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -369,7 +521,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9E5B2CD70DAF4A1BB5C63F6F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				02B24B54476446EE826E68AD /* Attributes.swift in Sources */,
+				06BEEDB4579144EAB73C7A2C /* CarbWidget.swift in Sources */,
+				76F96FE8A51B48C4B0462FBD /* CarbWidgetBundle.swift in Sources */,
+				EE4F6DC0627A442CAB359F7B /* CarbWidgetProvider.swift in Sources */,
+				2649121841914C04A825AD59 /* CarbWidgetView.swift in Sources */,
+				24896D8A46AA4C63931D0D39 /* WidgetModels.swift in Sources */,
+				91E8BB311B4C4D959F591C91 /* WidgetStorage.swift in Sources */,
+				A1B2C3D4E5F6478990ABCDE1 /* WidgetL10n.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E87B02A34E4D4C2896CF7A74 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F8E136381EFD425BA433E957 /* GlucoScanWidgets */;
+			targetProxy = A6F02811B3A240658960D99D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
@@ -451,6 +626,50 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
+		};
+		4FAD5BAD0D1D44369D3E6345 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B0C9250C722FB5E7DEFB070A /* Pods-GlucoScanWidgets.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GlucoScanWidgets/GlucoScanWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GC4RN35B82;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GlucoScanWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GlucoScanWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0.0;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mistergooddeal.glucoscan.GlucoScanWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7FB43986A41C497C8320AB78 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CA9A133CBA87259BE55731BD /* Pods-GlucoScanWidgets.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GlucoScanWidgets/GlucoScanWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GC4RN35B82;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GlucoScanWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GlucoScanWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0.0;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mistergooddeal.glucoscan.GlucoScanWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -594,6 +813,15 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7C86581DFD6F41DD8F8166B2 /* Build configuration list for PBXNativeTarget "GlucoScanWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7FB43986A41C497C8320AB78 /* Debug */,
+				4FAD5BAD0D1D44369D3E6345 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
