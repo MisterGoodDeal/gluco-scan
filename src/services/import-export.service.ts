@@ -20,6 +20,7 @@ import {
 } from '@/services/productImage.service';
 import { normalizeExportProduct } from '@/utils/exportProduct';
 import { computeMealItemCarbsWithCooking } from '@/utils/carbs';
+import { flushWidgetSync } from '@/features/widgets/services/widgetSync.service';
 
 export const EXPORT_VERSION = 5;
 const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3, 4, 5] as const;
@@ -288,6 +289,7 @@ export const importPayload = async (
   }
 
   await useCookingConversionStore.getState().hydrate();
+  await flushWidgetSync();
 };
 
 export const importFromGsBytes = async (

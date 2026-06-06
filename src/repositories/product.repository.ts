@@ -6,6 +6,7 @@ import type { ProductTag } from '@/types/productTag';
 import { deleteLocalProductImage, isLocalProductImage } from '@/services/productImage.service';
 import { generateId } from '@/utils/id';
 import { productMatchesQuery } from '@/utils/productSearch';
+import { scheduleWidgetSync } from '@/features/widgets/services/widgetSync.service';
 
 type ProductRow = {
   id: string;
@@ -124,6 +125,7 @@ export const productRepository = {
     await productEanRepository.setForProduct(id, data.eans ?? []);
     const product = await this.getById(id);
     if (!product) throw new Error('Failed to create product');
+    scheduleWidgetSync();
     return product;
   },
 
@@ -150,6 +152,7 @@ export const productRepository = {
     await productEanRepository.setForProduct(product.id, product.eans);
     const updated = await this.getById(product.id);
     if (!updated) throw new Error('Failed to update product');
+    scheduleWidgetSync();
     return updated;
   },
 
@@ -160,6 +163,7 @@ export const productRepository = {
     }
     const db = getDatabase();
     await db.runAsync('DELETE FROM products WHERE id = ?', id);
+    scheduleWidgetSync();
   },
 
   async getUsageCount(id: string): Promise<number> {

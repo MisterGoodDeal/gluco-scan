@@ -10,6 +10,7 @@ import {
   sumCarbs,
 } from '@/utils/carbs';
 import { generateId } from '@/utils/id';
+import { scheduleWidgetSync } from '@/features/widgets/services/widgetSync.service';
 
 type MealRow = {
   id: string;
@@ -207,6 +208,7 @@ export const mealRepository = {
 
     const meal = await this.getById(mealId);
     if (!meal) throw new Error('Failed to create meal');
+    scheduleWidgetSync();
     return meal;
   },
 
@@ -275,12 +277,14 @@ export const mealRepository = {
 
     const meal = await this.getById(mealId);
     if (!meal) throw new Error('Failed to update meal');
+    scheduleWidgetSync();
     return meal;
   },
 
   async delete(id: string): Promise<void> {
     const db = getDatabase();
     await db.runAsync('DELETE FROM meals WHERE id = ?', id);
+    scheduleWidgetSync();
   },
 
   async getAllForExport(): Promise<Meal[]> {

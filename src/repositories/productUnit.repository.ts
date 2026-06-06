@@ -1,6 +1,7 @@
 import { getDatabase } from '@/database/client';
 import type { ProductUnit } from '@/types/productUnit';
 import { generateId } from '@/utils/id';
+import { scheduleWidgetSync } from '@/features/widgets/services/widgetSync.service';
 
 type ProductUnitRow = {
   id: string;
@@ -42,6 +43,7 @@ export const productUnitRepository = {
       unit.name,
       unit.equivalentInGrams,
     );
+    scheduleWidgetSync();
     return unit;
   },
 
@@ -56,10 +58,12 @@ export const productUnitRepository = {
       unit.id,
       productId,
     );
+    scheduleWidgetSync();
   },
 
   async delete(id: string): Promise<void> {
     const db = getDatabase();
     await db.runAsync('DELETE FROM product_units WHERE id = ?', id);
+    scheduleWidgetSync();
   },
 };

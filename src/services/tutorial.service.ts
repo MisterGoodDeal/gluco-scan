@@ -11,6 +11,7 @@ import { useProductStore } from '@/store/product.store';
 import { hydrateAppPreferences } from '@/store/preferences.store';
 import { useSettingsStore } from '@/store/settings.store';
 import { tutorialMmkv } from '@/utils/tutorialMmkv';
+import { flushWidgetSync } from '@/features/widgets/services/widgetSync.service';
 
 export const hydrateAllStores = async (): Promise<void> => {
   await Promise.all([
@@ -68,6 +69,9 @@ export const endTutorialSession = async (markSeen: boolean): Promise<void> => {
       tutorialMmkv.setHasSeenTutorial(true);
     }
     await hydrateAllStores();
+    if (markSeen) {
+      await flushWidgetSync();
+    }
   } catch (error) {
     await safeRestoreFromBackup();
     throw error;
