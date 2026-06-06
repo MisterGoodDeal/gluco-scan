@@ -287,10 +287,10 @@ export type TranslationSchema = {
       dayTotal: string;
     };
     records: {
-      highestMeal: string;
-      highestDay: string;
-      mostProduct: string;
-      mostCategory: string;
+      highestMealLabel: string;
+      highestDayLabel: string;
+      mostProductLabel: string;
+      mostCategoryLabel: string;
     };
     productDetail: {
       title: string;
@@ -624,10 +624,10 @@ export const fr: TranslationSchema = {
       dayTotal: 'Total : {{value}} g glucides',
     },
     records: {
-      highestMeal: 'Repas le plus glucidique : {{value}} g',
-      highestDay: 'Jour le plus glucidique : {{value}} g',
-      mostProduct: 'Produit le plus consommé : {{name}}',
-      mostCategory: 'Catégorie la plus consommée : {{name}}',
+      highestMealLabel: 'Repas le plus glucidique :',
+      highestDayLabel: 'Jour le plus glucidique :',
+      mostProductLabel: 'Produit le plus consommé :',
+      mostCategoryLabel: 'Catégorie la plus consommée :',
     },
     productDetail: {
       title: 'Statistiques',

@@ -26,6 +26,15 @@ const ListRow = styled.View`
   border-bottom-color: ${({ theme }) => theme.colors.glass.border};
 `;
 
+const RecordLine: FC<{ label: string; value: string }> = ({ label, value }) => (
+  <Text $variant="body">
+    {label}{' '}
+    <Text $variant="body" style={{ fontWeight: '700' }}>
+      {value}
+    </Text>
+  </Text>
+);
+
 const emptyCopy = {
   title: 'statistics.empty.title',
   description: 'statistics.empty.description',
@@ -223,28 +232,26 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, onHeatmap
         emptyDescription={emptyDescription}>
         {stats.records.highestCarbMeal ? (
           <>
-            <Text $variant="body">
-              {t('statistics.records.highestMeal', {
-                value: formatDecimal(stats.records.highestCarbMeal.carbs),
-              })}
-            </Text>
-            <Text $variant="body">
-              {t('statistics.records.highestDay', {
-                value: formatDecimal(stats.records.highestCarbDay?.carbs ?? 0),
-              })}
-            </Text>
-            <Text $variant="body">
-              {t('statistics.records.mostProduct', {
-                name: stats.records.mostConsumedProduct?.name ?? '—',
-              })}
-            </Text>
-            <Text $variant="body">
-              {t('statistics.records.mostCategory', {
-                name: stats.records.mostConsumedCategory
+            <RecordLine
+              label={t('statistics.records.highestMealLabel')}
+              value={`${formatDecimal(stats.records.highestCarbMeal.carbs)} g`}
+            />
+            <RecordLine
+              label={t('statistics.records.highestDayLabel')}
+              value={`${formatDecimal(stats.records.highestCarbDay?.carbs ?? 0)} g`}
+            />
+            <RecordLine
+              label={t('statistics.records.mostProductLabel')}
+              value={stats.records.mostConsumedProduct?.name ?? '—'}
+            />
+            <RecordLine
+              label={t('statistics.records.mostCategoryLabel')}
+              value={
+                stats.records.mostConsumedCategory
                   ? t(`tags.${stats.records.mostConsumedCategory.tag}`)
-                  : '—',
-              })}
-            </Text>
+                  : '—'
+              }
+            />
           </>
         ) : null}
       </StatisticsWidgetCard>

@@ -309,10 +309,10 @@ export const en: TranslationSchema = {
       dayTotal: 'Total: {{value}} g carbs',
     },
     records: {
-      highestMeal: 'Highest carb meal: {{value}} g',
-      highestDay: 'Highest carb day: {{value}} g',
-      mostProduct: 'Most consumed product: {{name}}',
-      mostCategory: 'Most consumed category: {{name}}',
+      highestMealLabel: 'Highest carb meal:',
+      highestDayLabel: 'Highest carb day:',
+      mostProductLabel: 'Most consumed product:',
+      mostCategoryLabel: 'Most consumed category:',
     },
     productDetail: {
       title: 'Statistics',
