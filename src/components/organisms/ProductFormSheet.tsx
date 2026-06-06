@@ -56,6 +56,7 @@ import { hasCookingConversion } from '@/utils/cooking/hasCookingConversion';
 import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import { generateId } from '@/utils/id';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
+import { ProductStatisticsSection } from '@/features/statistics/components/ProductStatisticsSection';
 
 type ProductFormSheetProps = {
   visible: boolean;
@@ -643,6 +644,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
               ))
             )}
           </UnitsSection>
+
+          {product?.id ? <ProductStatisticsSection productId={product.id} /> : null}
 
           {error && (
             <Text $variant="caption" $color="error" style={{ marginTop: 8 }}>

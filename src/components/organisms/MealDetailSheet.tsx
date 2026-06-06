@@ -23,6 +23,7 @@ import { listRowDivider } from '@/styles/listRow';
 import { mutedButtonStyles } from '@/styles/button';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { productRepository } from '@/repositories/product.repository';
+import { MealStatisticsSection } from '@/features/statistics/components/MealStatisticsSection';
 import type { Product } from '@/types/product';
 
 type MealDetailSheetProps = {
@@ -126,6 +127,7 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
           <Text $variant="title" $color="accent" style={{ marginTop: 16 }}>
             {t('meals.mealTotal')}: {formatDecimal(meal.totalCarbs)} g
           </Text>
+          <MealStatisticsSection meal={meal} productsById={productsById} />
           <EditButton
             onPress={() => {
               onClose();
