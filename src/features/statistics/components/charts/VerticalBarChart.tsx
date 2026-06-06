@@ -14,23 +14,26 @@ export type VerticalBarChartPoint = {
 type VerticalBarChartProps = {
   data: VerticalBarChartPoint[];
   height?: number;
+  fillWidth?: boolean;
 };
 
-const ChartArea = styled.View<{ $height: number }>`
+const ChartArea = styled.View<{ $height: number; $fillWidth?: boolean }>`
   height: ${({ $height }) => $height}px;
   flex-direction: row;
   align-items: flex-end;
-  gap: ${({ theme }) => theme.spacing.xs}px;
+  gap: ${({ theme, $fillWidth }) => ($fillWidth ? theme.spacing.sm : theme.spacing.xs)}px;
+  ${({ $fillWidth }) => ($fillWidth ? 'width: 100%;' : '')}
 `;
 
-const BarColumn = styled.View`
+const BarColumn = styled.View<{ $fillWidth?: boolean }>`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.xs}px;
-  min-width: 28px;
+  min-width: ${({ $fillWidth }) => ($fillWidth ? 0 : 28)}px;
+  ${({ $fillWidth }) => ($fillWidth ? 'flex: 1;' : '')}
 `;
 
-const BarTrack = styled.View<{ $height: number }>`
-  width: 20px;
+const BarTrack = styled.View<{ $height: number; $fillWidth?: boolean }>`
+  width: ${({ $fillWidth }) => ($fillWidth ? '100%' : '20px')};
   height: ${({ $height }) => $height}px;
   justify-content: flex-end;
   border-radius: ${({ theme }) => theme.radius.sm}px;
@@ -45,32 +48,42 @@ const BarFill = styled.View<{ $fillHeight: number }>`
   border-radius: ${({ theme }) => theme.radius.sm}px;
 `;
 
-export const VerticalBarChart: FC<VerticalBarChartProps> = ({ data, height = 160 }) => {
+export const VerticalBarChart: FC<VerticalBarChartProps> = ({
+  data,
+  height = 160,
+  fillWidth = false,
+}) => {
   const maxValue = getMaxValue(data.map((point) => point.value));
   const trackHeight = height - 24;
 
+  const chart = (
+    <ChartArea $height={height} $fillWidth={fillWidth}>
+      {data.map((point) => {
+        const fillHeight = maxValue > 0 ? (point.value / maxValue) * trackHeight : 0;
+        return (
+          <BarColumn key={`${point.label}-${point.value}`} $fillWidth={fillWidth}>
+            <BarTrack $height={trackHeight} $fillWidth={fillWidth}>
+              <BarFill $fillHeight={Math.max(fillHeight, point.value > 0 ? 4 : 0)} />
+            </BarTrack>
+            <Text $variant="caption" $color="textSecondary" style={{ fontSize: 10, textAlign: 'center' }}>
+              {point.label}
+            </Text>
+            {point.value > 0 ? (
+              <Text $variant="caption" $color="accent" style={{ fontSize: 9 }}>
+                {formatDecimal(point.value)}
+              </Text>
+            ) : null}
+          </BarColumn>
+        );
+      })}
+    </ChartArea>
+  );
+
+  if (fillWidth) return chart;
+
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <ChartArea $height={height}>
-        {data.map((point) => {
-          const fillHeight = maxValue > 0 ? (point.value / maxValue) * trackHeight : 0;
-          return (
-            <BarColumn key={`${point.label}-${point.value}`}>
-              <BarTrack $height={trackHeight}>
-                <BarFill $fillHeight={Math.max(fillHeight, point.value > 0 ? 4 : 0)} />
-              </BarTrack>
-              <Text $variant="caption" $color="textSecondary" style={{ fontSize: 10 }}>
-                {point.label}
-              </Text>
-              {point.value > 0 ? (
-                <Text $variant="caption" $color="accent" style={{ fontSize: 9 }}>
-                  {formatDecimal(point.value)}
-                </Text>
-              ) : null}
-            </BarColumn>
-          );
-        })}
-      </ChartArea>
+      {chart}
     </ScrollView>
   );
 };
