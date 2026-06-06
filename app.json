@@ -10,6 +10,11 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.mistergooddeal.glucoscan",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.mistergooddeal.glucoscan"
+        ]
+      },
       "infoPlist": {
         "NSCameraUsageDescription": "GlucoScan a besoin de la caméra pour scanner les codes-barres alimentaires.",
         "ITSAppUsesNonExemptEncryption": false
@@ -57,6 +62,14 @@
           "photosPermission": "GlucoScan accède à vos photos pour ajouter une image à vos produits.",
           "cameraPermission": "GlucoScan a besoin de la caméra pour photographier vos produits.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "react-native-widget-extension",
+        {
+          "widgetsFolder": "ios/CarbWidgetExtension",
+          "groupIdentifier": "group.com.mistergooddeal.glucoscan",
+          "deploymentTarget": "16.2"
         }
       ]
     ],
