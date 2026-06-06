@@ -1,9 +1,11 @@
-import { type FC } from 'react';
-import { ScrollView } from 'react-native';
+import { type FC, useMemo } from 'react';
 import styled from 'styled-components/native';
 
 import { Text } from '@/components/atoms/Text';
-import { getMaxValue } from '@/features/statistics/components/charts/chartUtils';
+import {
+  aggregateBarChartPoints,
+  getChartMaxValue,
+} from '@/features/statistics/components/charts/chartUtils';
 import { formatDecimal } from '@/utils/format';
 
 export type VerticalBarChartPoint = {
@@ -14,26 +16,28 @@ export type VerticalBarChartPoint = {
 type VerticalBarChartProps = {
   data: VerticalBarChartPoint[];
   height?: number;
-  fillWidth?: boolean;
+  maxBars?: number;
 };
 
-const ChartArea = styled.View<{ $height: number; $fillWidth?: boolean }>`
+const ChartArea = styled.View<{ $height: number }>`
+  width: 100%;
   height: ${({ $height }) => $height}px;
   flex-direction: row;
   align-items: flex-end;
-  gap: ${({ theme, $fillWidth }) => ($fillWidth ? theme.spacing.sm : theme.spacing.xs)}px;
-  ${({ $fillWidth }) => ($fillWidth ? 'width: 100%;' : '')}
+  gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-const BarColumn = styled.View<{ $fillWidth?: boolean }>`
+const BarColumn = styled.View`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.xs}px;
-  min-width: ${({ $fillWidth }) => ($fillWidth ? 0 : 28)}px;
-  ${({ $fillWidth }) => ($fillWidth ? 'flex: 1;' : '')}
+  flex: 1;
+  min-width: 0;
 `;
 
-const BarTrack = styled.View<{ $height: number; $fillWidth?: boolean }>`
-  width: ${({ $fillWidth }) => ($fillWidth ? '100%' : '20px')};
+const BarTrack = styled.View<{ $height: number }>`
+  width: 100%;
+  max-width: 32px;
+  align-self: center;
   height: ${({ $height }) => $height}px;
   justify-content: flex-end;
   border-radius: ${({ theme }) => theme.radius.sm}px;
@@ -48,24 +52,30 @@ const BarFill = styled.View<{ $fillHeight: number }>`
   border-radius: ${({ theme }) => theme.radius.sm}px;
 `;
 
-export const VerticalBarChart: FC<VerticalBarChartProps> = ({
-  data,
-  height = 160,
-  fillWidth = false,
-}) => {
-  const maxValue = getMaxValue(data.map((point) => point.value));
+export const VerticalBarChart: FC<VerticalBarChartProps> = ({ data, height = 160, maxBars }) => {
+  const chartData = useMemo(() => {
+    if (maxBars == null) return data;
+    return aggregateBarChartPoints(data, maxBars);
+  }, [data, maxBars]);
+  const maxValue = getChartMaxValue(chartData.map((point) => point.value));
   const trackHeight = height - 24;
+  const compact = chartData.length > 10;
 
-  const chart = (
-    <ChartArea $height={height} $fillWidth={fillWidth}>
-      {data.map((point) => {
+  return (
+    <ChartArea $height={height}>
+      {chartData.map((point, index) => {
         const fillHeight = maxValue > 0 ? (point.value / maxValue) * trackHeight : 0;
+
         return (
-          <BarColumn key={`${point.label}-${point.value}`} $fillWidth={fillWidth}>
-            <BarTrack $height={trackHeight} $fillWidth={fillWidth}>
+          <BarColumn key={`${point.label}-${index}`}>
+            <BarTrack $height={trackHeight}>
               <BarFill $fillHeight={Math.max(fillHeight, point.value > 0 ? 4 : 0)} />
             </BarTrack>
-            <Text $variant="caption" $color="textSecondary" style={{ fontSize: 10, textAlign: 'center' }}>
+            <Text
+              $variant="caption"
+              $color="textSecondary"
+              numberOfLines={2}
+              style={{ fontSize: compact ? 9 : 10, textAlign: 'center', width: '100%' }}>
               {point.label}
             </Text>
             {point.value > 0 ? (
@@ -77,13 +87,5 @@ export const VerticalBarChart: FC<VerticalBarChartProps> = ({
         );
       })}
     </ChartArea>
-  );
-
-  if (fillWidth) return chart;
-
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      {chart}
-    </ScrollView>
   );
 };

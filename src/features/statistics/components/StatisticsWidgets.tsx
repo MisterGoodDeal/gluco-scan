@@ -10,6 +10,8 @@ import { PieChart } from '@/features/statistics/components/charts/PieChart';
 import { VerticalBarChart } from '@/features/statistics/components/charts/VerticalBarChart';
 import { StatisticsWidgetCard } from '@/features/statistics/components/StatisticsWidgetCard';
 import type { ComputedStatistics } from '@/features/statistics/services/statisticsCompute.service';
+import { getDailyBarChartMaxBars } from '@/features/statistics/components/charts/chartUtils';
+import type { StatisticsPeriod } from '@/features/statistics/types/statisticsPeriod';
 import { formatDecimal } from '@/utils/format';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { formatDateLabel } from '@/utils/date';
@@ -17,6 +19,7 @@ import { getCurrentLocale } from '@/i18n';
 
 type StatisticsWidgetsProps = {
   stats: ComputedStatistics;
+  period: StatisticsPeriod;
   onHeatmapDayPress?: (date: string, carbs: number) => void;
 };
 
@@ -40,7 +43,7 @@ const emptyCopy = {
   description: 'statistics.empty.description',
 } as const;
 
-export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, onHeatmapDayPress }) => {
+export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, onHeatmapDayPress }) => {
   const { t } = useTranslation();
   const locale = getCurrentLocale();
   const emptyTitle = t(emptyCopy.title);
@@ -54,6 +57,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, onHeatmap
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}>
         <VerticalBarChart
+          maxBars={getDailyBarChartMaxBars(period)}
           data={stats.dailyCarbs.map((point) => ({ label: point.label, value: point.carbs }))}
         />
       </StatisticsWidgetCard>
@@ -137,7 +141,6 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, onHeatmap
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}>
         <VerticalBarChart
-          fillWidth
           data={stats.averageCarbsByMealType.map((entry) => ({
             label: t(getMealTypeLabelKey(entry.type)),
             value: entry.averageCarbs,

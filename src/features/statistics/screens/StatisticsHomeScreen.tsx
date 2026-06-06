@@ -71,6 +71,7 @@ export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInse
               <StatisticsSummaryCards summary={stats.summary} />
               <StatisticsWidgets
                 stats={stats}
+                period={period}
                 onHeatmapDayPress={(date, carbs) => setSelectedHeatmapDay({ date, carbs })}
               />
             </>
