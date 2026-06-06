@@ -2,6 +2,7 @@ export type TranslationSchema = {
   tabs: {
     products: string;
     meals: string;
+    statistics: string;
     settings: string;
   };
   common: {
@@ -234,12 +235,90 @@ export type TranslationSchema = {
       finish: { title: string; message: string };
     };
   };
+  statistics: {
+    title: string;
+    period: {
+      '7d': string;
+      '30d': string;
+      '90d': string;
+      '1y': string;
+      all: string;
+    };
+    summary: {
+      totalCarbs: string;
+      averagePerDay: string;
+      day: string;
+      mealCount: string;
+      productCount: string;
+      mostConsumedProduct: string;
+    };
+    empty: {
+      title: string;
+      description: string;
+    };
+    widgets: {
+      dailyCarbs: string;
+      trend: string;
+      byMealType: string;
+      byCategory: string;
+      topProducts: string;
+      topCarbs: string;
+      starchBreakdown: string;
+      mealDistribution: string;
+      cookedVsRaw: string;
+      favoriteMeals: string;
+      mostConsumedTags: string;
+      heatmap: string;
+      consistency: string;
+      bestDays: string;
+      records: string;
+    };
+    cookedRaw: {
+      raw: string;
+      cooked: string;
+    };
+    favoriteMeals: {
+      line: string;
+    };
+    consistency: {
+      description: string;
+    };
+    heatmap: {
+      dayTotal: string;
+    };
+    records: {
+      highestMeal: string;
+      highestDay: string;
+      mostProduct: string;
+      mostCategory: string;
+    };
+    productDetail: {
+      title: string;
+      timesConsumed: string;
+      lastConsumed: string;
+      totalCarbs: string;
+      averagePortion: string;
+      averageCookedPortion: string;
+      averageRawPortion: string;
+      favoriteMealType: string;
+      never: string;
+    };
+    mealDetail: {
+      title: string;
+      dayPercentage: string;
+      equivalentRaw: string;
+      equivalentCooked: string;
+      tags: string;
+      mostCarbRich: string;
+    };
+  };
 };
 
 export const fr: TranslationSchema = {
   tabs: {
     products: 'Produits',
     meals: 'Repas',
+    statistics: 'Statistiques',
     settings: 'Réglages',
   },
   common: {
@@ -492,5 +571,82 @@ export const fr: TranslationSchema = {
     offRateLimit:
       'Limite Open Food Facts atteinte (15/min). Attendez {{seconds}}s avant de rescanner.',
     generic: 'Une erreur est survenue',
+  },
+  statistics: {
+    title: 'Statistiques',
+    period: {
+      '7d': '7 jours',
+      '30d': '30 jours',
+      '90d': '90 jours',
+      '1y': '1 an',
+      all: 'Tout',
+    },
+    summary: {
+      totalCarbs: 'Total glucides',
+      averagePerDay: 'Moyenne / jour',
+      day: 'jour',
+      mealCount: 'Nombre de repas',
+      productCount: 'Produits consommés',
+      mostConsumedProduct: 'Produit le plus consommé',
+    },
+    empty: {
+      title: 'Aucun repas enregistré',
+      description: 'Enregistrez vos repas pour voir vos statistiques.',
+    },
+    widgets: {
+      dailyCarbs: 'Glucides journaliers',
+      trend: 'Tendance des glucides',
+      byMealType: 'Glucides par type de repas',
+      byCategory: 'Glucides par catégorie',
+      topProducts: 'Produits les plus consommés',
+      topCarbs: 'Produits les plus glucidiques',
+      starchBreakdown: 'Répartition des féculents',
+      mealDistribution: 'Répartition dans la journée',
+      cookedVsRaw: 'Cru vs cuit',
+      favoriteMeals: 'Repas favoris',
+      mostConsumedTags: 'Tags les plus consommés',
+      heatmap: 'Calendrier des glucides',
+      consistency: 'Score de régularité',
+      bestDays: 'Meilleurs jours',
+      records: 'Records',
+    },
+    cookedRaw: {
+      raw: 'Cru',
+      cooked: 'Cuit',
+    },
+    favoriteMeals: {
+      line: '{{count}} fois · moy. {{average}} g',
+    },
+    consistency: {
+      description: 'Mesure la régularité de votre apport quotidien en glucides.',
+    },
+    heatmap: {
+      dayTotal: 'Total : {{value}} g glucides',
+    },
+    records: {
+      highestMeal: 'Repas le plus glucidique : {{value}} g',
+      highestDay: 'Jour le plus glucidique : {{value}} g',
+      mostProduct: 'Produit le plus consommé : {{name}}',
+      mostCategory: 'Catégorie la plus consommée : {{name}}',
+    },
+    productDetail: {
+      title: 'Statistiques',
+      timesConsumed: 'Fois consommé',
+      lastConsumed: 'Dernière consommation',
+      totalCarbs: 'Total glucides générés',
+      averagePortion: 'Portion moyenne',
+      averageCookedPortion: 'Portion cuite moyenne',
+      averageRawPortion: 'Portion crue moyenne',
+      favoriteMealType: 'Type de repas favori',
+      never: 'Jamais',
+    },
+    mealDetail: {
+      title: 'Statistiques',
+      dayPercentage: 'Part du jour',
+      equivalentRaw: 'Équivalent cru',
+      equivalentCooked: 'Équivalent cuit',
+      tags: 'Tags impliqués',
+      mostCarbRich: 'Produit le plus glucidique',
+    },
   },
 };
