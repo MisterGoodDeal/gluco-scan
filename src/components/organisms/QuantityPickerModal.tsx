@@ -1,11 +1,10 @@
-import { Dialog, Switch } from 'heroui-native';
+import { Dialog, Switch, Tabs } from 'heroui-native';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { AppButton } from '@/components/ui/AppButton';
-import { AppChip } from '@/components/ui/AppChip';
 import { useSettingsStore } from '@/store/settings.store';
 import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import type { MealDraftItem } from '@/store/meal.store';
@@ -55,6 +54,10 @@ type UnitOption = {
   equivalentInGrams: number;
   unitType: 'grams' | 'custom';
 };
+
+const getUnitTabValue = (opt: UnitOption): string => `${opt.unitType}-${opt.id}`;
+
+const UNIT_TABS_SCROLL_THRESHOLD = 4;
 
 export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   visible,
@@ -214,75 +217,103 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
               <Dialog.Description>{t('meals.selectQuantity')}</Dialog.Description>
             </View>
 
-            <View className="flex-row flex-wrap justify-center gap-1.5">
-              {unitOptions.map((opt) => {
-                const selected =
-                  activeUnit?.id === opt.id && activeUnit?.unitType === opt.unitType;
-                return (
-                  <AppChip
-                    key={`${opt.unitType}-${opt.id}`}
-                    size="sm"
-                    variant={selected ? 'soft' : 'tertiary'}
-                    color={selected ? 'accent' : 'default'}
-                    label={opt.abbreviation}
-                    onPress={() => setSelectedUnit(opt)}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                  />
-                );
-              })}
-            </View>
+            {activeUnit ? (
+              <Tabs
+                value={getUnitTabValue(activeUnit)}
+                onValueChange={(value) => {
+                  const opt = unitOptions.find((o) => getUnitTabValue(o) === value);
+                  if (!opt) return;
+                  triggerImpactLight();
+                  setSelectedUnit(opt);
+                }}
+                variant="primary">
+                <Tabs.List className="w-full self-stretch">
+                  {unitOptions.length > UNIT_TABS_SCROLL_THRESHOLD ? (
+                    <Tabs.ScrollView scrollAlign="center" contentContainerClassName="gap-1">
+                      <Tabs.Indicator />
+                      {unitOptions.map((opt) => (
+                        <Tabs.Trigger key={getUnitTabValue(opt)} value={getUnitTabValue(opt)}>
+                          <Tabs.Label>{opt.abbreviation}</Tabs.Label>
+                        </Tabs.Trigger>
+                      ))}
+                    </Tabs.ScrollView>
+                  ) : (
+                    <>
+                      <Tabs.Indicator />
+                      {unitOptions.map((opt) => (
+                        <Tabs.Trigger
+                          key={getUnitTabValue(opt)}
+                          value={getUnitTabValue(opt)}
+                          className="flex-1">
+                          <Tabs.Label className="text-center">{opt.abbreviation}</Tabs.Label>
+                        </Tabs.Trigger>
+                      ))}
+                    </>
+                  )}
+                </Tabs.List>
 
-            {cookingEligible ? (
-              <View className="flex-row items-center justify-between mt-4">
-                <Text className="text-muted text-sm">{t('meals.weighingType')}</Text>
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-foreground text-sm font-medium">
-                    {isCooked ? t('meals.weighingCooked') : t('meals.weighingRaw')}
-                  </Text>
-                  <Switch
-                    isSelected={isCooked}
-                    onSelectedChange={(selected) => {
-                      triggerImpactLight();
-                      setQuantityType(selected ? 'cooked' : 'raw');
-                    }}
-                    accessibilityLabel={t('meals.weighingType')}
-                  />
-                </View>
-              </View>
+                {unitOptions.map((opt) => {
+                  const tabIsGrams = opt.unitType === 'grams';
+                  const tabCookingEligible =
+                    tabIsGrams && product && hasCookingConversion(product, userConversions);
+
+                  return (
+                    <Tabs.Content key={getUnitTabValue(opt)} value={getUnitTabValue(opt)}>
+                      {tabCookingEligible ? (
+                        <View className="flex-row items-center justify-between mt-4">
+                          <Text className="text-muted text-sm">{t('meals.weighingType')}</Text>
+                          <View className="flex-row items-center gap-2">
+                            <Text className="text-foreground text-sm font-medium">
+                              {isCooked ? t('meals.weighingCooked') : t('meals.weighingRaw')}
+                            </Text>
+                            <Switch
+                              isSelected={isCooked}
+                              onSelectedChange={(selected) => {
+                                triggerImpactLight();
+                                setQuantityType(selected ? 'cooked' : 'raw');
+                              }}
+                              accessibilityLabel={t('meals.weighingType')}
+                            />
+                          </View>
+                        </View>
+                      ) : null}
+
+                      {tabIsGrams ? (
+                        <View className="mt-4">
+                          <InputNumber
+                            value={gramsText}
+                            onChangeText={setGramsText}
+                            placeholder={String(defaultDisplayMassQuantity(unitSystem))}
+                          />
+                        </View>
+                      ) : (
+                        <View className="flex-row items-center justify-center gap-4 my-5">
+                          <AppButton
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                            accessibilityLabel="-">
+                            <Text className="text-foreground text-lg font-semibold">−</Text>
+                          </AppButton>
+                          <Text className="text-foreground text-2xl font-bold">
+                            {quantity} {opt.abbreviation}
+                          </Text>
+                          <AppButton
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => setQuantity((q) => q + 1)}
+                            accessibilityLabel="+">
+                            <Text className="text-foreground text-lg font-semibold">+</Text>
+                          </AppButton>
+                        </View>
+                      )}
+                    </Tabs.Content>
+                  );
+                })}
+              </Tabs>
             ) : null}
-
-            {isGrams ? (
-              <View className="mt-4">
-                <InputNumber
-                  value={gramsText}
-                  onChangeText={setGramsText}
-                  placeholder={String(defaultDisplayMassQuantity(unitSystem))}
-                />
-              </View>
-            ) : (
-              <View className="flex-row items-center justify-center gap-4 my-5">
-                <AppButton
-                  isIconOnly
-                  size="sm"
-                  variant="tertiary"
-                  onPress={() => setQuantity((q) => Math.max(1, q - 1))}
-                  accessibilityLabel="-">
-                  <Text className="text-foreground text-lg font-semibold">−</Text>
-                </AppButton>
-                <Text className="text-foreground text-2xl font-bold">
-                  {quantity} {activeUnit?.abbreviation}
-                </Text>
-                <AppButton
-                  isIconOnly
-                  size="sm"
-                  variant="tertiary"
-                  onPress={() => setQuantity((q) => q + 1)}
-                  accessibilityLabel="+">
-                  <Text className="text-foreground text-lg font-semibold">+</Text>
-                </AppButton>
-              </View>
-            )}
 
             <Text className="text-accent text-base font-semibold text-center mt-3">
               {formatDecimal(carbsResult.carbs)} g
