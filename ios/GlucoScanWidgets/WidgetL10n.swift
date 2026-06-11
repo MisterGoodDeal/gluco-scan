@@ -6,11 +6,11 @@ enum WidgetL10n {
     }
 
     static var addFood: String {
-        localized(french: "Nouvel aliment", english: "Add food")
+        localized(french: "Aliment", english: "Food")
     }
 
     static var addMeal: String {
-        localized(french: "Nouveau repas", english: "Add meal")
+        localized(french: "Repas", english: "Meal")
     }
 
     static var displayName: String {
