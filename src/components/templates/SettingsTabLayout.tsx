@@ -4,13 +4,12 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useFocusEffect } from 'expo-router';
 import { Accordion, useThemeColor } from 'heroui-native';
-import { type FC, useCallback, useRef, useState } from 'react';
+import { type FC, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, View } from 'react-native';
 
 import { FaIcon } from '@/components/atoms/FaIcon';
 import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
-import { PickerField } from '@/components/atoms/PickerField';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
@@ -18,13 +17,13 @@ import { CookingConversionSettings } from '@/components/molecules/CookingConvers
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
-import { LanguagePickerSheet } from '@/components/organisms/LanguagePickerSheet';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { AppPressable } from '@/components/ui/AppPressable';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useAppToast } from '@/components/ui/useAppToast';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
-import { getLanguageLabelKey } from '@/i18n';
+import { getLanguageLabelKey, supportedLocales, type SupportedLocale } from '@/i18n';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
 import { usePreferencesStore } from '@/store/preferences.store';
@@ -71,7 +70,6 @@ export const SettingsTabLayout: FC = () => {
 
   const [editingUnit, setEditingUnit] = useState<GlobalUnit | null>(null);
   const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
-  const [isLanguageSheetOpen, setIsLanguageSheetOpen] = useState(false);
   const [unitIdToDelete, setUnitIdToDelete] = useState<string | null>(null);
   const currentLocale = usePreferencesStore((s) => s.locale);
   const setLocale = usePreferencesStore((s) => s.setLocale);
@@ -82,6 +80,16 @@ export const SettingsTabLayout: FC = () => {
   const isTutorialRunning = tutorialStatus === TutorialStatus.RUNNING;
   const isTutorialBusy = tutorialStatus === TutorialStatus.STARTING;
   const appVersion = Constants.expoConfig?.version ?? '—';
+
+  const languageOptions = useMemo(
+    () =>
+      supportedLocales.map((locale) => ({
+        value: locale,
+        label: t(getLanguageLabelKey(locale)),
+      })),
+    [t],
+  );
+  const selectedLanguage = languageOptions.find((option) => option.value === currentLocale);
 
   useFocusEffect(
     useCallback(() => {
@@ -199,10 +207,14 @@ export const SettingsTabLayout: FC = () => {
             </SectionItem>
 
             <SectionItem value="language" title={t('settings.language')}>
-              <PickerField
-                value={t(getLanguageLabelKey(currentLocale))}
-                onPress={() => setIsLanguageSheetOpen(true)}
-                accessibilityLabel={t('settings.language')}
+              <AppSelect
+                value={selectedLanguage}
+                onValueChange={(option) => {
+                  if (option) void setLocale(option.value as SupportedLocale);
+                }}
+                options={languageOptions}
+                placeholder={t('settings.language')}
+                listLabel={t('settings.language')}
               />
             </SectionItem>
 
@@ -299,15 +311,6 @@ export const SettingsTabLayout: FC = () => {
         unit={editingUnit}
         onClose={closeUnitModal}
         onSave={handleSaveUnit}
-      />
-      <LanguagePickerSheet
-        visible={isLanguageSheetOpen}
-        locale={currentLocale}
-        onSelect={(locale) => {
-          void setLocale(locale);
-          setIsLanguageSheetOpen(false);
-        }}
-        onClose={() => setIsLanguageSheetOpen(false)}
       />
       <ConfirmDialog
         isOpen={unitIdToDelete !== null}
