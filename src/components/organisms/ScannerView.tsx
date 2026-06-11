@@ -1,12 +1,11 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { type FC } from 'react';
+import { useThemeColor } from 'heroui-native';
+import { type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 import { GlassPanel } from '@/components/atoms/GlassPanel';
-import { Text } from '@/components/atoms/Text';
-import { primaryButtonStyles } from '@/styles/button';
+import { AppButton } from '@/components/ui/AppButton';
 import { hp, topScreenSpace } from '@/utils/screen';
 
 type ScannerViewProps = {
@@ -22,93 +21,15 @@ type ScannerViewProps = {
   fill?: boolean;
 };
 
-const ScannerContainer = styled.View<{ $fill?: boolean }>`
-  ${({ $fill }) => ($fill ? 'flex: 1;' : `height: ${hp('22%')}px;`)}
-  overflow: hidden;
-  ${({ $fill, theme }) =>
-    $fill
-      ? ''
-      : `
-    border-bottom-left-radius: ${theme.radius.lg}px;
-    border-bottom-right-radius: ${theme.radius.lg}px;
-  `}
-`;
+const BAND_HEIGHT = hp('22%');
 
-const Camera = styled(CameraView)`
-  flex: 1;
-`;
-
-const Overlay = styled.View<{ $fill?: boolean }>`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  align-items: center;
-  justify-content: ${({ $fill }) => ($fill ? 'center' : 'flex-start')};
-  padding-top: ${({ $fill, theme }) => ($fill ? 0 : topScreenSpace)}px;
-`;
-
-const ScanFrame = styled.View<{ $fill?: boolean }>`
-  width: ${({ $fill }) => ($fill ? '78%' : '70%')};
-  height: ${({ $fill }) => ($fill ? '72%' : '60%')};
-  border-width: 2px;
-  border-color: ${({ theme }) => theme.colors.glass.highlight};
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-`;
-
-const FlashOverlay = styled.View`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: ${({ theme }) => theme.colors.accentMuted};
-`;
-
-const LoadingOverlay = styled.View`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.4);
-`;
-
-const MessageStack = styled.View<{ $fill?: boolean }>`
-  ${({ $fill }) =>
-    $fill
-      ? `
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  `
-      : ''}
-`;
-
-const ErrorBanner = styled.View`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-`;
-
-const WarningBanner = styled.View`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-`;
-
-const PermissionContainer = styled.View<{ $fill?: boolean }>`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacing.lg}px;
-  ${({ $fill }) => (!$fill ? `min-height: ${hp('22%')}px; padding-top: ${topScreenSpace}px;` : '')}
-  gap: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const PermissionButton = styled.Pressable`
-  ${primaryButtonStyles}
-`;
+const ScannerContainer: FC<{ fill: boolean; children: ReactNode }> = ({ fill, children }) => (
+  <View
+    className={`overflow-hidden ${fill ? 'flex-1' : 'rounded-b-3xl'}`}
+    style={fill ? undefined : { height: BAND_HEIGHT }}>
+    {children}
+  </View>
+);
 
 export const ScannerView: FC<ScannerViewProps> = ({
   onScan,
@@ -122,38 +43,40 @@ export const ScannerView: FC<ScannerViewProps> = ({
   fill = false,
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const accentColor = useThemeColor('accent');
   const [permission, requestPermission] = useCameraPermissions();
 
   const messages = (
-    <MessageStack $fill={fill}>
+    <View className={fill ? 'absolute left-0 right-0 bottom-0' : ''}>
       {scanWarning && (
-        <WarningBanner>
-          <GlassPanel padding={theme.spacing.sm}>
-            <Text $variant="caption" $color="accent">
-              {scanWarning}
-            </Text>
+        <View className="px-4 py-2">
+          <GlassPanel padding={8}>
+            <Text className="text-warning text-sm">{scanWarning}</Text>
           </GlassPanel>
-        </WarningBanner>
+        </View>
       )}
       {scanError && (
-        <ErrorBanner>
-          <GlassPanel padding={theme.spacing.sm}>
-            <Text $variant="caption" $color="error">
-              {scanError}
-            </Text>
+        <View className="px-4 py-2">
+          <GlassPanel padding={8}>
+            <Text className="text-danger text-sm">{scanError}</Text>
           </GlassPanel>
-        </ErrorBanner>
+        </View>
       )}
-    </MessageStack>
+    </View>
   );
+
+  const permissionContainerStyle = fill
+    ? undefined
+    : { minHeight: BAND_HEIGHT, paddingTop: topScreenSpace };
 
   if (!permission) {
     return (
-      <ScannerContainer $fill={fill}>
-        <PermissionContainer $fill={fill}>
-          <ActivityIndicator color={theme.colors.accent} />
-        </PermissionContainer>
+      <ScannerContainer fill={fill}>
+        <View
+          className="flex-1 items-center justify-center p-6 gap-4"
+          style={permissionContainerStyle}>
+          <ActivityIndicator color={accentColor} />
+        </View>
       </ScannerContainer>
     );
   }
@@ -161,15 +84,17 @@ export const ScannerView: FC<ScannerViewProps> = ({
   if (!permission.granted) {
     return (
       <>
-        <ScannerContainer $fill={fill}>
-          <PermissionContainer $fill={fill}>
-            <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
+        <ScannerContainer fill={fill}>
+          <View
+            className="flex-1 items-center justify-center p-6 gap-4"
+            style={permissionContainerStyle}>
+            <Text className="text-muted text-base text-center">
               {t('scanner.cameraPermission')}
             </Text>
-            <PermissionButton onPress={requestPermission}>
-              <Text>{t('scanner.authorizeCamera')}</Text>
-            </PermissionButton>
-          </PermissionContainer>
+            <AppButton variant="primary" onPress={() => void requestPermission()}>
+              {t('scanner.authorizeCamera')}
+            </AppButton>
+          </View>
         </ScannerContainer>
         {!fill && messages}
       </>
@@ -178,8 +103,9 @@ export const ScannerView: FC<ScannerViewProps> = ({
 
   return (
     <>
-      <ScannerContainer $fill={fill}>
-        <Camera
+      <ScannerContainer fill={fill}>
+        <CameraView
+          style={{ flex: 1 }}
           active={enabled}
           facing="back"
           barcodeScannerSettings={{
@@ -194,14 +120,27 @@ export const ScannerView: FC<ScannerViewProps> = ({
               : undefined
           }
         />
-        <Overlay $fill={fill} pointerEvents="none">
-          <ScanFrame $fill={fill} />
-        </Overlay>
-        {scanSuccessFlash && <FlashOverlay pointerEvents="none" />}
+        <View
+          className={`absolute inset-0 items-center ${fill ? 'justify-center' : 'justify-start'}`}
+          style={fill ? undefined : { paddingTop: topScreenSpace }}
+          pointerEvents="none">
+          <View
+            className="border-2 border-white/40 rounded-xl"
+            style={{
+              width: fill ? '78%' : '70%',
+              height: fill ? '72%' : '60%',
+            }}
+          />
+        </View>
+        {scanSuccessFlash && (
+          <View className="absolute inset-0 bg-accent/20" pointerEvents="none" />
+        )}
         {isLoadingProduct && (
-          <LoadingOverlay pointerEvents="none">
-            <ActivityIndicator color={theme.colors.accent} size="large" />
-          </LoadingOverlay>
+          <View
+            className="absolute inset-0 items-center justify-center bg-black/40"
+            pointerEvents="none">
+            <ActivityIndicator color={accentColor} size="large" />
+          </View>
         )}
         {fill && messages}
       </ScannerContainer>

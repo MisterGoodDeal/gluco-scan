@@ -1,13 +1,11 @@
-import { BlurView } from 'expo-blur';
+import { Dialog, Switch } from 'heroui-native';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, StyleSheet } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
-import { ButtonIcon } from '@/components/atoms/ButtonIcon';
-import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { InputNumber } from '@/components/atoms/InputNumber';
-import { Text } from '@/components/atoms/Text';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppChip } from '@/components/ui/AppChip';
 import { useSettingsStore } from '@/store/settings.store';
 import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import type { MealDraftItem } from '@/store/meal.store';
@@ -18,8 +16,7 @@ import { hasCookingConversion } from '@/utils/cooking/hasCookingConversion';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { defaultDisplayMassQuantity } from '@/utils/mass';
 import { formatDecimal } from '@/utils/format';
-import { triggerNotificationSuccess } from '@/utils/haptics';
-import { primaryButtonStyles } from '@/styles/button';
+import { triggerImpactLight, triggerNotificationSuccess } from '@/utils/haptics';
 
 export type QuantityPickerConfirm = {
   quantity: number;
@@ -59,48 +56,6 @@ type UnitOption = {
   unitType: 'grams' | 'custom';
 };
 
-const Row = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing.md}px;
-  margin: ${({ theme }) => theme.spacing.lg}px 0;
-`;
-
-const WeighingChip = styled.Pressable<{ $selected?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  border-width: 1px;
-  border-color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.accent : theme.colors.glass.border};
-  background-color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.accentMuted : theme.colors.glass.background};
-  margin: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const UnitChip = styled.Pressable<{ $selected?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  border-width: 1px;
-  border-color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.accent : theme.colors.glass.border};
-  background-color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.accentMuted : theme.colors.glass.background};
-  margin: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const Chips = styled.View`
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-`;
-
-const ActionButton = styled.Pressable`
-  ${primaryButtonStyles}
-  align-self: center;
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-`;
-
 export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   visible,
   product,
@@ -109,7 +64,6 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   onConfirm,
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const globalUnits = useSettingsStore((s) => s.globalUnits);
   const userConversions = useCookingConversionStore((s) => s.conversions);
   const { unitSystem, massUnit, massLabel, displayToGrams, formatMassForInput } =
@@ -211,6 +165,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   const qty = isGrams ? displayToGrams(parsedDisplay) : quantity;
   const cookingEligible =
     isGrams && hasCookingConversion(product, userConversions);
+  const isCooked = quantityType === 'cooked';
 
   const carbsResult = activeUnit
     ? computeMealItemCarbsWithCooking(
@@ -245,88 +200,104 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <BlurView
-        intensity={50}
-        tint={theme.blur.tint}
-        blurMethod={theme.blur.androidMethod}
-        style={StyleSheet.absoluteFill}>
-        <Pressable style={{ flex: 1, justifyContent: 'center', padding: 24 }} onPress={onClose}>
-          <Pressable onPress={(e) => e.stopPropagation()}>
-            <GlassPanel padding={theme.spacing.lg}>
-              <Text $variant="subtitle">{product.name}</Text>
-              <Text $variant="caption" $color="textSecondary">
-                {t('meals.selectQuantity')}
-              </Text>
+    <Dialog isOpen={visible} onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          pointerEvents="box-none"
+          style={{ flex: 1, justifyContent: 'center' }}>
+          <Dialog.Content>
+            <Dialog.Close />
+            <View className="gap-1 mb-3 pr-8">
+              <Dialog.Title>{product.name}</Dialog.Title>
+              <Dialog.Description>{t('meals.selectQuantity')}</Dialog.Description>
+            </View>
 
-              <Chips>
-                {unitOptions.map((opt) => (
-                  <UnitChip
-                    key={opt.id}
-                    $selected={activeUnit?.id === opt.id && activeUnit?.unitType === opt.unitType}
-                    onPress={() => setSelectedUnit(opt)}>
-                    <Text $variant="caption">{opt.abbreviation}</Text>
-                  </UnitChip>
-                ))}
-              </Chips>
+            <View className="flex-row flex-wrap justify-center gap-1.5">
+              {unitOptions.map((opt) => {
+                const selected =
+                  activeUnit?.id === opt.id && activeUnit?.unitType === opt.unitType;
+                return (
+                  <AppChip
+                    key={`${opt.unitType}-${opt.id}`}
+                    size="sm"
+                    variant={selected ? 'soft' : 'tertiary'}
+                    color={selected ? 'accent' : 'default'}
+                    label={opt.abbreviation}
+                    onPress={() => setSelectedUnit(opt)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                  />
+                );
+              })}
+            </View>
 
-              {cookingEligible ? (
-                <>
-                  <Text $variant="caption" $color="textSecondary" style={{ textAlign: 'center' }}>
-                    {t('meals.weighingType')}
+            {cookingEligible ? (
+              <View className="flex-row items-center justify-between mt-4">
+                <Text className="text-muted text-sm">{t('meals.weighingType')}</Text>
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-foreground text-sm font-medium">
+                    {isCooked ? t('meals.weighingCooked') : t('meals.weighingRaw')}
                   </Text>
-                  <Chips>
-                    <WeighingChip
-                      $selected={quantityType === 'raw'}
-                      onPress={() => setQuantityType('raw')}>
-                      <Text $variant="caption">{t('meals.weighingRaw')}</Text>
-                    </WeighingChip>
-                    <WeighingChip
-                      $selected={quantityType === 'cooked'}
-                      onPress={() => setQuantityType('cooked')}>
-                      <Text $variant="caption">{t('meals.weighingCooked')}</Text>
-                    </WeighingChip>
-                  </Chips>
-                </>
-              ) : null}
+                  <Switch
+                    isSelected={isCooked}
+                    onSelectedChange={(selected) => {
+                      triggerImpactLight();
+                      setQuantityType(selected ? 'cooked' : 'raw');
+                    }}
+                    accessibilityLabel={t('meals.weighingType')}
+                  />
+                </View>
+              </View>
+            ) : null}
 
-              {isGrams ? (
+            {isGrams ? (
+              <View className="mt-4">
                 <InputNumber
                   value={gramsText}
                   onChangeText={setGramsText}
                   placeholder={String(defaultDisplayMassQuantity(unitSystem))}
                 />
-              ) : (
-                <Row>
-                  <ButtonIcon
-                    onPress={() => setQuantity((q) => Math.max(1, q - 1))}
-                    accessibilityLabel="-">
-                    <Text $variant="subtitle">−</Text>
-                  </ButtonIcon>
-                  <Text $variant="title">
-                    {quantity} {activeUnit?.abbreviation}
-                  </Text>
-                  <ButtonIcon
-                    onPress={() => setQuantity((q) => q + 1)}
-                    accessibilityLabel="+">
-                    <Text $variant="subtitle">+</Text>
-                  </ButtonIcon>
-                </Row>
-              )}
-
-              <Text $variant="body" $color="accent" style={{ textAlign: 'center' }}>
-                {formatDecimal(carbsResult.carbs)} g
-              </Text>
-
-              <ActionButton onPress={handleConfirm}>
-                <Text $variant="caption">
-                  {initialItem ? t('common.save') : t('common.add')}
+              </View>
+            ) : (
+              <View className="flex-row items-center justify-center gap-4 my-5">
+                <AppButton
+                  isIconOnly
+                  size="sm"
+                  variant="tertiary"
+                  onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                  accessibilityLabel="-">
+                  <Text className="text-foreground text-lg font-semibold">−</Text>
+                </AppButton>
+                <Text className="text-foreground text-2xl font-bold">
+                  {quantity} {activeUnit?.abbreviation}
                 </Text>
-              </ActionButton>
-            </GlassPanel>
-          </Pressable>
-        </Pressable>
-      </BlurView>
-    </Modal>
+                <AppButton
+                  isIconOnly
+                  size="sm"
+                  variant="tertiary"
+                  onPress={() => setQuantity((q) => q + 1)}
+                  accessibilityLabel="+">
+                  <Text className="text-foreground text-lg font-semibold">+</Text>
+                </AppButton>
+              </View>
+            )}
+
+            <Text className="text-accent text-base font-semibold text-center mt-3">
+              {formatDecimal(carbsResult.carbs)} g
+            </Text>
+
+            <AppButton
+              variant="primary"
+              className="mt-4"
+              haptic={false}
+              onPress={handleConfirm}>
+              {initialItem ? t('common.save') : t('common.add')}
+            </AppButton>
+          </Dialog.Content>
+        </KeyboardAvoidingView>
+      </Dialog.Portal>
+    </Dialog>
   );
 };

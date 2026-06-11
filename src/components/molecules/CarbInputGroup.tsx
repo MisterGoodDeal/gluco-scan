@@ -1,10 +1,8 @@
 import { type FC, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components/native';
+import { Text, View } from 'react-native';
 
 import { CarbValue } from '@/components/atoms/CarbValue';
 import { InputNumber } from '@/components/atoms/InputNumber';
-import { Text } from '@/components/atoms/Text';
 import { getDecimalSeparator } from '@/i18n';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 
@@ -13,16 +11,6 @@ type CarbInputGroupProps = {
   carbs: number;
   onGramsChange: (grams: number) => void;
 };
-
-const Row = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const Label = styled(Text)`
-  flex: 1;
-`;
 
 const isValidPartialDecimal = (text: string): boolean => /^\d*[,.]?\d*$/.test(text);
 
@@ -37,7 +25,6 @@ export const CarbInputGroup: FC<CarbInputGroupProps> = ({
   carbs,
   onGramsChange,
 }) => {
-  const { t } = useTranslation();
   const decimalSeparator = getDecimalSeparator();
   const { massLabel, formatMassForInput, displayToGrams } = useMassDisplay();
   const [text, setText] = useState(() => formatMassForInput(grams));
@@ -78,12 +65,10 @@ export const CarbInputGroup: FC<CarbInputGroupProps> = ({
   };
 
   return (
-    <Row>
-      <Label $variant="caption" $color="textSecondary">
-        {massLabel}
-      </Label>
+    <View className="flex-row items-center gap-2">
+      <Text className="flex-1 text-muted text-sm">{massLabel}</Text>
       <InputNumber value={text} onChangeText={handleChange} onBlur={handleBlur} />
       <CarbValue grams={carbs} />
-    </Row>
+    </View>
   );
 };

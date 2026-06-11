@@ -1,17 +1,14 @@
-import { FaIcon } from '@/components/atoms/FaIcon';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useThemeColor } from 'heroui-native';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import styled, { useTheme } from 'styled-components/native';
 
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
-import { HapticPressable } from '@/components/atoms/HapticPressable';
-import { HapticTouchableOpacity } from '@/components/atoms/HapticTouchableOpacity';
 import { TutorialMealCreateBanner } from '@/components/organisms/TutorialMealCreateBanner';
 import { PickerField } from '@/components/atoms/PickerField';
-import { Text } from '@/components/atoms/Text';
 import {
   MealMetaPickerSheet,
   type MealMetaPickerField,
@@ -19,6 +16,9 @@ import {
 import { ProductSpotlightSearch } from '@/components/organisms/ProductSpotlightSearch';
 import { QuantityPickerModal } from '@/components/organisms/QuantityPickerModal';
 import { ScannerView } from '@/components/organisms/ScannerView';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppPressable } from '@/components/ui/AppPressable';
+import { useAppToast } from '@/components/ui/useAppToast';
 import {
   persistOffProduct,
   useMealProductScan,
@@ -36,91 +36,14 @@ import { formatDateLabel } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
 import { MealItemConversionLine } from '@/components/molecules/MealItemConversionLine';
 import { getMealTypeLabelKey } from '@/utils/mealType';
-import { listRowDivider } from '@/styles/listRow';
-import { actionButtonStyles } from '@/styles/button';
-import { hp } from '@/utils/screen';
-import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
-import { Screen, ScreenHeaderBar } from '@/styles/global';
-
-const Header = styled(ScreenHeaderBar)`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const StepIndicator = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const Dot = styled.View<{ $active?: boolean }>`
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  background-color: ${({ theme, $active }) =>
-    $active ? theme.colors.accent : theme.colors.glass.border};
-`;
-
-const Field = styled.View`
-  margin: ${({ theme }) => theme.spacing.md}px;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const NavRow = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const ActionButton = styled(HapticPressable)<{ $primary?: boolean }>`
-  ${actionButtonStyles}
-`;
-
-const ScannerSection = styled.View`
-  height: ${hp('30%')}px;
-  margin: ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.lg}px;
-  overflow: hidden;
-`;
-
-const SearchTrigger = styled(HapticPressable)`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin: 0 ${({ theme }) => theme.spacing.md}px ${({ theme }) => theme.spacing.md}px;
-  padding: ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.md}px;
-  background-color: ${({ theme }) => theme.colors.glass.background};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
-`;
-
-const ItemsSection = styled.View`
-  margin: ${({ theme }) => theme.spacing.md}px;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const ItemRow = styled.View<{ $isLast?: boolean }>`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${({ theme }) => theme.spacing.sm}px 0;
-  ${listRowDivider}
-`;
-
-const ItemTouchable = styled(HapticTouchableOpacity)`
-  flex: 1;
-  margin-right: ${({ theme }) => theme.spacing.sm}px;
-  padding-vertical: ${({ theme }) => theme.spacing.xs}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-`;
+import { hp, topScreenSpace } from '@/utils/screen';
 
 export const MealCreateLayout: FC = () => {
   const { mealId } = useLocalSearchParams<{ mealId?: string }>();
   const isEditing = Boolean(mealId);
   const { t } = useTranslation();
+  const toast = useAppToast();
+  const [mutedColor, dangerColor] = useThemeColor(['muted', 'danger']);
   const locale = getCurrentLocale();
   const step = useMealStore((s) => s.step);
   const setStep = useMealStore((s) => s.setStep);
@@ -140,12 +63,11 @@ export const MealCreateLayout: FC = () => {
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
   const insets = useSafeAreaInsets();
 
-  const theme = useTheme();
   const showTutorialBanner =
     !isEditing &&
     tutorialStatus === TutorialStatus.RUNNING &&
     getTutorialStepId() === 'meal-create';
-  const navBottomInset = insets.bottom + theme.spacing.lg;
+  const navBottomInset = insets.bottom + 24;
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
@@ -155,6 +77,16 @@ export const MealCreateLayout: FC = () => {
 
   const timeLabel = `${String(draftMeta.hours).padStart(2, '0')}:${String(draftMeta.minutes).padStart(2, '0')}`;
   const scannerActive = step === 1 && pickerProduct === null && !searchVisible;
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error, { haptic: false });
+      clearMessages();
+    } else if (warning) {
+      toast.warning(warning, { haptic: false });
+      clearMessages();
+    }
+  }, [error, warning, toast, clearMessages]);
 
   const openProductPicker = (result: MealScanResult) => {
     if (result.kind === 'existing') {
@@ -221,15 +153,14 @@ export const MealCreateLayout: FC = () => {
 
   const handleSave = async () => {
     if (draftItems.length === 0) {
-      triggerNotificationError();
-      Alert.alert(t('meals.noItems'));
+      toast.warning(t('meals.noItems'));
       return;
     }
     try {
       await saveMeal();
-      triggerNotificationSuccess();
+      toast.success(t('meals.saveSuccess'));
     } catch {
-      triggerNotificationError();
+      toast.error(t('meals.saveError'));
       return;
     }
     if (!isEditing) {
@@ -242,9 +173,13 @@ export const MealCreateLayout: FC = () => {
   };
 
   const renderDraftItem = (item: MealDraftItem, isLast: boolean) => (
-    <ItemRow key={item.id} $isLast={isLast}>
-      <ItemTouchable
-        activeOpacity={0.6}
+    <View
+      key={item.id}
+      className={`flex-row items-center justify-between py-2 ${
+        isLast ? '' : 'border-b border-separator'
+      }`}>
+      <AppPressable
+        className="flex-1 mr-2 py-1 rounded-lg"
         accessibilityRole="button"
         accessibilityLabel={t('meals.editItemA11y', { name: item.productName })}
         onPress={() => void openEditItem(item)}>
@@ -255,156 +190,154 @@ export const MealCreateLayout: FC = () => {
           }}
           product={{ tags: item.productTags, customCookingFactor: null }}
         />
-      </ItemTouchable>
-      <HapticPressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
-        <FaIcon name="xmark" size={18} color={theme.colors.error} />
-      </HapticPressable>
-    </ItemRow>
+      </AppPressable>
+      <AppPressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
+        <FaIcon name="xmark" size={18} color={dangerColor} />
+      </AppPressable>
+    </View>
   );
 
   return (
-    <Screen>
+    <View className="flex-1 bg-background">
       <BackgroundGradient />
-      <Header>
-        <HapticPressable
+      <View
+        className="flex-row items-center justify-between px-4 pb-2"
+        style={{ paddingTop: topScreenSpace }}>
+        <AppPressable
           onPress={() => {
             resetDraft();
             router.back();
           }}>
-          <Text $variant="body" $color="accent">
-            {t('common.cancel')}
-          </Text>
-        </HapticPressable>
-        <Text $variant="subtitle">
+          <Text className="text-accent text-base">{t('common.cancel')}</Text>
+        </AppPressable>
+        <Text className="text-foreground text-lg font-semibold">
           {isEditing ? t('meals.editTitle') : t('meals.createTitle')}
         </Text>
-        <View style={{ width: 60 }} />
-      </Header>
+        <View className="w-[60px]" />
+      </View>
 
-      <StepIndicator>
+      <View className="flex-row justify-center gap-2 mb-4">
         {[0, 1, 2].map((i) => (
-          <Dot key={i} $active={step === i} />
+          <View
+            key={i}
+            className={`w-2 h-2 rounded-full ${step === i ? 'bg-accent' : 'bg-border'}`}
+          />
         ))}
-      </StepIndicator>
+      </View>
 
       <ScrollView
         style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: theme.spacing.md }}>
+        contentContainerStyle={{ paddingBottom: 16 }}>
         {step === 0 && (
           <>
-            <Field>
-              <Text $variant="caption" $color="textSecondary">
-                {t('meals.mealType')}
-              </Text>
+            <View className="m-4 mb-0 gap-1">
+              <Text className="text-muted text-sm">{t('meals.mealType')}</Text>
               <PickerField
                 value={t(getMealTypeLabelKey(draftMeta.type))}
                 onPress={() => setOpenMetaPicker('mealType')}
                 accessibilityLabel={t('meals.mealType')}
               />
-            </Field>
-            <Field>
-              <Text $variant="caption" $color="textSecondary">
-                {t('meals.date')}
-              </Text>
+            </View>
+            <View className="m-4 mb-0 gap-1">
+              <Text className="text-muted text-sm">{t('meals.date')}</Text>
               <PickerField
                 value={formatDateLabel(draftMeta.dateKey, locale)}
                 onPress={() => setOpenMetaPicker('date')}
                 accessibilityLabel={t('meals.date')}
               />
-            </Field>
-            <Field>
-              <Text $variant="caption" $color="textSecondary">
-                {t('meals.time')}
-              </Text>
+            </View>
+            <View className="m-4 gap-1">
+              <Text className="text-muted text-sm">{t('meals.time')}</Text>
               <PickerField
                 value={timeLabel}
                 onPress={() => setOpenMetaPicker('time')}
                 accessibilityLabel={t('meals.time')}
               />
-            </Field>
+            </View>
           </>
         )}
 
         {step === 1 && (
           <>
-            <ScannerSection>
+            <View className="m-4 rounded-3xl overflow-hidden" style={{ height: hp('30%') }}>
               <ScannerView
                 fill
                 onScan={onBarcodeScan}
                 isLoadingProduct={isLoading}
-                scanError={error}
-                scanWarning={warning}
+                scanError={null}
+                scanWarning={null}
                 scanSuccessFlash={false}
                 isScanning={!isLoading && scannerActive}
                 enabled={scannerActive}
                 onClearError={clearMessages}
               />
-            </ScannerSection>
+            </View>
 
-            <SearchTrigger
+            <AppPressable
+              className="mx-4 mb-4 flex-row items-center gap-2 rounded-2xl border border-border bg-surface p-4"
               onPress={() => setSearchVisible(true)}
               accessibilityLabel={t('meals.searchProduct')}>
-              <FaIcon name="magnifying-glass" size={18} color={theme.colors.textSecondary} />
-              <Text $variant="body" $color="textSecondary" style={{ flex: 1 }}>
+              <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
+              <Text className="flex-1 text-muted text-base">
                 {t('meals.searchSpotlightPlaceholder')}
               </Text>
-            </SearchTrigger>
+            </AppPressable>
 
-            <ItemsSection>
-              <Text $variant="body">{t('meals.stepFoods')}</Text>
+            <View className="m-4 gap-2">
+              <Text className="text-foreground text-base font-medium">
+                {t('meals.stepFoods')}
+              </Text>
               {draftItems.length > 0 ? (
-                <Text $variant="caption" $color="textSecondary">
-                  {t('meals.editItemHint')}
-                </Text>
+                <Text className="text-muted text-sm">{t('meals.editItemHint')}</Text>
               ) : null}
               {draftItems.length === 0 ? (
-                <Text $variant="caption" $color="textSecondary">
-                  {t('scanner.scanProduct')}
-                </Text>
+                <Text className="text-muted text-sm">{t('scanner.scanProduct')}</Text>
               ) : (
                 draftItems.map((item, index) =>
                   renderDraftItem(item, index === draftItems.length - 1),
                 )
               )}
-            </ItemsSection>
+            </View>
           </>
         )}
 
         {step === 2 && (
           <>
             {draftItems.map((item, index) => (
-              <View key={item.id} style={{ marginHorizontal: 16 }}>
+              <View key={item.id} className="mx-4">
                 {renderDraftItem(item, index === draftItems.length - 1)}
               </View>
             ))}
-            <Text $variant="title" $color="accent" style={{ textAlign: 'center', marginTop: 24 }}>
+            <Text className="text-accent text-2xl font-bold text-center mt-6">
               {t('meals.mealTotal')}: {formatDecimal(draftTotal)} g
             </Text>
-            <View style={{ margin: 24, alignSelf: 'center' }}>
-              <ActionButton $primary onPress={handleSave}>
-                <Text $variant="caption">{t('meals.saveMeal')}</Text>
-              </ActionButton>
+            <View className="m-6 self-center">
+              <AppButton variant="primary" onPress={() => void handleSave()}>
+                {t('meals.saveMeal')}
+              </AppButton>
             </View>
           </>
         )}
       </ScrollView>
 
       {showTutorialBanner ? <TutorialMealCreateBanner /> : null}
-      <NavRow style={{ paddingBottom: navBottomInset }}>
+      <View
+        className="flex-row justify-between p-4"
+        style={{ paddingBottom: navBottomInset }}>
         {step > 0 ? (
-          <ActionButton onPress={() => setStep(step - 1)}>
-            <Text $variant="caption">{t('common.previous')}</Text>
-          </ActionButton>
+          <AppButton variant="secondary" onPress={() => setStep(step - 1)}>
+            {t('common.previous')}
+          </AppButton>
         ) : (
           <View />
         )}
         {step < 2 && (
-          <ActionButton $primary onPress={() => setStep(step + 1)}>
-            <Text $variant="caption">{t('common.next')}</Text>
-          </ActionButton>
+          <AppButton variant="primary" onPress={() => setStep(step + 1)}>
+            {t('common.next')}
+          </AppButton>
         )}
-      </NavRow>
+      </View>
 
       <QuantityPickerModal
         visible={pickerProduct !== null}
@@ -450,6 +383,6 @@ export const MealCreateLayout: FC = () => {
           setPickerProduct(product);
         }}
       />
-    </Screen>
+    </View>
   );
 };

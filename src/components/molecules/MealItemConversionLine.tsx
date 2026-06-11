@@ -1,7 +1,6 @@
 import { type FC } from 'react';
-import styled from 'styled-components/native';
+import { Text, View } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
 import { TagIcon } from '@/components/atoms/TagIcon';
 import type { MealItem } from '@/types/mealItem';
 import type { Product } from '@/types/product';
@@ -17,22 +16,6 @@ type MealItemConversionLineProps = {
   showName?: boolean;
   compactIcons?: boolean;
 };
-
-const Row = styled.View`
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const NameRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const IconRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: 2px;
-`;
 
 export const MealItemConversionLine: FC<MealItemConversionLineProps> = ({
   item,
@@ -53,30 +36,22 @@ export const MealItemConversionLine: FC<MealItemConversionLineProps> = ({
   });
 
   return (
-    <Row>
+    <View className="gap-1">
       {showName ? (
-        <NameRow>
+        <View className="flex-row items-center gap-1">
           {compactIcons ? (
-            <IconRow>
+            <View className="flex-row items-center gap-0.5">
               {sortProductTags(productTags).map((tag) => (
                 <TagIcon key={tag} tag={tag} size={16} />
               ))}
-            </IconRow>
+            </View>
           ) : null}
-          <Text $variant="body">{item.productName}</Text>
-        </NameRow>
+          <Text className="text-foreground text-base">{item.productName}</Text>
+        </View>
       ) : null}
-      <Text $variant="caption" $color="textSecondary">
-        {primaryLine}
-      </Text>
-      {equivalentLine ? (
-        <Text $variant="caption" $color="textSecondary">
-          {equivalentLine}
-        </Text>
-      ) : null}
-      <Text $variant="caption" $color="accent">
-        {carbsLine}
-      </Text>
-    </Row>
+      <Text className="text-muted text-sm">{primaryLine}</Text>
+      {equivalentLine ? <Text className="text-muted text-sm">{equivalentLine}</Text> : null}
+      <Text className="text-accent text-sm">{carbsLine}</Text>
+    </View>
   );
 };
