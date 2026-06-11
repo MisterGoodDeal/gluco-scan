@@ -1,19 +1,16 @@
+import { Accordion, AccordionLayoutTransition, Card } from 'heroui-native';
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { Text, View, useWindowDimensions } from 'react-native';
+import Animated from 'react-native-reanimated';
 
-import { FaIcon } from '@/components/atoms/FaIcon';
-import { ButtonIcon } from '@/components/atoms/ButtonIcon';
-import { GlassPanel } from '@/components/atoms/GlassPanel';
-import { Text } from '@/components/atoms/Text';
 import { MealItemThumbnails } from '@/components/molecules/MealItemThumbnails';
+import { AppButton } from '@/components/ui/AppButton';
 import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
 import { getCurrentLocale } from '@/i18n';
 import type { Meal } from '@/types/meal';
 import { formatDateLabel, formatTimeLabel } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
-import { listRowDivider } from '@/styles/listRow';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 
 type DayMealsViewProps = {
@@ -26,34 +23,6 @@ type DayMealsViewProps = {
   headerInset?: number;
 };
 
-const Page = styled(ScrollView)<{ $width: number }>`
-  width: ${({ $width }) => $width}px;
-  flex: 1;
-`;
-
-const MealRow = styled.View<{ $isLast?: boolean }>`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  padding: ${({ theme }) => theme.spacing.sm}px 0;
-  ${listRowDivider}
-`;
-
-const MealContent = styled.View`
-  flex: 1;
-  min-width: 0;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const MealInfo = styled.Pressable`
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const EmptyState = styled.View`
-  padding: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.md}px;
-  align-items: center;
-`;
-
 export const DayMealsView: FC<DayMealsViewProps> = ({
   dateKey,
   isToday,
@@ -64,7 +33,6 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   headerInset = 0,
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const { width } = useWindowDimensions();
   const locale = getCurrentLocale();
   const tabBarInset = useTabBarBottomInset();
@@ -80,63 +48,80 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   const hasMeals = sortedMeals.length > 0;
 
   return (
-    <Page
-      $width={width}
+    <Animated.ScrollView
+      style={{ width, flex: 1 }}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-        padding: theme.spacing.md,
-        paddingTop: theme.spacing.md + headerInset,
+        padding: 16,
+        paddingTop: 16 + headerInset,
         paddingBottom: tabBarInset,
       }}>
-      <Text $variant="subtitle" style={{ marginBottom: 16, textTransform: 'capitalize' }}>
+      <Text className="text-foreground text-lg font-semibold capitalize mb-4">
         {formatDateLabel(dateKey, locale)}
       </Text>
 
       {hasMeals ? (
-        <GlassPanel>
-          {sortedMeals.map((meal, index) => (
-            <MealRow key={meal.id} $isLast={index === sortedMeals.length - 1}>
-              <MealContent>
-                <MealInfo
-                  onPress={() => onMealPress(meal)}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('meals.viewDetailsA11y')}>
-                  <Text $variant="body">
+        <Accordion selectionMode="multiple" variant="surface">
+          {sortedMeals.map((meal) => (
+            <Accordion.Item key={meal.id} value={meal.id}>
+              <Accordion.Trigger>
+                <View className="flex-1 gap-0.5">
+                  <Text className="text-foreground text-base font-medium">
                     {t(getMealTypeLabelKey(meal.type))} ·{' '}
                     {formatTimeLabel(meal.createdAt, locale)}
                   </Text>
-                  <Text $variant="caption" $color="accent">
+                  <Text className="text-accent text-sm font-medium">
                     {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
                   </Text>
-                  <Text $variant="caption" $color="textSecondary">
+                </View>
+                <Accordion.Indicator />
+              </Accordion.Trigger>
+              <Accordion.Content>
+                <View className="gap-3">
+                  <Text className="text-muted text-sm">
                     {t('meals.itemCount', { count: meal.items.length })}
                   </Text>
                   <MealItemThumbnails items={meal.items} size={28} />
-                </MealInfo>
-              </MealContent>
-              <ButtonIcon
-                onPress={() => onMealDelete(meal.id)}
-                accessibilityLabel={t('meals.deleteA11y')}>
-                <FaIcon name="xmark" size={18} color={theme.colors.error} />
-              </ButtonIcon>
-            </MealRow>
+                  <View className="flex-row gap-2">
+                    <AppButton
+                      size="sm"
+                      variant="tertiary"
+                      className="flex-1"
+                      onPress={() => onMealPress(meal)}
+                      accessibilityLabel={t('meals.viewDetailsA11y')}>
+                      {t('meals.viewDetailsA11y')}
+                    </AppButton>
+                    <AppButton
+                      size="sm"
+                      variant="danger-soft"
+                      className="flex-1"
+                      onPress={() => onMealDelete(meal.id)}
+                      accessibilityLabel={t('meals.deleteA11y')}>
+                      {t('common.delete')}
+                    </AppButton>
+                  </View>
+                </View>
+              </Accordion.Content>
+            </Accordion.Item>
           ))}
-        </GlassPanel>
+        </Accordion>
       ) : (
-        <GlassPanel>
-          <EmptyState>
-            <Text $variant="body" $color="textSecondary" style={{ textAlign: 'center' }}>
+        <Card>
+          <Card.Body className="items-center px-4 py-6">
+            <Text className="text-muted text-base text-center">
               {isToday ? t('meals.emptyToday') : t('meals.emptyDay')}
             </Text>
-          </EmptyState>
-        </GlassPanel>
+          </Card.Body>
+        </Card>
       )}
 
       {hasMeals && (
-        <Text $variant="title" $color="accent" style={{ marginTop: 24, textAlign: 'center' }}>
-          {t('meals.dayTotal', { value: formatDecimal(dayTotalCarbs) })}
-        </Text>
+        <Animated.View layout={AccordionLayoutTransition}>
+          <Text className="text-accent text-2xl font-bold text-center mt-6">
+            {t('meals.dayTotal', { value: formatDecimal(dayTotalCarbs) })}
+          </Text>
+        </Animated.View>
       )}
-    </Page>
+    </Animated.ScrollView>
   );
 };
