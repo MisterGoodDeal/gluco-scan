@@ -22,20 +22,5 @@
         "bundleIdentifier": "com.mistergooddeal.glucoscan"
       }
     }
-  },
-  "experimental": {
-    "ios": {
-      "appExtensions": [
-        {
-          "targetName": "GlucoScanWidgets",
-          "bundleIdentifier": "com.mistergooddeal.glucoscan.GlucoScanWidgets",
-          "entitlements": {
-            "com.apple.security.application-groups": [
-              "group.com.mistergooddeal.glucoscan"
-            ]
-          }
-        }
-      ]
-    }
   }
 }
