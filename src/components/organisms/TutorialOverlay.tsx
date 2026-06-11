@@ -1,7 +1,6 @@
 import { type FC, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Platform, View, type LayoutRectangle } from 'react-native';
-import styled from 'styled-components/native';
 
 import { TutorialStepCard } from '@/components/molecules/TutorialStepCard';
 import { useTutorialCardBottomInset } from '@/hooks/useTutorialCardBottomInset';
@@ -11,10 +10,6 @@ import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { measureTutorialAnchorsWithRetry } from '@/utils/tutorialAnchors';
 import { navigateToTutorialStep } from '@/utils/tutorialNavigation';
-
-const Backdrop = styled.View`
-  flex: 1;
-`;
 
 const DIM_COLOR = 'rgba(0,0,0,0.45)';
 
@@ -150,10 +145,10 @@ export const TutorialOverlay: FC = () => {
 
   return (
     <Modal {...modalProps}>
-      <Backdrop>
+      <View style={{ flex: 1 }}>
         <SpotlightHole rect={spotlight} dimOnly={step.anchorIds.length === 0} />
         {stepCard}
-      </Backdrop>
+      </View>
     </Modal>
   );
 };

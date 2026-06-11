@@ -1,43 +1,10 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type ViewStyle } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { Text, View, type ViewStyle } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
+import { AppButton } from '@/components/ui/AppButton';
 import { TUTORIAL_STEPS } from '@/config/tutorialSteps';
-import { actionButtonStyles } from '@/styles/button';
 import { useTutorialStore } from '@/store/tutorial.store';
-
-const Card = styled.View`
-  border-radius: ${({ theme }) => theme.radius.md}px;
-  background-color: ${({ theme }) => theme.colors.sheet.background};
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
-  padding: ${({ theme }) => theme.spacing.md}px;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const ActionsRow = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const ActionsEnd = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const ActionButton = styled.Pressable<{ $primary?: boolean; $disabled?: boolean }>`
-  ${actionButtonStyles}
-  background-color: ${({ theme, $primary, $disabled }) => {
-    if ($disabled && $primary) return theme.colors.glass.background;
-    return $primary ? theme.colors.accent : theme.colors.glass.background;
-  }};
-  opacity: ${({ $disabled }) => ($disabled ? 0.55 : 1)};
-`;
 
 type TutorialStepCardProps = {
   stepIndex: number;
@@ -55,7 +22,6 @@ export const TutorialStepCard: FC<TutorialStepCardProps> = ({
   style,
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const mealCreateValidated = useTutorialStore((s) => s.mealCreateValidated);
 
   const step = TUTORIAL_STEPS[stepIndex];
@@ -66,40 +32,29 @@ export const TutorialStepCard: FC<TutorialStepCardProps> = ({
     !step.requiresAction || step.id !== 'meal-create' || mealCreateValidated;
 
   return (
-    <Card style={style}>
-      <Text $variant="subtitle">{t(step.titleKey)}</Text>
-      <Text $variant="body" $color="textSecondary">
-        {t(step.messageKey)}
-      </Text>
+    <View
+      className="rounded-3xl bg-overlay border border-border p-4 gap-2"
+      style={style}>
+      <Text className="text-foreground text-lg font-semibold">{t(step.titleKey)}</Text>
+      <Text className="text-muted text-base">{t(step.messageKey)}</Text>
       {step.requiresAction && step.id === 'meal-create' && !mealCreateValidated ? (
-        <Text $variant="caption" $color="accent">
-          {t('tutorial.steps.mealCreate.hint')}
-        </Text>
+        <Text className="text-accent text-sm">{t('tutorial.steps.mealCreate.hint')}</Text>
       ) : null}
-      <ActionsRow>
-        <ActionButton onPress={onQuit}>
-          <Text $variant="caption">{t('tutorial.quit.button')}</Text>
-        </ActionButton>
-        <ActionsEnd>
+      <View className="flex-row justify-between items-center mt-1">
+        <AppButton size="sm" variant="tertiary" onPress={onQuit}>
+          {t('tutorial.quit.button')}
+        </AppButton>
+        <View className="flex-row items-center gap-2">
           {stepIndex > 0 ? (
-            <ActionButton onPress={onPrevious}>
-              <Text $variant="caption">{t('common.previous')}</Text>
-            </ActionButton>
+            <AppButton size="sm" variant="tertiary" onPress={onPrevious}>
+              {t('common.previous')}
+            </AppButton>
           ) : null}
-          <ActionButton
-            $primary
-            $disabled={!canGoNext}
-            onPress={onNext}
-            disabled={!canGoNext}>
-            <Text
-              $variant="caption"
-              $color={canGoNext ? undefined : 'textSecondary'}
-              style={canGoNext ? { color: theme.colors.onAccent } : undefined}>
-              {isLast ? t('tutorial.finish') : t('common.next')}
-            </Text>
-          </ActionButton>
-        </ActionsEnd>
-      </ActionsRow>
-    </Card>
+          <AppButton size="sm" variant="primary" onPress={onNext} isDisabled={!canGoNext}>
+            {isLast ? t('tutorial.finish') : t('common.next')}
+          </AppButton>
+        </View>
+      </View>
+    </View>
   );
 };
