@@ -13,7 +13,6 @@
 		1FD4B0DF83C2CC21415FB9F5 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6829D1154648D381AA8F3C69 /* ExpoModulesProvider.swift */; };
 		24896D8A46AA4C63931D0D39 /* WidgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC5FAD5A96F48BB8CFD1620 /* WidgetModels.swift */; };
 		2649121841914C04A825AD59 /* CarbWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 760A352718DF48058F3542FF /* CarbWidgetView.swift */; };
-		A1B2C3D4E5F6478990ABCDE1 /* WidgetL10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A748990ABCDEF1 /* WidgetL10n.swift */; };
 		3574F53AC1164134BEC5DF7F /* fa-solid-900.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8E60A5E6EFBE44EE9A566446 /* fa-solid-900.ttf */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		44473D48B42E4656BE3D14BB /* GlucoScanWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 89DCD37B944747CCAE15DE4A /* GlucoScanWidgets.appex */; };
@@ -23,6 +22,7 @@
 		84DEBA0D6BC541FCB18E6E64 /* expo.icon in Resources */ = {isa = PBXBuildFile; fileRef = 435F1E06E731428D8C568960 /* expo.icon */; };
 		91E8BB311B4C4D959F591C91 /* WidgetStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101C635030A8477481E417E8 /* WidgetStorage.swift */; };
 		9A963145D31D64D3464EF004 /* libPods-GlucoScanWidgets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0624DB6F46327E2A065FDFF7 /* libPods-GlucoScanWidgets.a */; };
+		A1B2C3D4E5F6478990ABCDE1 /* WidgetL10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A748990ABCDEF1 /* WidgetL10n.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		EE4F6DC0627A442CAB359F7B /* CarbWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF88B7FAE220420A8CBA53C1 /* CarbWidgetProvider.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
@@ -67,7 +67,6 @@
 		6829D1154648D381AA8F3C69 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-glucoscan/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		6DD6B04CBEE04D859F7790E9 /* Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		760A352718DF48058F3542FF /* CarbWidgetView.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = CarbWidgetView.swift; sourceTree = "<group>"; };
-		B2C3D4E5F6A748990ABCDEF1 /* WidgetL10n.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = WidgetL10n.swift; sourceTree = "<group>"; };
 		8480BE3E7EC24D68803AEC47 /* GlucoScanWidgets.entitlements */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; path = GlucoScanWidgets.entitlements; sourceTree = "<group>"; };
 		89DCD37B944747CCAE15DE4A /* GlucoScanWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; fileEncoding = 9; includeInIndex = 0; path = GlucoScanWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A89CA1F787C4211BA92F02F /* Attributes.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = Attributes.swift; sourceTree = "<group>"; };
@@ -76,6 +75,7 @@
 		99B459EE67FE42F6BDAAAF0B /* WidgetKit.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = glucoscan/SplashScreen.storyboard; sourceTree = "<group>"; };
 		B0C9250C722FB5E7DEFB070A /* Pods-GlucoScanWidgets.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GlucoScanWidgets.release.xcconfig"; path = "Target Support Files/Pods-GlucoScanWidgets/Pods-GlucoScanWidgets.release.xcconfig"; sourceTree = "<group>"; };
+		B2C3D4E5F6A748990ABCDEF1 /* WidgetL10n.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = WidgetL10n.swift; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		C7DAC8EC341A4471B21C8A7B /* CarbWidgetBundle.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = CarbWidgetBundle.swift; sourceTree = "<group>"; };
 		C8AEF56EDBEF433EBC677FC6 /* Assets.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
