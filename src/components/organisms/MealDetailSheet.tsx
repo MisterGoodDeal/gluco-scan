@@ -60,17 +60,33 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
           contentContainerClassName="h-full">
           {meal ? (
             <BottomSheetScrollView
+              showsVerticalScrollIndicator={false}
               contentContainerStyle={{
                 padding: 24,
                 paddingBottom: insets.bottom + 24,
               }}>
-              <Text className="text-foreground text-lg font-semibold">
-                {t(getMealTypeLabelKey(meal.type))}
-              </Text>
-              <Text className="text-muted text-sm">
-                {formatTimeLabel(meal.createdAt, locale)}
-              </Text>
-              <Text className="text-muted text-sm mb-2">
+              <View className="flex-row items-start justify-between gap-3 pb-4 border-b border-separator">
+                <View className="flex-1 gap-1">
+                  <Text className="text-foreground text-lg font-semibold">
+                    {t(getMealTypeLabelKey(meal.type))}
+                  </Text>
+                  <Text className="text-muted text-sm">
+                    {formatTimeLabel(meal.createdAt, locale)}
+                  </Text>
+                </View>
+                <AppButton
+                  size="sm"
+                  variant="tertiary"
+                  className="shrink-0"
+                  onPress={() => {
+                    onClose();
+                    router.push(`/meal/edit?mealId=${meal.id}`);
+                  }}
+                  accessibilityLabel={t('meals.editMealA11y')}>
+                  {t('meals.editTitle')}
+                </AppButton>
+              </View>
+              <Text className="text-muted text-sm mt-2 mb-2">
                 {t('meals.itemCount', { count: meal.items.length })}
               </Text>
               {meal.items.map((item, index) => (
@@ -94,17 +110,6 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
                 {t('meals.mealTotal')}: {formatDecimal(meal.totalCarbs)} g
               </Text>
               <MealStatisticsSection meal={meal} productsById={productsById} />
-              <AppButton
-                size="sm"
-                variant="tertiary"
-                className="self-start mt-4"
-                onPress={() => {
-                  onClose();
-                  router.push(`/meal/edit?mealId=${meal.id}`);
-                }}
-                accessibilityLabel={t('meals.editMealA11y')}>
-                {t('meals.editTitle')}
-              </AppButton>
             </BottomSheetScrollView>
           ) : null}
         </BottomSheet.Content>

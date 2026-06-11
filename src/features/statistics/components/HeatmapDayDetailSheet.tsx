@@ -41,6 +41,7 @@ export const HeatmapDayDetailSheet: FC<HeatmapDayDetailSheetProps> = ({
           contentContainerClassName="h-full">
           {date ? (
             <BottomSheetScrollView
+              showsVerticalScrollIndicator={false}
               contentContainerStyle={{
                 padding: 24,
                 paddingBottom: insets.bottom + 24,
