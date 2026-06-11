@@ -3,6 +3,8 @@ import { type FC } from 'react';
 import { TextInput, type KeyboardTypeOptions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { FIELD_NO_BORDER_CLASSNAME } from '@/components/ui/fieldClassName';
+
 type SearchInputVariant = 'default' | 'plain';
 
 type SearchInputProps = {
@@ -31,6 +33,7 @@ export const SearchInput: FC<SearchInputProps> = ({
   const { t } = useTranslation();
 
   const className = [
+    FIELD_NO_BORDER_CLASSNAME,
     flex ? 'flex-1 min-w-0' : 'w-full',
     mono ? 'font-mono text-sm font-semibold' : '',
     editable ? '' : 'opacity-85',

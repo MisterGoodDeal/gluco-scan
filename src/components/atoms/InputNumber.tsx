@@ -1,6 +1,8 @@
 import { Input } from 'heroui-native';
 import { type FC } from 'react';
 
+import { FIELD_NO_BORDER_CLASSNAME } from '@/components/ui/fieldClassName';
+
 type InputNumberProps = {
   value: string;
   onChangeText: (text: string) => void;
@@ -15,7 +17,7 @@ export const InputNumber: FC<InputNumberProps> = ({
   placeholder = '100',
 }) => (
   <Input
-    className="min-w-[72px] text-center font-mono text-sm font-semibold"
+    className={`min-w-[72px] text-center font-mono text-sm font-semibold ${FIELD_NO_BORDER_CLASSNAME}`}
     placeholderColorClassName="accent-field-placeholder"
     value={value}
     onChangeText={onChangeText}
