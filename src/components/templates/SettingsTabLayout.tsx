@@ -1,19 +1,17 @@
-import { FaIcon } from '@/components/atoms/FaIcon';
 import { BlurTargetView } from 'expo-blur';
 import Constants from 'expo-constants';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useFocusEffect } from 'expo-router';
+import { Accordion, useThemeColor } from 'heroui-native';
 import { type FC, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { ScrollView, Text, View } from 'react-native';
 
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { PickerField } from '@/components/atoms/PickerField';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
-import { GlassPanel } from '@/components/atoms/GlassPanel';
-import { Text } from '@/components/atoms/Text';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
 import { CookingConversionSettings } from '@/components/molecules/CookingConversionSettings';
@@ -21,6 +19,10 @@ import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReport
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
 import { LanguagePickerSheet } from '@/components/organisms/LanguagePickerSheet';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppPressable } from '@/components/ui/AppPressable';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useAppToast } from '@/components/ui/useAppToast';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { getLanguageLabelKey } from '@/i18n';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
@@ -32,42 +34,30 @@ import type { GlobalUnit } from '@/types/globalUnit';
 import { exportToGsFile, importFromGsBytes } from '@/services/export.service';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
-import { Screen as AppScreen } from '@/styles/global';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
-import { actionButtonStyles, mutedButtonStyles } from '@/styles/button';
-import { listRowDivider } from '@/styles/listRow';
 
-const Section = styled.View`
-  padding: ${({ theme }) => theme.spacing.md}px;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
+type SectionItemProps = {
+  value: string;
+  title: string;
+  children: React.ReactNode;
+};
 
-const SectionTitleRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const UnitRow = styled.View<{ $isLast?: boolean }>`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.sm}px 0;
-  ${listRowDivider}
-`;
-
-const AddButton = styled.Pressable`
-  ${mutedButtonStyles}
-`;
-
-const ActionButton = styled.Pressable<{ $primary?: boolean }>`
-  ${actionButtonStyles}
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-`;
+const SectionItem: FC<SectionItemProps> = ({ value, title, children }) => (
+  <Accordion.Item value={value}>
+    <Accordion.Trigger>
+      <Text className="text-foreground text-base font-medium flex-1">{title}</Text>
+      <Accordion.Indicator />
+    </Accordion.Trigger>
+    <Accordion.Content>
+      <View className="gap-2 pb-2">{children}</View>
+    </Accordion.Content>
+  </Accordion.Item>
+);
 
 export const SettingsTabLayout: FC = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const toast = useAppToast();
+  const dangerColor = useThemeColor('danger');
   const blurTargetRef = useRef<View>(null);
   const { headerHeight, onHeaderLayout } = useBlurHeaderInset(0);
   const hydrate = useSettingsStore((s) => s.hydrate);
@@ -82,6 +72,7 @@ export const SettingsTabLayout: FC = () => {
   const [editingUnit, setEditingUnit] = useState<GlobalUnit | null>(null);
   const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
   const [isLanguageSheetOpen, setIsLanguageSheetOpen] = useState(false);
+  const [unitIdToDelete, setUnitIdToDelete] = useState<string | null>(null);
   const currentLocale = usePreferencesStore((s) => s.locale);
   const setLocale = usePreferencesStore((s) => s.setLocale);
   const { formatEquivalentMass } = useMassDisplay();
@@ -128,19 +119,25 @@ export const SettingsTabLayout: FC = () => {
     }
   };
 
+  const handleDeleteUnitConfirmed = useCallback(() => {
+    if (!unitIdToDelete) return;
+    void removeUnit(unitIdToDelete)
+      .then(() => toast.success(t('settings.unitDeleted')))
+      .catch(() => toast.error(t('settings.unitDeleteError')));
+    setUnitIdToDelete(null);
+  }, [unitIdToDelete, removeUnit, t, toast]);
+
   const handleExport = async () => {
     if (isTutorialRunning) {
-      Alert.alert(t('tutorial.settings.disabledDuringTutorial'));
+      toast.warning(t('tutorial.settings.disabledDuringTutorial'));
       return;
     }
     setExporting(true);
     try {
       await exportToGsFile();
-      triggerNotificationSuccess();
-      Alert.alert(t('settings.exportSuccess'));
+      toast.success(t('settings.exportSuccess'));
     } catch {
-      triggerNotificationError();
-      Alert.alert(t('settings.importError'));
+      toast.error(t('settings.importError'));
     } finally {
       setExporting(false);
     }
@@ -148,7 +145,7 @@ export const SettingsTabLayout: FC = () => {
 
   const handleImport = async () => {
     if (isTutorialRunning) {
-      Alert.alert(t('tutorial.settings.disabledDuringTutorial'));
+      toast.warning(t('tutorial.settings.disabledDuringTutorial'));
       return;
     }
     try {
@@ -164,142 +161,137 @@ export const SettingsTabLayout: FC = () => {
       await importFromGsBytes(bytes, { mode: 'merge' });
       await hydrate();
       await hydrateCookingConversions();
-      triggerNotificationSuccess();
-      Alert.alert(t('settings.importSuccess'));
+      toast.success(t('settings.importSuccess'));
     } catch {
-      triggerNotificationError();
-      Alert.alert(t('settings.importError'));
+      toast.error(t('settings.importError'));
     } finally {
       setImporting(false);
     }
   };
 
   return (
-    <AppScreen>
+    <View className="flex-1 bg-background">
       <TabBarHeightReporter />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
         <ScrollView
           contentContainerStyle={{
-            paddingTop: headerHeight,
+            paddingTop: headerHeight + 8,
             paddingBottom: tabBarInset,
+            paddingHorizontal: 16,
           }}>
-          <Section>
-            <Text $variant="body">{t('settings.appearance')}</Text>
-            <Text $variant="caption" $color="textSecondary">
-              {t('settings.appearanceDescription')}
-            </Text>
-            <ThemePreferencePicker />
-          </Section>
+          <Accordion
+            selectionMode="multiple"
+            variant="surface"
+            defaultValue={['appearance']}>
+            <SectionItem value="appearance" title={t('settings.appearance')}>
+              <Text className="text-muted text-sm">{t('settings.appearanceDescription')}</Text>
+              <ThemePreferencePicker />
+            </SectionItem>
 
-          <Section>
-            <Text $variant="body">{t('settings.units')}</Text>
-            <Text $variant="caption" $color="textSecondary">
-              {t('settings.unitsDescription')}
-            </Text>
-            <UnitSystemPicker />
-          </Section>
+            <SectionItem value="units" title={t('settings.units')}>
+              <Text className="text-muted text-sm">{t('settings.unitsDescription')}</Text>
+              <UnitSystemPicker />
+            </SectionItem>
 
-          <Section>
-            <Text $variant="body">{t('settings.cookingConversions')}</Text>
-            <GlassPanel blurTarget={blurTargetRef}>
+            <SectionItem value="cooking" title={t('settings.cookingConversions')}>
               <CookingConversionSettings />
-            </GlassPanel>
-          </Section>
+            </SectionItem>
 
-          <Section>
-            <Text $variant="body">{t('settings.language')}</Text>
-            <PickerField
-              value={t(getLanguageLabelKey(currentLocale))}
-              onPress={() => setIsLanguageSheetOpen(true)}
-              accessibilityLabel={t('settings.language')}
-            />
-          </Section>
+            <SectionItem value="language" title={t('settings.language')}>
+              <PickerField
+                value={t(getLanguageLabelKey(currentLocale))}
+                onPress={() => setIsLanguageSheetOpen(true)}
+                accessibilityLabel={t('settings.language')}
+              />
+            </SectionItem>
 
-          <Section>
-            <Text $variant="body">{t('tutorial.settings.title')}</Text>
-            <Text $variant="caption" $color="textSecondary">
-              {t('tutorial.settings.relaunchDescription')}
-            </Text>
-            <ActionButton
-              $primary
-              onPress={() => void startTutorial()}
-              disabled={isTutorialRunning || isTutorialBusy}>
-              <Text $variant="caption">{t('tutorial.settings.relaunch')}</Text>
-            </ActionButton>
-          </Section>
+            <SectionItem value="tutorial" title={t('tutorial.settings.title')}>
+              <Text className="text-muted text-sm">
+                {t('tutorial.settings.relaunchDescription')}
+              </Text>
+              <AppButton
+                size="sm"
+                variant="primary"
+                onPress={() => void startTutorial()}
+                isDisabled={isTutorialRunning || isTutorialBusy}>
+                {t('tutorial.settings.relaunch')}
+              </AppButton>
+            </SectionItem>
+          </Accordion>
 
           <TutorialAnchor id="tutorial-settings-units">
-          <Section>
-            <SectionTitleRow>
-              <Text $variant="body">{t('settings.globalUnits')}</Text>
-              <AddButton onPress={openAddUnit} accessibilityLabel={t('settings.addUnit')}>
-                <Text $variant="caption" $color="accent">
-                  {t('settings.addUnit')}
-                </Text>
-              </AddButton>
-            </SectionTitleRow>
-            <GlassPanel blurTarget={blurTargetRef}>
-              {globalUnits.map((unit, index) => (
-                <UnitRow key={unit.id} $isLast={index === globalUnits.length - 1}>
-                  <Pressable onPress={() => openEditUnit(unit)}>
-                    <Text $variant="body">
-                      {unit.name} ({unit.abbreviation}) — {formatEquivalentMass(unit.equivalentInGrams)}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() =>
-                      Alert.alert(t('settings.deleteUnitConfirm'), '', [
-                        { text: t('common.cancel'), style: 'cancel' },
-                        {
-                          text: t('common.delete'),
-                          style: 'destructive',
-                          onPress: () => {
-                            void removeUnit(unit.id)
-                              .then(() => triggerNotificationSuccess())
-                              .catch(() => triggerNotificationError());
-                          },
-                        },
-                      ])
-                    }>
-                    <FaIcon name="xmark" size={16} color={theme.colors.error} />
-                  </Pressable>
-                </UnitRow>
-              ))}
-            </GlassPanel>
-          </Section>
+            <View className="mt-4">
+              <Accordion selectionMode="multiple" variant="surface">
+                <SectionItem value="globalUnits" title={t('settings.globalUnits')}>
+                  {globalUnits.map((unit, index) => (
+                    <View
+                      key={unit.id}
+                      className={`flex-row items-center justify-between py-2 ${
+                        index === globalUnits.length - 1 ? '' : 'border-b border-separator'
+                      }`}>
+                      <AppPressable onPress={() => openEditUnit(unit)} className="flex-1">
+                        <Text className="text-foreground text-base">
+                          {unit.name} ({unit.abbreviation}) —{' '}
+                          {formatEquivalentMass(unit.equivalentInGrams)}
+                        </Text>
+                      </AppPressable>
+                      <AppButton
+                        isIconOnly
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => setUnitIdToDelete(unit.id)}
+                        accessibilityLabel={t('common.delete')}>
+                        <FaIcon name="xmark" size={16} color={dangerColor} />
+                      </AppButton>
+                    </View>
+                  ))}
+                  <AppButton
+                    size="sm"
+                    variant="tertiary"
+                    onPress={openAddUnit}
+                    accessibilityLabel={t('settings.addUnit')}>
+                    {t('settings.addUnit')}
+                  </AppButton>
+                </SectionItem>
+              </Accordion>
+            </View>
           </TutorialAnchor>
 
           <TutorialAnchor id="tutorial-settings-data">
-          <Section>
-            <Text $variant="body">{t('settings.export')}</Text>
-            <Text $variant="caption" $color="textSecondary">
-              {t('settings.exportDescription')}
-            </Text>
-            <ActionButton $primary onPress={handleExport} disabled={isTutorialRunning}>
-              <Text $variant="caption">{t('settings.export')}</Text>
-            </ActionButton>
-          </Section>
+            <View className="mt-4">
+              <Accordion selectionMode="multiple" variant="surface">
+                <SectionItem value="export" title={t('settings.export')}>
+                  <Text className="text-muted text-sm">{t('settings.exportDescription')}</Text>
+                  <AppButton
+                    size="sm"
+                    variant="primary"
+                    onPress={() => void handleExport()}
+                    isDisabled={isTutorialRunning}>
+                    {t('settings.export')}
+                  </AppButton>
+                </SectionItem>
 
-          <Section>
-            <Text $variant="body">{t('settings.import')}</Text>
-            <Text $variant="caption" $color="textSecondary">
-              {t('settings.importDescription')}
-            </Text>
-            <ActionButton onPress={handleImport} disabled={isTutorialRunning}>
-              <Text $variant="caption">{t('settings.import')}</Text>
-            </ActionButton>
-          </Section>
+                <SectionItem value="import" title={t('settings.import')}>
+                  <Text className="text-muted text-sm">{t('settings.importDescription')}</Text>
+                  <AppButton
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => void handleImport()}
+                    isDisabled={isTutorialRunning}>
+                    {t('settings.import')}
+                  </AppButton>
+                </SectionItem>
+              </Accordion>
 
-          <Section>
-            <Text $variant="caption" $color="textSecondary">
-              Version {appVersion}
-            </Text>
-          </Section>
+              <Text className="text-muted text-xs text-center mt-4">
+                Version {appVersion}
+              </Text>
+            </View>
           </TutorialAnchor>
         </ScrollView>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
-          <Text $variant="subtitle">{t('settings.title')}</Text>
+          <Text className="text-foreground text-lg font-semibold">{t('settings.title')}</Text>
         </BlurScreenHeader>
       </BlurTargetView>
       <GlobalUnitFormModal
@@ -317,6 +309,16 @@ export const SettingsTabLayout: FC = () => {
         }}
         onClose={() => setIsLanguageSheetOpen(false)}
       />
-    </AppScreen>
+      <ConfirmDialog
+        isOpen={unitIdToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setUnitIdToDelete(null);
+        }}
+        title={t('settings.deleteUnitConfirm')}
+        confirmLabel={t('common.delete')}
+        destructive
+        onConfirm={handleDeleteUnitConfirmed}
+      />
+    </View>
   );
 };

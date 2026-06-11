@@ -1,29 +1,13 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components/native';
+import { Text, View } from 'react-native';
 
 import { InputNumber } from '@/components/atoms/InputNumber';
-import { Text } from '@/components/atoms/Text';
 import { TagChip } from '@/components/molecules/tag-chip/TagChip';
 import { DEFAULT_COOKING_CONVERSIONS } from '@/constants/cooking-conversions';
 import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import type { ProductTag } from '@/types/productTag';
 import { parseManualCarbs } from '@/utils/ean';
-
-const Section = styled.View`
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const Row = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const FactorInput = styled.View`
-  width: 72px;
-`;
 
 export const CookingConversionSettings: FC = () => {
   const { t } = useTranslation();
@@ -43,21 +27,19 @@ export const CookingConversionSettings: FC = () => {
   };
 
   return (
-    <Section>
-      <Text $variant="caption" $color="textSecondary">
-        {t('settings.cookingConversionsHint')}
-      </Text>
+    <View className="gap-2">
+      <Text className="text-muted text-sm">{t('settings.cookingConversionsHint')}</Text>
       {DEFAULT_COOKING_CONVERSIONS.map((entry) => (
-        <Row key={entry.tag}>
+        <View key={entry.tag} className="flex-row items-center justify-between gap-2">
           <TagChip tag={entry.tag} variant="expanded" />
-          <FactorInput>
+          <View className="w-[72px]">
             <InputNumber
               value={String(getFactor(entry.tag)).replace('.', ',')}
               onChangeText={(text) => void handleChange(entry.tag, text)}
             />
-          </FactorInput>
-        </Row>
+          </View>
+        </View>
       ))}
-    </Section>
+    </View>
   );
 };

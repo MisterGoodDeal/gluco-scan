@@ -1,27 +1,10 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components/native';
+import { Text, View } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
-import type { ThemePreference } from '@/styles/theme';
+import { AppPressable } from '@/components/ui/AppPressable';
+import type { ThemePreference } from '@/types/theme';
 import { usePreferencesStore } from '@/store/preferences.store';
-
-const Row = styled.View`
-  flex-direction: row;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const Option = styled.Pressable<{ $selected?: boolean }>`
-  flex: 1;
-  padding: ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  align-items: center;
-  background-color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.accentMuted : theme.colors.glass.background};
-  border-width: 1px;
-  border-color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.accent : theme.colors.glass.border};
-`;
 
 const OPTIONS: ThemePreference[] = ['system', 'light', 'dark'];
 
@@ -37,23 +20,28 @@ export const ThemePreferencePicker: FC = () => {
   };
 
   return (
-    <Row>
-      {OPTIONS.map((option) => (
-        <Option
-          key={option}
-          $selected={preference === option}
-          onPress={() => void setPreference(option)}
-          accessibilityRole="button"
-          accessibilityState={{ selected: preference === option }}
-          accessibilityLabel={labels[option]}>
-          <Text
-            $variant="caption"
-            $color={preference === option ? 'accent' : 'textSecondary'}
-            style={{ fontWeight: preference === option ? '600' : '500' }}>
-            {labels[option]}
-          </Text>
-        </Option>
-      ))}
-    </Row>
+    <View className="flex-row gap-1">
+      {OPTIONS.map((option) => {
+        const selected = preference === option;
+        return (
+          <AppPressable
+            key={option}
+            className={`flex-1 items-center rounded-lg border p-2 ${
+              selected ? 'border-accent bg-accent-soft' : 'border-border bg-surface-secondary'
+            }`}
+            onPress={() => void setPreference(option)}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            accessibilityLabel={labels[option]}>
+            <Text
+              className={`text-sm ${
+                selected ? 'text-accent font-semibold' : 'text-muted font-medium'
+              }`}>
+              {labels[option]}
+            </Text>
+          </AppPressable>
+        );
+      })}
+    </View>
   );
 };
