@@ -1,8 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useThemeColor } from 'heroui-native';
+import { Card, useThemeColor } from 'heroui-native';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { ProgressStep, ProgressSteps } from '@/components/meal-progress-steps';
+import { FONT_FAMILY } from '@/constants/typography';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FaIcon } from '@/components/atoms/FaIcon';
@@ -40,7 +42,8 @@ export const MealCreateLayout: FC = () => {
   const isEditing = Boolean(mealId);
   const { t } = useTranslation();
   const toast = useAppToast();
-  const [mutedColor, dangerColor] = useThemeColor(['muted', 'danger']);
+  const [mutedColor, dangerColor, accentColor, accentForeground, borderColor, foregroundColor] =
+    useThemeColor(['muted', 'danger', 'accent', 'accent-foreground', 'border', 'foreground']);
   const locale = getCurrentLocale();
   const step = useMealStore((s) => s.step);
   const setStep = useMealStore((s) => s.setStep);
@@ -169,6 +172,40 @@ export const MealCreateLayout: FC = () => {
   }, [hydrateSettings]);
 
   const draftTotal = draftItems.reduce((sum, item) => sum + item.carbs, 0);
+  const canGoNext = step !== 1 || draftItems.length > 0;
+
+  const progressStepScrollProps = useMemo(
+    () => ({
+      showsVerticalScrollIndicator: false as const,
+      keyboardShouldPersistTaps: 'handled' as const,
+      contentContainerStyle: { paddingBottom: 16 },
+    }),
+    [],
+  );
+
+  const progressStepsTheme = useMemo(
+    () => ({
+      activeStep: step,
+      topOffset: 4,
+      marginBottom: 8,
+      activeStepIconBorderColor: accentColor,
+      activeStepIconColor: 'transparent',
+      activeStepNumColor: accentColor,
+      completedStepIconColor: accentColor,
+      completedStepNumColor: accentForeground,
+      completedCheckColor: accentForeground,
+      progressBarColor: borderColor,
+      completedProgressBarColor: accentColor,
+      disabledStepIconColor: borderColor,
+      labelColor: mutedColor,
+      activeLabelColor: foregroundColor,
+      completedLabelColor: foregroundColor,
+      labelFontFamily: FONT_FAMILY.medium,
+      labelFontSize: 13,
+      activeLabelFontSize: 13,
+    }),
+    [accentColor, accentForeground, borderColor, foregroundColor, mutedColor, step],
+  );
 
   const onBarcodeScan = async (ean: string) => {
     const result = await handleScan(ean);
@@ -248,24 +285,17 @@ export const MealCreateLayout: FC = () => {
         <View className="w-[60px]" />
       </View>
 
-      <View className="flex-row justify-center gap-2 mb-4">
-        {[0, 1, 2].map((i) => (
-          <View
-            key={i}
-            className={`w-2 h-2 rounded-full ${step === i ? 'bg-accent' : 'bg-border'}`}
-          />
-        ))}
-      </View>
-
-      <ScrollView
-        style={{ flex: 1 }}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 16 }}>
-        {step === 0 && (
-          <>
-            <View className="m-4 mb-0 gap-1">
-              <Text className="text-muted text-sm">{t('meals.mealType')}</Text>
+      <ProgressSteps {...progressStepsTheme}>
+        <ProgressStep
+          label={t('meals.stepInfo')}
+          removeBtnRow
+          scrollable
+          scrollViewProps={progressStepScrollProps}>
+          <Card className="gap-4 p-4">
+            <View className="gap-1.5">
+              <Text className="text-foreground text-sm font-medium">{t('meals.mealType')}</Text>
               <AppSelect
+                triggerVariant="surface"
                 value={selectedMealType}
                 onValueChange={(option) => {
                   if (option) setDraftMeta({ type: option.value as MealType });
@@ -275,9 +305,10 @@ export const MealCreateLayout: FC = () => {
                 listLabel={t('meals.mealType')}
               />
             </View>
-            <View className="m-4 mb-0 gap-1">
-              <Text className="text-muted text-sm">{t('meals.date')}</Text>
+            <View className="gap-1.5">
+              <Text className="text-foreground text-sm font-medium">{t('meals.date')}</Text>
               <AppSelect
+                triggerVariant="surface"
                 value={selectedDate}
                 onValueChange={(option) => {
                   if (option) setDraftMeta({ dateKey: option.value });
@@ -288,11 +319,12 @@ export const MealCreateLayout: FC = () => {
                 scrollable
               />
             </View>
-            <View className="m-4 gap-1">
-              <Text className="text-muted text-sm">{t('meals.time')}</Text>
+            <View className="gap-1.5">
+              <Text className="text-foreground text-sm font-medium">{t('meals.time')}</Text>
               <View className="flex-row gap-2">
                 <View className="flex-1">
                   <AppSelect
+                    triggerVariant="surface"
                     value={selectedHour}
                     onValueChange={(option) => {
                       if (option) setDraftMeta({ hours: Number(option.value) });
@@ -305,6 +337,7 @@ export const MealCreateLayout: FC = () => {
                 </View>
                 <View className="flex-1">
                   <AppSelect
+                    triggerVariant="surface"
                     value={selectedMinute}
                     onValueChange={(option) => {
                       if (option) setDraftMeta({ minutes: Number(option.value) });
@@ -317,71 +350,70 @@ export const MealCreateLayout: FC = () => {
                 </View>
               </View>
             </View>
-          </>
-        )}
+          </Card>
+        </ProgressStep>
 
-        {step === 1 && (
-          <>
-            <View className="m-4 rounded-3xl overflow-hidden" style={{ height: hp('30%') }}>
-              <ScannerView
-                fill
-                onScan={onBarcodeScan}
-                isLoadingProduct={isLoading}
-                scanError={null}
-                scanWarning={null}
-                scanSuccessFlash={false}
-                isScanning={!isLoading && scannerActive}
-                enabled={scannerActive}
-                onClearError={clearMessages}
-              />
-            </View>
+        <ProgressStep
+          label={t('meals.stepFoods')}
+          removeBtnRow
+          scrollable
+          scrollViewProps={progressStepScrollProps}>
+          <View className="rounded-3xl overflow-hidden" style={{ height: hp('30%') }}>
+            <ScannerView
+              fill
+              onScan={onBarcodeScan}
+              isLoadingProduct={isLoading}
+              scanError={null}
+              scanWarning={null}
+              scanSuccessFlash={false}
+              isScanning={!isLoading && scannerActive}
+              enabled={scannerActive}
+              onClearError={clearMessages}
+            />
+          </View>
 
-            <AppPressable
-              className="mx-4 mb-4 flex-row items-center gap-2 rounded-2xl border border-border bg-surface p-4"
-              onPress={() => setSearchVisible(true)}
-              accessibilityLabel={t('meals.searchProduct')}>
-              <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
-              <Text className="flex-1 text-muted text-base">
-                {t('meals.searchSpotlightPlaceholder')}
-              </Text>
-            </AppPressable>
-
-            <View className="m-4 gap-2">
-              <Text className="text-foreground text-base font-medium">
-                {t('meals.stepFoods')}
-              </Text>
-              {draftItems.length > 0 ? (
-                <Text className="text-muted text-sm">{t('meals.editItemHint')}</Text>
-              ) : null}
-              {draftItems.length === 0 ? (
-                <Text className="text-muted text-sm">{t('scanner.scanProduct')}</Text>
-              ) : (
-                draftItems.map((item, index) =>
-                  renderDraftItem(item, index === draftItems.length - 1),
-                )
-              )}
-            </View>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            {draftItems.map((item, index) => (
-              <View key={item.id} className="mx-4">
-                {renderDraftItem(item, index === draftItems.length - 1)}
-              </View>
-            ))}
-            <Text className="text-accent text-2xl font-bold text-center mt-6">
-              {t('meals.mealTotal')}: {formatDecimal(draftTotal)} g
+          <AppPressable
+            className="mt-4 flex-row items-center gap-2 rounded-2xl border border-border bg-surface p-4"
+            onPress={() => setSearchVisible(true)}
+            accessibilityLabel={t('meals.searchProduct')}>
+            <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
+            <Text className="flex-1 text-muted text-base">
+              {t('meals.searchSpotlightPlaceholder')}
             </Text>
-            <View className="m-6 self-center">
-              <AppButton variant="primary" onPress={() => void handleSave()}>
-                {t('meals.saveMeal')}
-              </AppButton>
-            </View>
-          </>
-        )}
-      </ScrollView>
+          </AppPressable>
+
+          <View className="mt-4 gap-2">
+            {draftItems.length > 0 ? (
+              <Text className="text-muted text-sm">{t('meals.editItemHint')}</Text>
+            ) : null}
+            {draftItems.length === 0 ? (
+              <Text className="text-muted text-sm">{t('scanner.scanProduct')}</Text>
+            ) : (
+              draftItems.map((item, index) =>
+                renderDraftItem(item, index === draftItems.length - 1),
+              )
+            )}
+          </View>
+        </ProgressStep>
+
+        <ProgressStep
+          label={t('meals.stepSummary')}
+          removeBtnRow
+          scrollable
+          scrollViewProps={progressStepScrollProps}>
+          {draftItems.map((item, index) => (
+            <View key={item.id}>{renderDraftItem(item, index === draftItems.length - 1)}</View>
+          ))}
+          <Text className="text-accent text-2xl font-bold text-center mt-6">
+            {t('meals.mealTotal')}: {formatDecimal(draftTotal)} g
+          </Text>
+          <View className="mt-6 self-center">
+            <AppButton variant="primary" onPress={() => void handleSave()}>
+              {t('meals.saveMeal')}
+            </AppButton>
+          </View>
+        </ProgressStep>
+      </ProgressSteps>
 
       {showTutorialBanner ? <TutorialMealCreateBanner /> : null}
       <View
@@ -395,7 +427,10 @@ export const MealCreateLayout: FC = () => {
           <View />
         )}
         {step < 2 && (
-          <AppButton variant="primary" onPress={() => setStep(step + 1)}>
+          <AppButton
+            variant="primary"
+            onPress={() => setStep(step + 1)}
+            isDisabled={!canGoNext}>
             {t('common.next')}
           </AppButton>
         )}
