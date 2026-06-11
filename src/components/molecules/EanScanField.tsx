@@ -1,56 +1,21 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { FaIcon } from '@/components/atoms/FaIcon';
+import { FieldError, useThemeColor } from 'heroui-native';
 import { type FC, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { ActivityIndicator, Text, View } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
-import { mutedButtonStyles, primaryButtonStyles } from '@/styles/button';
+import { FaIcon } from '@/components/atoms/FaIcon';
+import { AppButton, AppButtonLabel } from '@/components/ui/AppButton';
+import { isValidEan } from '@/utils/ean';
 import { triggerImpactLight, triggerNotificationError } from '@/utils/haptics';
 
 type EanScanFieldProps = {
   onScan: (ean: string) => void;
 };
 
-const ScanButton = styled.Pressable`
-  align-self: flex-start;
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-  ${mutedButtonStyles}
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const ScannerContainer = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-  height: 140px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  overflow: hidden;
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
-`;
-
-const Camera = styled(CameraView)`
-  flex: 1;
-`;
-
-const PermissionHint = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-  padding: ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
-  background-color: ${({ theme }) => theme.colors.glass.background};
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const PermissionButton = styled.Pressable`
-  align-self: flex-start;
-  ${primaryButtonStyles}
-`;
-
 export const EanScanField: FC<EanScanFieldProps> = ({ onScan }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const accentColor = useThemeColor('accent');
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
@@ -94,47 +59,50 @@ export const EanScanField: FC<EanScanFieldProps> = ({ onScan }) => {
 
   return (
     <>
-      <ScanButton
-        onPress={handleToggleScan}
-        accessibilityLabel={isScanning ? t('modal.stopScanA11y') : t('modal.scanEanA11y')}
-        accessibilityRole="button">
+      <AppButton
+        size="sm"
+        variant="tertiary"
+        className="self-start mt-2"
+        onPress={() => void handleToggleScan()}
+        accessibilityLabel={isScanning ? t('modal.stopScanA11y') : t('modal.scanEanA11y')}>
         {isScanning ? (
-          <ActivityIndicator color={theme.colors.accent} size="small" />
+          <ActivityIndicator color={accentColor} size="small" />
         ) : (
-          <FaIcon name="barcode" size={16} color={theme.colors.accent} />
+          <FaIcon name="barcode" size={16} color={accentColor} />
         )}
-        <Text $variant="caption" $color="accent">
+        <AppButtonLabel>
           {isScanning ? t('modal.stopScanA11y') : t('modal.scanPlaceholder')}
-        </Text>
-      </ScanButton>
+        </AppButtonLabel>
+      </AppButton>
 
-      {scanError && (
-        <Text $variant="caption" $color="error" style={{ marginTop: 4 }}>
-          {scanError}
-        </Text>
-      )}
+      <FieldError isInvalid={scanError !== null} className="mt-1">
+        {scanError ?? ''}
+      </FieldError>
 
       {isScanning && permission?.granted && (
-        <ScannerContainer>
-          <Camera
+        <View className="mt-2 h-[140px] rounded-lg overflow-hidden border border-border">
+          <CameraView
+            style={{ flex: 1 }}
             facing="back"
             barcodeScannerSettings={{
               barcodeTypes: ['ean13', 'ean8', 'upc_a'],
             }}
             onBarcodeScanned={handleBarcodeScanned}
           />
-        </ScannerContainer>
+        </View>
       )}
 
       {isScanning && permission && !permission.granted && (
-        <PermissionHint>
-          <Text $variant="caption" $color="textSecondary">
-            {t('modal.cameraRequired')}
-          </Text>
-          <PermissionButton onPress={requestPermission}>
-            <Text $variant="caption">{t('common.authorize')}</Text>
-          </PermissionButton>
-        </PermissionHint>
+        <View className="mt-2 p-2 rounded-lg border border-border bg-surface gap-2">
+          <Text className="text-muted text-sm">{t('modal.cameraRequired')}</Text>
+          <AppButton
+            size="sm"
+            variant="primary"
+            className="self-start"
+            onPress={() => void requestPermission()}>
+            {t('common.authorize')}
+          </AppButton>
+        </View>
       )}
     </>
   );

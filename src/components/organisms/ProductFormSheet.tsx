@@ -1,25 +1,22 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  type BottomSheetModal as BottomSheetModalType,
-} from '@gorhom/bottom-sheet';
-import { FaIcon } from '@/components/atoms/FaIcon';
-import { type ComponentProps, type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheet, FieldError, useThemeColor } from 'heroui-native';
+import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable } from 'react-native';
+import { ActivityIndicator, Alert, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import styled, { useTheme } from 'styled-components/native';
 
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { ProductImage } from '@/components/atoms/ProductImage';
 import { SearchInput } from '@/components/atoms/SearchInput';
-import { Text } from '@/components/atoms/Text';
 import { ProductEanListEditor } from '@/components/molecules/ProductEanListEditor';
 import { ProductUnitFormModal } from '@/components/organisms/ProductUnitFormModal';
 import { ProductTagPicker } from '@/components/molecules/ProductTagPicker';
 import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppPressable } from '@/components/ui/AppPressable';
+import { useAppToast } from '@/components/ui/useAppToast';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
 import { getErrorMessage } from '@/services/errors';
@@ -32,13 +29,9 @@ import type { Product } from '@/types/product';
 import type { ProductTag } from '@/types/productTag';
 import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
-import { useBottomSheetModalVisibility } from '@/hooks/useBottomSheetModalVisibility';
-import { getBottomSheetProps, getBottomSheetScrollPadding } from '@/components/navigation/bottomSheet';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
-import { listRowDivider } from '@/styles/listRow';
-import { actionButtonStyles, mutedButtonStyles } from '@/styles/button';
 import {
   deleteLocalProductImage,
   deleteLocalProductImageById,
@@ -64,100 +57,21 @@ type ProductFormSheetProps = {
   onClose: () => void;
 };
 
-const SheetHeader = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.md}px ${({ theme }) => theme.spacing.lg}px;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
-`;
-
-const Field = styled.View`
-  gap: ${({ theme }) => theme.spacing.xs}px;
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const InputRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const InputWrap = styled.View`
-  flex: 1;
-`;
-
-const PhotoRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md}px;
-  margin-top: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const PhotoActions = styled.View`
-  flex: 1;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const PhotoButton = styled(Pressable)`
-  align-self: flex-start;
-  ${mutedButtonStyles}
-`;
-
-const UnitsSection = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const SectionTitleRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const UnitRow = styled.View<{ $isLast?: boolean }>`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.sm}px 0;
-  ${listRowDivider}
-`;
-
-const UnitInfo = styled(Pressable)`
-  flex: 1;
-  padding-right: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const AddUnitButton = styled.Pressable`
-  ${mutedButtonStyles}
-`;
-
-const FooterActions = styled.View`
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme }) => theme.spacing.lg}px;
-  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
-`;
-
-const ActionButton = styled.Pressable<{ $primary?: boolean }>`
-  ${actionButtonStyles}
-`;
-
 export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   visible,
   product,
   onClose,
 }) => {
   const { t } = useTranslation();
+  const toast = useAppToast();
   const { formatEquivalentMass } = useMassDisplay();
-  const theme = useTheme();
+  const [accentColor, mutedColor, dangerColor, accentForeground] = useThemeColor([
+    'accent',
+    'muted',
+    'danger',
+    'accent-foreground',
+  ]);
   const insets = useSafeAreaInsets();
-  const sheetRef = useRef<BottomSheetModalType>(null);
-  const { markDismissed } = useBottomSheetModalVisibility(sheetRef, visible);
-  const snapPoints = useMemo(() => ['90%'], []);
   const tutorialStatus = useTutorialStore((s) => s.status);
   const tutorialStep = useTutorialStore((s) => s.currentStep);
   const productFormStepIndex = getTutorialInlineStepIndex('product-form');
@@ -180,13 +94,15 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const [tags, setTags] = useState<ProductTag[]>([]);
   const [tagsTouched, setTagsTouched] = useState(false);
   const [cookingFactorText, setCookingFactorText] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const userConversions = useCookingConversionStore((s) => s.conversions);
 
-  const showError = useCallback((message: string) => {
-    setError(message);
-    triggerNotificationError();
-  }, []);
+  const showError = useCallback(
+    (message: string) => {
+      toast.error(message);
+    },
+    [toast],
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isLookupLoading, setIsLookupLoading] = useState(false);
 
@@ -197,13 +113,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const getFormProductId = useCallback(
     () => product?.id ?? (draftProductIdRef.current ??= generateId()),
     [product?.id],
-  );
-
-  const renderBackdrop = useCallback(
-    (props: ComponentProps<typeof BottomSheetBackdrop>) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
-    ),
-    [],
   );
 
   useEffect(() => {
@@ -223,23 +132,18 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     setCookingFactorText(
       product?.customCookingFactor != null ? String(product.customCookingFactor).replace('.', ',') : '',
     );
-    setError(null);
+    setSubmitted(false);
     setUnitModalVisible(false);
     setEditingUnit(null);
   }, [visible, product]);
 
   const handleDismiss = useCallback(() => {
-    markDismissed();
     if (!product) {
       const draftId = draftProductIdRef.current;
       if (draftId) deleteLocalProductImageById(draftId);
     }
     onClose();
-  }, [markDismissed, onClose, product]);
-
-  const requestDismiss = useCallback(() => {
-    sheetRef.current?.dismiss();
-  }, []);
+  }, [onClose, product]);
 
   const applyOffPartial = useCallback((partial: PartialOffProduct) => {
     if (partial.name) setName(partial.name);
@@ -319,7 +223,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const fetchFromOff = useCallback(
     async (ean: string): Promise<boolean> => {
       setIsLookupLoading(true);
-      setError(null);
       try {
         const partial = await fetchOffPartialByEAN(ean);
         const hasData =
@@ -375,6 +278,10 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const showCookingSection = hasCookingConversion(previewProduct, userConversions);
   const resolvedCookingFactor = getCookingFactor(previewProduct, userConversions);
 
+  const nameInvalid = submitted && name.trim().length === 0;
+  const carbsInvalid = submitted && parseManualCarbs(carbsText) === null;
+  const eansInvalid = submitted && eans.some((code) => !isValidEan(code));
+
   const openAddUnit = () => {
     setEditingUnit(null);
     setUnitModalVisible(true);
@@ -401,21 +308,13 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   };
 
   const handleSave = async () => {
+    setSubmitted(true);
     const trimmedName = name.trim();
     const carbs = parseManualCarbs(carbsText);
-    if (!trimmedName) {
-      showError(t('modal.nameRequired'));
+    const hasInvalidEan = eans.some((code) => !isValidEan(code));
+    if (!trimmedName || carbs === null || hasInvalidEan) {
+      triggerNotificationError();
       return;
-    }
-    if (carbs === null) {
-      showError(t('modal.invalidCarbs'));
-      return;
-    }
-    for (const code of eans) {
-      if (!isValidEan(code)) {
-        showError(t('modal.invalidEan'));
-        return;
-      }
     }
     const conflict = await productEanRepository.findConflicts(eans, product?.id);
     if (conflict) {
@@ -466,7 +365,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         }
       }
       triggerNotificationSuccess();
-      requestDismiss();
+      handleDismiss();
     } catch (err) {
       showError(getErrorMessage(err));
     } finally {
@@ -476,199 +375,195 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   return (
     <>
-      <BottomSheetModal
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        enablePanDownToClose={!showTutorialBanner}
-        onDismiss={handleDismiss}
-        backdropComponent={renderBackdrop}
-        {...getBottomSheetProps(theme)}
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize">
-        <BottomSheetScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            paddingHorizontal: theme.spacing.lg,
-            ...getBottomSheetScrollPadding(insets.bottom, theme.spacing.lg),
-          }}>
-          <SheetHeader>
-            <Text $variant="subtitle">{sheetTitle}</Text>
-            <Pressable onPress={requestDismiss} hitSlop={8}>
-              <Text $variant="body" $color="accent">
-                {t('common.cancel')}
-              </Text>
-            </Pressable>
-          </SheetHeader>
+      <BottomSheet isOpen={visible} onOpenChange={(open) => !open && handleDismiss()}>
+        <BottomSheet.Portal>
+          <BottomSheet.Overlay />
+          <BottomSheet.Content
+            snapPoints={['90%']}
+            enableOverDrag={false}
+            enableDynamicSizing={false}
+            enablePanDownToClose={!showTutorialBanner}
+            contentContainerClassName="h-full"
+            keyboardBehavior="interactive"
+            keyboardBlurBehavior="restore"
+            android_keyboardInputMode="adjustResize">
+            <BottomSheetScrollView
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{
+                paddingHorizontal: 24,
+                paddingBottom: insets.bottom + 24,
+              }}>
+              <View className="flex-row items-center justify-between py-4 border-b border-separator">
+                <Text className="text-foreground text-lg font-semibold">{sheetTitle}</Text>
+                <AppPressable onPress={handleDismiss} hitSlop={8}>
+                  <Text className="text-accent text-base">{t('common.cancel')}</Text>
+                </AppPressable>
+              </View>
 
-          <Field>
-            <Text $variant="caption" $color="textSecondary">
-              {t('modal.eanLabel')}
-            </Text>
-            <ProductEanListEditor eans={eans} onChange={setEans} onScan={handleLookup} />
-          </Field>
+              <View className="gap-1 mt-4">
+                <Text className="text-muted text-sm">{t('modal.eanLabel')}</Text>
+                <ProductEanListEditor eans={eans} onChange={setEans} onScan={handleLookup} />
+                <FieldError isInvalid={eansInvalid}>{t('modal.invalidEan')}</FieldError>
+              </View>
 
-          <Field>
-            <Text $variant="caption" $color="textSecondary">
-              {t('modal.nameLabel')}
-            </Text>
-            <InputRow>
-              <InputWrap>
-                <SearchInput
-                  value={name}
-                  onChangeText={setName}
-                  placeholder={t('modal.namePlaceholder')}
-                  flex
+              <View className="gap-1 mt-4">
+                <Text className="text-muted text-sm">{t('modal.nameLabel')}</Text>
+                <View className="flex-row items-center gap-2">
+                  <View className="flex-1">
+                    <SearchInput
+                      value={name}
+                      onChangeText={setName}
+                      placeholder={t('modal.namePlaceholder')}
+                      flex
+                    />
+                  </View>
+                  <ButtonIcon
+                    onPress={() => {
+                      if (!canRefreshFromOff || isLookupLoading) return;
+                      void handleRefreshFromOff();
+                    }}
+                    accessibilityLabel={t('products.refreshFromOffA11y')}
+                    accessibilityState={{ disabled: !canRefreshFromOff || isLookupLoading }}>
+                    {isLookupLoading ? (
+                      <ActivityIndicator color={accentColor} size="small" />
+                    ) : (
+                      <FaIcon
+                        name="arrows-rotate"
+                        size={18}
+                        color={canRefreshFromOff ? accentColor : mutedColor}
+                      />
+                    )}
+                  </ButtonIcon>
+                </View>
+                <FieldError isInvalid={nameInvalid}>{t('modal.nameRequired')}</FieldError>
+              </View>
+
+              <View className="gap-1 mt-4">
+                <Text className="text-muted text-sm">{t('modal.carbsLabel')}</Text>
+                <InputNumber value={carbsText} onChangeText={setCarbsText} />
+                <FieldError isInvalid={carbsInvalid}>{t('modal.invalidCarbs')}</FieldError>
+              </View>
+
+              <View className="gap-1 mt-4">
+                <Text className="text-muted text-sm">{t('products.tagsSection')}</Text>
+                <ProductTagPicker
+                  value={tags}
+                  onChange={(nextTags) => {
+                    setTagsTouched(true);
+                    setTags(nextTags);
+                  }}
                 />
-              </InputWrap>
-              <ButtonIcon
-                onPress={() => {
-                  if (!canRefreshFromOff || isLookupLoading) return;
-                  void handleRefreshFromOff();
-                }}
-                accessibilityLabel={t('products.refreshFromOffA11y')}
-                accessibilityState={{ disabled: !canRefreshFromOff || isLookupLoading }}>
-                {isLookupLoading ? (
-                  <ActivityIndicator color={theme.colors.accent} size="small" />
+              </View>
+
+              {showCookingSection && resolvedCookingFactor != null ? (
+                <View className="gap-1 mt-4">
+                  <Text className="text-muted text-sm">{t('products.cookingConversion')}</Text>
+                  <TagChipList tags={tags} variant="expanded" />
+                  <Text className="text-muted text-sm mt-2">{t('products.cookingFactor')}</Text>
+                  <InputNumber value={cookingFactorText} onChangeText={setCookingFactorText} />
+                  <Text className="text-muted text-sm mt-2">
+                    {t('products.cookingConversionPreview', {
+                      raw: '100',
+                      rawUnit: t('common.gramsUnit'),
+                      cooked: String(convertRawToCooked(100, resolvedCookingFactor)).replace('.', ','),
+                      cookedUnit: t('common.gramsUnit'),
+                    })}
+                  </Text>
+                </View>
+              ) : null}
+
+              <View className="gap-1 mt-4">
+                <Text className="text-muted text-sm">{t('products.photo')}</Text>
+                <View className="flex-row items-center gap-4 mt-1">
+                  {imageUrl ? <ProductImage uri={imageUrl} size={64} /> : null}
+                  <View className="flex-1 gap-1">
+                    <AppButton
+                      size="sm"
+                      variant="tertiary"
+                      className="self-start"
+                      onPress={handlePickPhoto}
+                      accessibilityLabel={
+                        imageUrl ? t('products.changePhoto') : t('products.addPhoto')
+                      }>
+                      {imageUrl ? t('products.changePhoto') : t('products.addPhoto')}
+                    </AppButton>
+                    {imageUrl ? (
+                      <AppButton
+                        size="sm"
+                        variant="danger-soft"
+                        className="self-start"
+                        onPress={handleRemovePhoto}
+                        accessibilityLabel={t('products.removePhotoA11y')}>
+                        {t('products.removePhoto')}
+                      </AppButton>
+                    ) : null}
+                    {imageUrl ? (
+                      <Text className="text-muted text-sm">
+                        {isRemoteProductImage(imageUrl)
+                          ? t('products.photoFromOff')
+                          : t('products.photoCustom')}
+                      </Text>
+                    ) : null}
+                  </View>
+                </View>
+              </View>
+
+              <View className="mt-4">
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text className="text-foreground text-base font-medium">
+                    {t('products.customUnits')}
+                  </Text>
+                  <AppButton
+                    size="sm"
+                    variant="tertiary"
+                    onPress={openAddUnit}
+                    accessibilityLabel={t('products.addUnit')}>
+                    {t('products.addUnit')}
+                  </AppButton>
+                </View>
+                {units.length === 0 ? (
+                  <Text className="text-muted text-sm">{t('products.noCustomUnits')}</Text>
                 ) : (
-                  <FaIcon
-                    name="arrows-rotate"
-                    size={18}
-                    color={canRefreshFromOff ? theme.colors.accent : theme.colors.textSecondary}
-                  />
+                  units.map((unit, index) => (
+                    <View
+                      key={unit.id}
+                      className={`flex-row items-center justify-between py-2 ${
+                        index === units.length - 1 ? '' : 'border-b border-separator'
+                      }`}>
+                      <AppPressable className="flex-1 pr-2" onPress={() => openEditUnit(unit)}>
+                        <Text className="text-foreground text-sm">
+                          1 {unit.abbreviation} = {formatEquivalentMass(unit.equivalentInGrams)} ({unit.name})
+                        </Text>
+                      </AppPressable>
+                      <AppPressable onPress={() => removeUnit(unit.id)} hitSlop={8}>
+                        <FaIcon name="xmark" size={16} color={dangerColor} />
+                      </AppPressable>
+                    </View>
+                  ))
                 )}
-              </ButtonIcon>
-            </InputRow>
-          </Field>
+              </View>
 
-          <Field>
-            <Text $variant="caption" $color="textSecondary">
-              {t('modal.carbsLabel')}
-            </Text>
-            <InputNumber value={carbsText} onChangeText={setCarbsText} />
-          </Field>
+              {product?.id ? <ProductStatisticsSection productId={product.id} /> : null}
 
-          <Field>
-            <Text $variant="caption" $color="textSecondary">
-              {t('products.tagsSection')}
-            </Text>
-            <ProductTagPicker
-              value={tags}
-              onChange={(nextTags) => {
-                setTagsTouched(true);
-                setTags(nextTags);
-              }}
-            />
-          </Field>
-
-          {showCookingSection && resolvedCookingFactor != null ? (
-            <Field>
-              <Text $variant="caption" $color="textSecondary">
-                {t('products.cookingConversion')}
-              </Text>
-              <TagChipList tags={tags} variant="expanded" />
-              <Text $variant="caption" $color="textSecondary" style={{ marginTop: 8 }}>
-                {t('products.cookingFactor')}
-              </Text>
-              <InputNumber value={cookingFactorText} onChangeText={setCookingFactorText} />
-              <Text $variant="caption" $color="textSecondary" style={{ marginTop: 8 }}>
-                {t('products.cookingConversionPreview', {
-                  raw: '100',
-                  rawUnit: t('common.gramsUnit'),
-                  cooked: String(convertRawToCooked(100, resolvedCookingFactor)).replace('.', ','),
-                  cookedUnit: t('common.gramsUnit'),
-                })}
-              </Text>
-            </Field>
-          ) : null}
-
-          <Field>
-            <Text $variant="caption" $color="textSecondary">
-              {t('products.photo')}
-            </Text>
-            <PhotoRow>
-              {imageUrl ? <ProductImage uri={imageUrl} size={64} /> : null}
-              <PhotoActions>
-                <PhotoButton
-                  onPress={handlePickPhoto}
-                  accessibilityLabel={imageUrl ? t('products.changePhoto') : t('products.addPhoto')}>
-                  <Text $variant="caption" $color="accent">
-                    {imageUrl ? t('products.changePhoto') : t('products.addPhoto')}
-                  </Text>
-                </PhotoButton>
-                {imageUrl ? (
-                  <PhotoButton
-                    onPress={handleRemovePhoto}
-                    accessibilityLabel={t('products.removePhotoA11y')}>
-                    <Text $variant="caption" $color="error">
-                      {t('products.removePhoto')}
-                    </Text>
-                  </PhotoButton>
-                ) : null}
-                {imageUrl ? (
-                  <Text $variant="caption" $color="textSecondary">
-                    {isRemoteProductImage(imageUrl)
-                      ? t('products.photoFromOff')
-                      : t('products.photoCustom')}
-                  </Text>
-                ) : null}
-              </PhotoActions>
-            </PhotoRow>
-          </Field>
-
-          <UnitsSection>
-            <SectionTitleRow>
-              <Text $variant="body">{t('products.customUnits')}</Text>
-              <AddUnitButton onPress={openAddUnit} accessibilityLabel={t('products.addUnit')}>
-                <Text $variant="caption" $color="accent">
-                  {t('products.addUnit')}
-                </Text>
-              </AddUnitButton>
-            </SectionTitleRow>
-            {units.length === 0 ? (
-              <Text $variant="caption" $color="textSecondary">
-                {t('products.noCustomUnits')}
-              </Text>
-            ) : (
-              units.map((unit, index) => (
-                <UnitRow key={unit.id} $isLast={index === units.length - 1}>
-                  <UnitInfo onPress={() => openEditUnit(unit)}>
-                    <Text $variant="caption">
-                      1 {unit.abbreviation} = {formatEquivalentMass(unit.equivalentInGrams)} ({unit.name})
-                    </Text>
-                  </UnitInfo>
-                  <Pressable onPress={() => removeUnit(unit.id)} hitSlop={8}>
-                    <FaIcon name="xmark" size={16} color={theme.colors.error} />
-                  </Pressable>
-                </UnitRow>
-              ))
-            )}
-          </UnitsSection>
-
-          {product?.id ? <ProductStatisticsSection productId={product.id} /> : null}
-
-          {error && (
-            <Text $variant="caption" $color="error" style={{ marginTop: 8 }}>
-              {error}
-            </Text>
-          )}
-
-          <FooterActions>
-            <ActionButton onPress={requestDismiss} disabled={isSaving}>
-              <Text $variant="caption">{t('common.cancel')}</Text>
-            </ActionButton>
-            <ActionButton $primary onPress={handleSave} disabled={isSaving}>
-              {isSaving ? (
-                <ActivityIndicator color={theme.colors.onAccent} size="small" />
-              ) : (
-                <Text $variant="caption" style={{ color: theme.colors.onAccent }}>
-                  {t('common.save')}
-                </Text>
-              )}
-            </ActionButton>
-          </FooterActions>
-        </BottomSheetScrollView>
-      </BottomSheetModal>
+              <View className="flex-row items-center justify-end gap-2 mt-6 mb-8">
+                <AppButton variant="ghost" onPress={handleDismiss} isDisabled={isSaving}>
+                  {t('common.cancel')}
+                </AppButton>
+                <AppButton
+                  variant="primary"
+                  onPress={() => void handleSave()}
+                  isDisabled={isSaving}>
+                  {isSaving ? (
+                    <ActivityIndicator color={accentForeground} size="small" />
+                  ) : (
+                    t('common.save')
+                  )}
+                </AppButton>
+              </View>
+            </BottomSheetScrollView>
+          </BottomSheet.Content>
+        </BottomSheet.Portal>
+      </BottomSheet>
 
       <ProductUnitFormModal
         visible={unitModalVisible}

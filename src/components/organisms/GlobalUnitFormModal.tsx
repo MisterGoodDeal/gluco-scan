@@ -1,26 +1,14 @@
-import { BlurView } from 'expo-blur';
+import { Dialog, FieldError } from 'heroui-native';
 import { type FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
-import { GlassPanel } from '@/components/atoms/GlassPanel';
 import { InputNumber } from '@/components/atoms/InputNumber';
 import { SearchInput } from '@/components/atoms/SearchInput';
-import { Text } from '@/components/atoms/Text';
-import { actionButtonStyles } from '@/styles/button';
+import { AppButton } from '@/components/ui/AppButton';
 import type { GlobalUnit } from '@/types/globalUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { parseManualCarbs } from '@/utils/ean';
-import { topScreenSpace } from '@/utils/screen';
 import { triggerNotificationError } from '@/utils/haptics';
 
 type GlobalUnitFormModalProps = {
@@ -30,29 +18,6 @@ type GlobalUnitFormModalProps = {
   onSave: (data: Omit<GlobalUnit, 'id'> | GlobalUnit) => Promise<void>;
 };
 
-const Overlay = styled.Pressable`
-  flex-grow: 1;
-  justify-content: center;
-  width: 100%;
-`;
-
-const Field = styled.View`
-  gap: ${({ theme }) => theme.spacing.xs}px;
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const FooterActions = styled.View`
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const ActionButton = styled.Pressable<{ $primary?: boolean }>`
-  ${actionButtonStyles}
-`;
-
 export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
   visible,
   unit,
@@ -60,11 +25,11 @@ export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
   onSave,
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const { massUnit, formatMassForInput, displayToGrams } = useMassDisplay();
   const [name, setName] = useState('');
   const [abbreviation, setAbbreviation] = useState('');
   const [gramsText, setGramsText] = useState('');
+  const [submitted, setSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -72,9 +37,15 @@ export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
     setName(unit?.name ?? '');
     setAbbreviation(unit?.abbreviation ?? '');
     setGramsText(unit ? formatMassForInput(unit.equivalentInGrams) : '');
+    setSubmitted(false);
   }, [visible, unit, formatMassForInput]);
 
+  const nameInvalid = submitted && name.trim().length === 0;
+  const abbreviationInvalid = submitted && abbreviation.trim().length === 0;
+  const massInvalid = submitted && parseManualCarbs(gramsText) === null;
+
   const handleSave = async () => {
+    setSubmitted(true);
     const displayValue = parseManualCarbs(gramsText);
     if (!name.trim() || !abbreviation.trim() || displayValue === null) {
       triggerNotificationError();
@@ -100,82 +71,61 @@ export const GlobalUnitFormModal: FC<GlobalUnitFormModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <BlurView
-        intensity={50}
-        tint={theme.blur.tint}
-        blurMethod={theme.blur.androidMethod}
-        style={StyleSheet.absoluteFill}>
+    <Dialog isOpen={visible} onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay />
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={topScreenSpace}>
-          <ScrollView
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: 'center',
-              padding: theme.spacing.lg,
-              paddingTop: topScreenSpace,
-            }}
-            keyboardShouldPersistTaps="handled">
-            <Overlay onPress={onClose}>
-              <Pressable onPress={(e) => e.stopPropagation()}>
-                <GlassPanel padding={theme.spacing.lg}>
-                  <Text $variant="subtitle">
-                    {unit ? t('settings.editUnit') : t('settings.addUnit')}
-                  </Text>
+          pointerEvents="box-none"
+          className="flex-1 justify-center">
+          <Dialog.Content>
+            <Dialog.Close />
+            <Dialog.Title>{unit ? t('settings.editUnit') : t('settings.addUnit')}</Dialog.Title>
 
-                  <Field>
-                    <Text $variant="caption" $color="textSecondary">
-                      {t('products.unitName')}
-                    </Text>
-                    <SearchInput
-                      value={name}
-                      onChangeText={setName}
-                      placeholder={t('products.unitName')}
-                    />
-                  </Field>
+            <View className="gap-1 mt-4">
+              <Text className="text-muted text-sm">{t('products.unitName')}</Text>
+              <SearchInput
+                value={name}
+                onChangeText={setName}
+                placeholder={t('products.unitName')}
+              />
+              <FieldError isInvalid={nameInvalid}>{t('common.fieldRequired')}</FieldError>
+            </View>
 
-                  <Field>
-                    <Text $variant="caption" $color="textSecondary">
-                      {t('products.unitAbbreviation')}
-                    </Text>
-                    <SearchInput
-                      value={abbreviation}
-                      onChangeText={setAbbreviation}
-                      placeholder={t('products.unitAbbreviation')}
-                    />
-                  </Field>
+            <View className="gap-1 mt-4">
+              <Text className="text-muted text-sm">{t('products.unitAbbreviation')}</Text>
+              <SearchInput
+                value={abbreviation}
+                onChangeText={setAbbreviation}
+                placeholder={t('products.unitAbbreviation')}
+              />
+              <FieldError isInvalid={abbreviationInvalid}>{t('common.fieldRequired')}</FieldError>
+            </View>
 
-                  <Field>
-                    <Text $variant="caption" $color="textSecondary">
-                      {t('products.unitMass', { unit: massUnit })}
-                    </Text>
-                    <InputNumber
-                      value={gramsText}
-                      onChangeText={setGramsText}
-                      placeholder={t('products.unitMass', { unit: massUnit })}
-                    />
-                  </Field>
+            <View className="gap-1 mt-4">
+              <Text className="text-muted text-sm">{t('products.unitMass', { unit: massUnit })}</Text>
+              <InputNumber
+                value={gramsText}
+                onChangeText={setGramsText}
+                placeholder={t('products.unitMass', { unit: massUnit })}
+              />
+              <FieldError isInvalid={massInvalid}>{t('common.invalidValue')}</FieldError>
+            </View>
 
-                  <FooterActions>
-                    <ActionButton onPress={onClose} disabled={isSaving}>
-                      <Text $variant="caption">{t('common.cancel')}</Text>
-                    </ActionButton>
-                    <ActionButton $primary onPress={handleSave} disabled={isSaving}>
-                      {isSaving ? (
-                        <ActivityIndicator color={theme.colors.text} size="small" />
-                      ) : (
-                        <Text $variant="caption">{t('common.save')}</Text>
-                      )}
-                    </ActionButton>
-                  </FooterActions>
-                </GlassPanel>
-              </Pressable>
-            </Overlay>
-          </ScrollView>
+            <View className="flex-row items-center justify-end gap-2 mt-4">
+              <AppButton variant="ghost" onPress={onClose} isDisabled={isSaving}>
+                {t('common.cancel')}
+              </AppButton>
+              <AppButton
+                variant="primary"
+                onPress={() => void handleSave()}
+                isDisabled={isSaving}>
+                {t('common.save')}
+              </AppButton>
+            </View>
+          </Dialog.Content>
         </KeyboardAvoidingView>
-      </BlurView>
-    </Modal>
+      </Dialog.Portal>
+    </Dialog>
   );
 };

@@ -1,12 +1,11 @@
-import { FaIcon } from '@/components/atoms/FaIcon';
+import { FieldError, useThemeColor } from 'heroui-native';
 import { type FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { Text, View } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { EanScanField } from '@/components/molecules/EanScanField';
-import { listRowDivider } from '@/styles/listRow';
+import { AppPressable } from '@/components/ui/AppPressable';
 import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
 
 type ProductEanListEditorProps = {
@@ -15,21 +14,13 @@ type ProductEanListEditorProps = {
   onScan: (ean: string) => void;
 };
 
-const EanRow = styled.View<{ $isLast?: boolean }>`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.xs}px 0;
-  ${listRowDivider}
-`;
-
 export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
   eans,
   onChange,
   onScan,
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const dangerColor = useThemeColor('danger');
   const [error, setError] = useState<string | null>(null);
 
   const removeEan = (ean: string) => {
@@ -52,28 +43,29 @@ export const ProductEanListEditor: FC<ProductEanListEditorProps> = ({
     <>
       {eans.length > 0 ? (
         eans.map((ean, index) => (
-          <EanRow key={ean} $isLast={index === eans.length - 1}>
-            <Text $variant="mono" style={{ flex: 1 }}>
-              {ean}
-            </Text>
-            <Pressable onPress={() => removeEan(ean)} hitSlop={8} accessibilityLabel={t('common.delete')}>
-              <FaIcon name="xmark" size={16} color={theme.colors.error} />
-            </Pressable>
-          </EanRow>
+          <View
+            key={ean}
+            className={`flex-row items-center justify-between py-1 ${
+              index === eans.length - 1 ? '' : 'border-b border-separator'
+            }`}>
+            <Text className="flex-1 text-foreground font-mono text-sm font-semibold">{ean}</Text>
+            <AppPressable
+              onPress={() => removeEan(ean)}
+              hitSlop={8}
+              accessibilityLabel={t('common.delete')}>
+              <FaIcon name="xmark" size={16} color={dangerColor} />
+            </AppPressable>
+          </View>
         ))
       ) : (
-        <Text $variant="caption" $color="textSecondary">
-          {t('products.noEans')}
-        </Text>
+        <Text className="text-muted text-sm">{t('products.noEans')}</Text>
       )}
 
       <EanScanField onScan={handleScan} />
 
-      {error && (
-        <Text $variant="caption" $color="error" style={{ marginTop: 4 }}>
-          {error}
-        </Text>
-      )}
+      <FieldError isInvalid={error !== null} className="mt-1">
+        {error ?? ''}
+      </FieldError>
     </>
   );
 };
