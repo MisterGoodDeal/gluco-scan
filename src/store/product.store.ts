@@ -20,8 +20,7 @@ type ProductStore = {
   isLoading: boolean;
   hydrate: () => Promise<void>;
   setQuery: (query: string) => void;
-  toggleTagFilter: (tag: ProductTag) => void;
-  clearTagFilters: () => void;
+  setTagFilters: (tagFilters: ProductTag[]) => void;
   toggleCompactList: () => void;
   getFiltered: () => Product[];
   create: (data: {
@@ -62,14 +61,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
   setQuery: (query) => set({ query }),
 
-  toggleTagFilter: (tag) =>
-    set((state) => ({
-      tagFilters: state.tagFilters.includes(tag)
-        ? state.tagFilters.filter((t) => t !== tag)
-        : [...state.tagFilters, tag],
-    })),
-
-  clearTagFilters: () => set({ tagFilters: [] }),
+  setTagFilters: (tagFilters) => set({ tagFilters }),
 
   getFiltered: () => {
     const { products, query, tagFilters } = get();
