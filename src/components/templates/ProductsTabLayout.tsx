@@ -16,7 +16,6 @@ import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
 import { ProductTagFilterBar } from '@/components/molecules/ProductTagFilterBar';
 import { AppButton } from '@/components/ui/AppButton';
-import { useAppToast } from '@/components/ui/useAppToast';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useProductStore } from '@/store/product.store';
 import { useTutorialStore } from '@/store/tutorial.store';
@@ -29,7 +28,6 @@ import { consumePendingAddProduct } from '@/features/widgets/deepLink/pendingAct
 
 export const ProductsTabLayout: FC = () => {
   const { t } = useTranslation();
-  const toast = useAppToast();
   const [accentColor, mutedColor] = useThemeColor(['accent', 'muted']);
   const blurTargetRef = useRef<View>(null);
   const { headerHeight, onHeaderLayout } = useBlurHeaderInset(1);
@@ -39,11 +37,9 @@ export const ProductsTabLayout: FC = () => {
   const products = useProductStore((s) => s.products);
   const tagFilters = useProductStore((s) => s.tagFilters);
   const setQuery = useProductStore((s) => s.setQuery);
-  const toggleTagFilter = useProductStore((s) => s.toggleTagFilter);
-  const clearTagFilters = useProductStore((s) => s.clearTagFilters);
+  const setTagFilters = useProductStore((s) => s.setTagFilters);
   const compactList = useProductStore((s) => s.compactList);
   const toggleCompactList = useProductStore((s) => s.toggleCompactList);
-  const remove = useProductStore((s) => s.remove);
   const filteredProducts = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     return products.filter((product) => {
@@ -122,11 +118,6 @@ export const ProductsTabLayout: FC = () => {
             compact={compactList}
             contentInsetTop={headerHeight + 8}
             onEdit={openEdit}
-            onDelete={(id) => {
-              void remove(id)
-                .then(() => toast.success(t('products.deleteSuccess')))
-                .catch(() => toast.error(t('products.deleteError')));
-            }}
             refreshing={isLoading}
             onRefresh={() => void loadProducts()}
           />
@@ -148,6 +139,7 @@ export const ProductsTabLayout: FC = () => {
             <TutorialAnchor id="tutorial-products-search" style={{ flex: 1, minWidth: 0 }}>
               <SearchInput value={query} onChangeText={setQuery} flex />
             </TutorialAnchor>
+            <ProductTagFilterBar value={tagFilters} onChange={setTagFilters} />
             <ButtonIcon
               onPress={toggleCompactList}
               accessibilityLabel={
@@ -161,11 +153,6 @@ export const ProductsTabLayout: FC = () => {
               />
             </ButtonIcon>
           </View>
-          <ProductTagFilterBar
-            value={tagFilters}
-            onToggle={toggleTagFilter}
-            onClear={clearTagFilters}
-          />
         </BlurScreenHeader>
       </BlurTargetView>
       <ProductFormSheet

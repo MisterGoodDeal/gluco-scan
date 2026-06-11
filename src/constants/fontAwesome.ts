@@ -51,6 +51,7 @@ export const FA_ICONS = {
   steak: icon(0xf824),
   stroopwafel: icon(0xf551),
   tag: icon(0xf02b),
+  'trash-can': icon(0xf2ed),
   utensils: icon(0xf2e7),
   wheat: icon(0xf72d),
   xmark: icon(0xf00d),

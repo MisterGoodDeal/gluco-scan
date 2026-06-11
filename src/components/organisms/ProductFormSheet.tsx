@@ -1,5 +1,5 @@
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { BottomSheet, FieldError, useThemeColor } from 'heroui-native';
+import { BottomSheet, Card, FieldError, useThemeColor } from 'heroui-native';
 import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Text, View } from 'react-native';
@@ -16,6 +16,7 @@ import { ProductTagPicker } from '@/components/molecules/ProductTagPicker';
 import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppPressable } from '@/components/ui/AppPressable';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useAppToast } from '@/components/ui/useAppToast';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
@@ -85,6 +86,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   const create = useProductStore((s) => s.create);
   const update = useProductStore((s) => s.update);
+  const remove = useProductStore((s) => s.remove);
 
   const [eans, setEans] = useState<string[]>([]);
   const [name, setName] = useState('');
@@ -104,6 +106,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     [toast],
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isLookupLoading, setIsLookupLoading] = useState(false);
 
   const [unitModalVisible, setUnitModalVisible] = useState(false);
@@ -133,6 +137,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       product?.customCookingFactor != null ? String(product.customCookingFactor).replace('.', ',') : '',
     );
     setSubmitted(false);
+    setDeleteConfirmOpen(false);
+    setIsDeleting(false);
     setUnitModalVisible(false);
     setEditingUnit(null);
   }, [visible, product]);
@@ -373,6 +379,22 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     }
   };
 
+  const handleDeleteConfirmed = useCallback(async () => {
+    if (!product?.id) return;
+    setIsDeleting(true);
+    try {
+      await remove(product.id);
+      triggerNotificationSuccess();
+      toast.success(t('products.deleteSuccess'));
+      onClose();
+    } catch (err) {
+      triggerNotificationError();
+      showError(getErrorMessage(err));
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [onClose, product?.id, remove, showError, t, toast]);
+
   return (
     <>
       <BottomSheet isOpen={visible} onOpenChange={(open) => !open && handleDismiss()}>
@@ -388,6 +410,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             keyboardBlurBehavior="restore"
             android_keyboardInputMode="adjustResize">
             <BottomSheetScrollView
+              showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{
                 paddingHorizontal: 24,
@@ -395,9 +418,9 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
               }}>
               <View className="flex-row items-center justify-between py-4 border-b border-separator">
                 <Text className="text-foreground text-lg font-semibold">{sheetTitle}</Text>
-                <AppPressable onPress={handleDismiss} hitSlop={8}>
-                  <Text className="text-accent text-base">{t('common.cancel')}</Text>
-                </AppPressable>
+                <AppButton variant="tertiary" size="sm" onPress={handleDismiss}>
+                  {t('common.cancel')}
+                </AppButton>
               </View>
 
               <View className="gap-1 mt-4">
@@ -470,41 +493,45 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                 </View>
               ) : null}
 
-              <View className="gap-1 mt-4">
-                <Text className="text-muted text-sm">{t('products.photo')}</Text>
-                <View className="flex-row items-center gap-4 mt-1">
-                  {imageUrl ? <ProductImage uri={imageUrl} size={64} /> : null}
-                  <View className="flex-1 gap-1">
-                    <AppButton
-                      size="sm"
-                      variant="tertiary"
-                      className="self-start"
-                      onPress={handlePickPhoto}
-                      accessibilityLabel={
-                        imageUrl ? t('products.changePhoto') : t('products.addPhoto')
-                      }>
-                      {imageUrl ? t('products.changePhoto') : t('products.addPhoto')}
-                    </AppButton>
-                    {imageUrl ? (
-                      <AppButton
-                        size="sm"
-                        variant="danger-soft"
-                        className="self-start"
-                        onPress={handleRemovePhoto}
-                        accessibilityLabel={t('products.removePhotoA11y')}>
-                        {t('products.removePhoto')}
-                      </AppButton>
-                    ) : null}
-                    {imageUrl ? (
-                      <Text className="text-muted text-sm">
+              <Card className="mt-4">
+                <Card.Header>
+                  <Card.Title>{t('products.photo')}</Card.Title>
+                </Card.Header>
+                <Card.Body className="items-center gap-2 py-2">
+                  {imageUrl ? (
+                    <>
+                      <ProductImage uri={imageUrl} size={96} />
+                      <Card.Description className="text-center">
                         {isRemoteProductImage(imageUrl)
                           ? t('products.photoFromOff')
                           : t('products.photoCustom')}
-                      </Text>
-                    ) : null}
-                  </View>
-                </View>
-              </View>
+                      </Card.Description>
+                    </>
+                  ) : (
+                    <View className="h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-separator bg-default" />
+                  )}
+                </Card.Body>
+                <Card.Footer className="flex-row gap-2">
+                  <AppButton
+                    variant="tertiary"
+                    className="flex-1"
+                    onPress={handlePickPhoto}
+                    accessibilityLabel={
+                      imageUrl ? t('products.changePhoto') : t('products.addPhoto')
+                    }>
+                    {imageUrl ? t('products.changePhoto') : t('products.addPhoto')}
+                  </AppButton>
+                  {imageUrl ? (
+                    <AppButton
+                      variant="danger-soft"
+                      className="flex-1"
+                      onPress={handleRemovePhoto}
+                      accessibilityLabel={t('products.removePhotoA11y')}>
+                      {t('products.removePhoto')}
+                    </AppButton>
+                  ) : null}
+                </Card.Footer>
+              </Card>
 
               <View className="mt-4">
                 <View className="flex-row items-center justify-between mb-2">
@@ -544,13 +571,26 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
               {product?.id ? <ProductStatisticsSection productId={product.id} /> : null}
 
               <View className="flex-row items-center justify-end gap-2 mt-6 mb-8">
-                <AppButton variant="ghost" onPress={handleDismiss} isDisabled={isSaving}>
+                {isEditing ? (
+                  <AppButton
+                    isIconOnly
+                    variant="danger-soft"
+                    onPress={() => setDeleteConfirmOpen(true)}
+                    isDisabled={isSaving || isDeleting}
+                    accessibilityLabel={t('products.deleteA11y')}>
+                    <FaIcon name="trash-can" size={18} color={dangerColor} />
+                  </AppButton>
+                ) : null}
+                <AppButton
+                  variant="tertiary"
+                  onPress={handleDismiss}
+                  isDisabled={isSaving || isDeleting}>
                   {t('common.cancel')}
                 </AppButton>
                 <AppButton
                   variant="primary"
                   onPress={() => void handleSave()}
-                  isDisabled={isSaving}>
+                  isDisabled={isSaving || isDeleting}>
                   {isSaving ? (
                     <ActivityIndicator color={accentForeground} size="small" />
                   ) : (
@@ -571,6 +611,16 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           setEditingUnit(null);
         }}
         onSave={handleUnitSave}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title={t('products.deleteConfirmTitle')}
+        description={t('products.deleteConfirmMessage')}
+        confirmLabel={t('common.delete')}
+        destructive
+        onConfirm={() => void handleDeleteConfirmed()}
       />
     </>
   );
