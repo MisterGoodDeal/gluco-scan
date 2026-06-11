@@ -3797,6 +3797,11 @@ lodash.throttle@^4.1.1:
   resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
   integrity sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==
 
+lodash@^4.17.21:
+  version "4.18.1"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
+  integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
+
 log-symbols@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/log-symbols/-/log-symbols-2.2.0.tgz#5740e1c5d6f0dfda4ad9323b5332107ef6b4c40a"
@@ -3844,6 +3849,11 @@ lru-cache@^5.1.1:
   integrity sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==
   dependencies:
     yallist "^3.0.2"
+
+lucide-react-native@^1.17.0:
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/lucide-react-native/-/lucide-react-native-1.17.0.tgz#7e0eb165f932562502d0856b2d7398125c379724"
+  integrity sha512-H5eM7dZkXJbYcrsjczlDC6Sq1/siWcM5O5BLLx6ljT0XDIGorZFjul+AdThuMs0I614nwowv5qbDivuQ+349Xw==
 
 magic-string@^0.30.21:
   version "0.30.21"
@@ -4690,6 +4700,13 @@ react-native-nitro-modules@^0.35.9:
   version "0.35.9"
   resolved "https://registry.yarnpkg.com/react-native-nitro-modules/-/react-native-nitro-modules-0.35.9.tgz#fe84f9fbcfc93305018fe3773cf0b39d8efa9c6d"
   integrity sha512-yCO6eJ85SPPUo4a4an7H5oj6wPCSIT72fbjr5WZ/20n6zswaJ2gNNpnWtg2We0AZwkAOjSqkOJ0Vjc05p6kGiA==
+
+react-native-progress-steps@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-progress-steps/-/react-native-progress-steps-2.0.3.tgz#c57fb6e67d9709088ee3c825ab4f60eb2ba990e4"
+  integrity sha512-N3JT9sQ/irEzS7RrYVNC86jHTgAXrQPDk2kHAHaz1JYv3wTCMLfbyQfDykp5y3cYqpbD3D1Ivc+1XOXhXwwvog==
+  dependencies:
+    lodash "^4.17.21"
 
 react-native-reanimated@4.3.1:
   version "4.3.1"
