@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
+import { useThemeColor } from 'heroui-native';
 import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
-import { useTheme } from 'styled-components/native';
 
 import { TabBarIcon } from '@/components/atoms/TabBarIcon';
 import { TabBarBackground } from '@/components/navigation/TabBarBackground';
@@ -19,7 +19,7 @@ const hapticTabListeners = {
 
 export default function TabsLayout() {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const [accentColor, mutedColor, borderColor] = useThemeColor(['accent', 'muted', 'border']);
 
   return (
     <Tabs
@@ -30,15 +30,15 @@ export default function TabsLayout() {
           position: 'absolute',
           backgroundColor: 'transparent',
           borderTopWidth: 1,
-          borderTopColor: theme.colors.glass.border,
+          borderTopColor: borderColor,
           elevation: 0,
           ...Platform.select({
             ios: { shadowOpacity: 0 },
             default: {},
           }),
         },
-        tabBarActiveTintColor: theme.colors.accent,
-        tabBarInactiveTintColor: theme.colors.textSecondary,
+        tabBarActiveTintColor: accentColor,
+        tabBarInactiveTintColor: mutedColor,
       }}>
       <Tabs.Screen
         name="products"
