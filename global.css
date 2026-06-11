@@ -1,0 +1,109 @@
+@import 'tailwindcss';
+@import 'uniwind';
+
+@import 'heroui-native/styles';
+
+/* Path to the heroui-native lib inside node_modules relative to global.css */
+@source './node_modules/heroui-native/lib';
+
+@theme {
+  /* Border Radius */
+  --radius: 0.5rem;
+  --field-radius: 1rem;
+
+  /* Font Family — Instrument Sans, chargée via @expo-google-fonts/instrument-sans */
+  --font-sans: 'InstrumentSans_400Regular';
+}
+
+/*
+ * HeroUI Theme Customization — GlucoScan
+ * Palette teal/cyan (hue 205.07) générée depuis le thème fourni.
+ */
+@layer theme {
+  :root {
+    @variant light {
+      /* Theme Colors (Light Mode) */
+      --accent: oklch(62.04% 0.195 205.07);
+      --accent-foreground: oklch(99.11% 0 0);
+      --background: oklch(97.02% 0.0131 205.07);
+      --border: oklch(90% 0.0131 205.07);
+      --danger: oklch(65.32% 0.2389 19.89);
+      --danger-foreground: oklch(99.11% 0 0);
+      --default: oklch(94% 0.0131 205.07);
+      --default-foreground: oklch(21.03% 0.0059 205.07);
+      --field-background: oklch(95.24% 0.0105 205.07);
+      --field-border: oklch(90% 0.0131 205.07);
+      --field-foreground: oklch(21.03% 0.0131 205.07);
+      --field-placeholder: oklch(55.17% 0.0262 205.07);
+      --focus: oklch(62.04% 0.195 205.07);
+      --foreground: oklch(21.03% 0.0131 205.07);
+      --muted: oklch(55.17% 0.0262 205.07);
+      --overlay: oklch(100% 0.0039 205.07);
+      --overlay-foreground: oklch(21.03% 0.0131 205.07);
+      --segment: oklch(100% 0.0131 205.07);
+      --segment-foreground: oklch(21.03% 0.0131 205.07);
+      --separator: oklch(92% 0.0131 205.07);
+      --success: oklch(73.29% 0.1986 144.96);
+      --success-foreground: oklch(21.03% 0.0059 144.96);
+      --surface: oklch(100% 0.0066 205.07);
+      --surface-foreground: oklch(21.03% 0.0131 205.07);
+      --surface-secondary: oklch(95.24% 0.0105 205.07);
+      --surface-secondary-foreground: oklch(21.03% 0.0131 205.07);
+      --surface-tertiary: oklch(93.73% 0.0105 205.07);
+      --surface-tertiary-foreground: oklch(21.03% 0.0131 205.07);
+      --warning: oklch(78.19% 0.1627 66.48);
+      --warning-foreground: oklch(21.03% 0.0059 66.48);
+    }
+
+    @variant dark {
+      /* Theme Colors (Dark Mode) */
+      --accent: oklch(62.04% 0.195 205.07);
+      --accent-foreground: oklch(99.11% 0 0);
+      --background: oklch(12% 0.0131 205.07);
+      --border: oklch(28% 0.0131 205.07);
+      --danger: oklch(59.4% 0.2019 18.78);
+      --danger-foreground: oklch(99.11% 0 0);
+      --default: oklch(27.4% 0.0131 205.07);
+      --default-foreground: oklch(99.11% 0 0);
+      --field-background: oklch(25.7% 0.0197 205.07);
+      --field-border: oklch(28% 0.0131 205.07);
+      --field-foreground: oklch(99.11% 0.0131 205.07);
+      --field-placeholder: oklch(70.5% 0.0262 205.07);
+      --focus: oklch(62.04% 0.195 205.07);
+      --foreground: oklch(99.11% 0.0131 205.07);
+      --muted: oklch(70.5% 0.0262 205.07);
+      --overlay: oklch(21.03% 0.0262 205.07);
+      --overlay-foreground: oklch(99.11% 0.0131 205.07);
+      --segment: oklch(39.64% 0.0131 205.07);
+      --segment-foreground: oklch(99.11% 0.0131 205.07);
+      --separator: oklch(25% 0.0131 205.07);
+      --success: oklch(73.29% 0.1986 144.96);
+      --success-foreground: oklch(21.03% 0.0059 144.96);
+      --surface: oklch(21.03% 0.0262 205.07);
+      --surface-foreground: oklch(99.11% 0.0131 205.07);
+      --surface-secondary: oklch(25.7% 0.0197 205.07);
+      --surface-secondary-foreground: oklch(99.11% 0.0131 205.07);
+      --surface-tertiary: oklch(27.21% 0.0197 205.07);
+      --surface-tertiary-foreground: oklch(99.11% 0.0131 205.07);
+      --warning: oklch(82.03% 0.1424 70.49);
+      --warning-foreground: oklch(21.03% 0.0059 70.49);
+    }
+  }
+}
+
+/*
+ * Instrument Sans : en React Native chaque graisse est une famille distincte,
+ * on remappe donc les utilitaires de graisse vers la bonne famille.
+ */
+@utility font-normal {
+  font-family: 'InstrumentSans_400Regular';
+}
+@utility font-medium {
+  font-family: 'InstrumentSans_500Medium';
+}
+@utility font-semibold {
+  font-family: 'InstrumentSans_600SemiBold';
+}
+@utility font-bold {
+  font-family: 'InstrumentSans_700Bold';
+}
