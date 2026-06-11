@@ -1,7 +1,8 @@
+import '../../global.css';
 import '@/i18n';
 
 import { Stack } from 'expo-router';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { HeroUINativeProvider } from 'heroui-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { FontProvider } from '@/components/providers/FontProvider';
@@ -16,9 +17,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <FontProvider>
           <AppThemeProvider>
+          <HeroUINativeProvider config={{ toast: { defaultProps: { placement: 'top' } } }}>
           <DatabaseGate>
-            <BottomSheetModalProvider>
-              <TutorialHost>
+            <TutorialHost>
               <WidgetBootstrap />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
@@ -32,9 +33,9 @@ export default function RootLayout() {
                   options={{ presentation: 'fullScreenModal' }}
                 />
               </Stack>
-              </TutorialHost>
-            </BottomSheetModalProvider>
+            </TutorialHost>
           </DatabaseGate>
+          </HeroUINativeProvider>
           </AppThemeProvider>
         </FontProvider>
       </SafeAreaProvider>

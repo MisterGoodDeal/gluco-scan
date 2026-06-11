@@ -1,9 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
-import { type FC, type ReactNode, useMemo } from 'react';
+import { type FC, type ReactNode, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import { ThemeProvider } from 'styled-components/native';
+import { Uniwind } from 'uniwind';
 
-import { resolveTheme } from '@/styles/theme';
 import { usePreferencesStore } from '@/store/preferences.store';
 
 type AppThemeProviderProps = {
@@ -14,15 +13,16 @@ export const AppThemeProvider: FC<AppThemeProviderProps> = ({ children }) => {
   const preference = usePreferencesStore((s) => s.theme);
   const systemScheme = useColorScheme();
 
-  const theme = useMemo(
-    () => resolveTheme(preference, systemScheme === 'light' ? 'light' : 'dark'),
-    [preference, systemScheme],
-  );
+  useEffect(() => {
+    Uniwind.setTheme(preference);
+  }, [preference]);
+
+  const mode = preference === 'system' ? (systemScheme === 'light' ? 'light' : 'dark') : preference;
 
   return (
-    <ThemeProvider theme={theme}>
-      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+    <>
+      <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       {children}
-    </ThemeProvider>
+    </>
   );
 };
