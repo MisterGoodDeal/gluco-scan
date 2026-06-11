@@ -7,7 +7,7 @@ import {
 
 export const topScreenSpace =
   DeviceInfo.hasDynamicIsland() || DeviceInfo.hasNotch()
-    ? hp("5.5%")
+    ? hp("7%")
     : (StatusBar.currentHeight ?? 0) + hp("2.5%");
 
 export { hp, wp };
