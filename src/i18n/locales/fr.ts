@@ -83,6 +83,12 @@ export type TranslationSchema = {
     cookingFactor: string;
     cookingConversionPreview: string;
     filterAll: string;
+    filterPlaceholder: string;
+    filterLabel: string;
+    filterActiveA11y: string;
+    filterResetA11y: string;
+    deleteConfirmTitle: string;
+    deleteConfirmMessage: string;
     deleteSuccess: string;
     deleteError: string;
   };
@@ -156,6 +162,7 @@ export type TranslationSchema = {
     cookedEquivalent: string;
     itemCount: string;
     editMealA11y: string;
+    viewDetails: string;
     viewDetailsA11y: string;
     deleteConfirmTitle: string;
     deleteConfirmMessage: string;
@@ -398,7 +405,7 @@ export const fr: TranslationSchema = {
     refreshSuccess: 'Informations mises à jour depuis Open Food Facts.',
     photo: 'Photo',
     addPhoto: 'Ajouter une photo',
-    changePhoto: 'Changer la photo',
+    changePhoto: 'Modifier',
     removePhoto: 'Supprimer',
     removePhotoA11y: 'Supprimer la photo du produit',
     photoSourceTitle: 'Ajouter une photo',
@@ -414,6 +421,12 @@ export const fr: TranslationSchema = {
     cookingFactor: 'Facteur cuisson',
     cookingConversionPreview: '{{raw}} {{rawUnit}} cru = {{cooked}} {{cookedUnit}} cuit',
     filterAll: 'Tous',
+    filterPlaceholder: 'Filtrer par tag',
+    filterLabel: 'Filtrer les produits',
+    filterActiveA11y: 'Filtrer les produits, {{count}} tag sélectionné',
+    filterResetA11y: 'Réinitialiser les filtres',
+    deleteConfirmTitle: 'Supprimer ce produit ?',
+    deleteConfirmMessage: 'Cette action est irréversible.',
     deleteSuccess: 'Produit supprimé',
     deleteError: 'Impossible de supprimer le produit',
   },
@@ -488,6 +501,7 @@ export const fr: TranslationSchema = {
     cookedEquivalent: '≈ {{value}} {{unit}} cuits',
     itemCount: '{{count}} aliments',
     editMealA11y: 'Modifier le repas',
+    viewDetails: 'Détail',
     viewDetailsA11y: 'Voir le détail du repas',
     deleteConfirmTitle: 'Supprimer ce repas ?',
     deleteConfirmMessage: 'Cette action est irréversible.',

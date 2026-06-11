@@ -89,7 +89,7 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
                       className="flex-1"
                       onPress={() => onMealPress(meal)}
                       accessibilityLabel={t('meals.viewDetailsA11y')}>
-                      {t('meals.viewDetailsA11y')}
+                      {t('meals.viewDetails')}
                     </AppButton>
                     <AppButton
                       size="sm"
