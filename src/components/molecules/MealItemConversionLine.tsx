@@ -9,6 +9,7 @@ import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { useTranslation } from 'react-i18next';
 import { useCookingConversionStore } from '@/store/cookingConversion.store';
 import { sortProductTags } from '@/utils/tags/sortProductTags';
+import { textLineClamp } from '@/utils/text';
 
 type MealItemConversionLineProps = {
   item: MealItem;
@@ -38,7 +39,7 @@ export const MealItemConversionLine: FC<MealItemConversionLineProps> = ({
   return (
     <View className="gap-1">
       {showName ? (
-        <View className="flex-row items-center gap-1">
+        <View className="flex-row items-center gap-1 min-w-0">
           {compactIcons ? (
             <View className="flex-row items-center gap-0.5">
               {sortProductTags(productTags).map((tag) => (
@@ -46,7 +47,9 @@ export const MealItemConversionLine: FC<MealItemConversionLineProps> = ({
               ))}
             </View>
           ) : null}
-          <Text className="text-foreground text-base">{item.productName}</Text>
+          <Text className="text-foreground text-base flex-1 min-w-0" {...textLineClamp(2)}>
+            {item.productName}
+          </Text>
         </View>
       ) : null}
       <Text className="text-muted text-sm">{primaryLine}</Text>

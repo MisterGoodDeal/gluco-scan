@@ -30,9 +30,11 @@ export const CookingConversionSettings: FC = () => {
     <View className="gap-2">
       <Text className="text-muted text-sm">{t('settings.cookingConversionsHint')}</Text>
       {DEFAULT_COOKING_CONVERSIONS.map((entry) => (
-        <View key={entry.tag} className="flex-row items-center justify-between gap-2">
-          <TagChip tag={entry.tag} variant="expanded" />
-          <View className="w-[72px]">
+        <View key={entry.tag} className="flex-row gap-2 min-h-12">
+          <View className="flex-1 justify-center">
+            <TagChip tag={entry.tag} variant="expanded" />
+          </View>
+          <View className="w-[72px] justify-center">
             <InputNumber
               value={String(getFactor(entry.tag)).replace('.', ',')}
               onChangeText={(text) => void handleChange(entry.tag, text)}

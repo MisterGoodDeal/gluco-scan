@@ -24,6 +24,7 @@ import { useProductStore } from '@/store/product.store';
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
+import { textLineClamp } from '@/utils/text';
 import { productMatchesQuery } from '@/utils/productSearch';
 import { topScreenSpace } from '@/utils/screen';
 
@@ -151,9 +152,7 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                       onPress={() => handleSelect(item)}>
                       {compactList ? (
                         <View className="flex-row items-center gap-1 min-w-0">
-                          <Text
-                            className="text-foreground text-base shrink"
-                            numberOfLines={1}>
+                          <Text className="text-foreground text-base shrink" {...textLineClamp(1)}>
                             {item.name}
                           </Text>
                           <Text className="text-muted text-sm" numberOfLines={1}>
@@ -164,7 +163,9 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                         <View className="flex-row items-center gap-2">
                           {item.imageUrl ? <ProductImage uri={item.imageUrl} /> : null}
                           <View className="flex-1 min-w-0">
-                            <Text className="text-foreground text-base">{item.name}</Text>
+                            <Text className="text-foreground text-base" {...textLineClamp(2)}>
+                              {item.name}
+                            </Text>
                             <Text className="text-muted text-sm">
                               {carbsLabel}
                               {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}

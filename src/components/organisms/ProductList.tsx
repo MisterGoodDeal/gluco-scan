@@ -12,7 +12,6 @@ type ProductListProps = {
   products: Product[];
   compact?: boolean;
   onEdit: (product: Product) => void;
-  onDelete: (id: string) => void;
   refreshing?: boolean;
   onRefresh?: () => void;
   contentInsetTop?: number;
@@ -22,7 +21,6 @@ export const ProductList: FC<ProductListProps> = ({
   products,
   compact = false,
   onEdit,
-  onDelete,
   refreshing = false,
   onRefresh,
   contentInsetTop = 0,
@@ -49,7 +47,7 @@ export const ProductList: FC<ProductListProps> = ({
         extraData={compact}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ProductRow product={item} compact={compact} onEdit={onEdit} onDelete={onDelete} />
+          <ProductRow product={item} compact={compact} onEdit={onEdit} />
         )}
         ItemSeparatorComponent={() => (
           <View style={{ height: compact ? 4 : hp('1.5%') }} />
