@@ -2,7 +2,7 @@
   "expo": {
     "name": "GlucoScan",
     "slug": "gluco-scan",
-    "version": "1.0.0",
+    "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "glucoscan",
@@ -10,6 +10,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.mistergooddeal.glucoscan",
+      "buildNumber": "11",
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.mistergooddeal.glucoscan"
@@ -29,14 +30,19 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.mistergooddeal.glucoscan",
-      "permissions": ["CAMERA"]
+      "permissions": [
+        "CAMERA"
+      ],
+      "versionCode": 11
     },
     "plugins": [
       "expo-router",
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/fa-solid-900.ttf"]
+          "fonts": [
+            "./assets/fonts/fa-solid-900.ttf"
+          ]
         }
       ],
       [
@@ -80,7 +86,24 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a5d21df7-8303-48fc-b0ca-c65c8503512f"
+        "projectId": "a5d21df7-8303-48fc-b0ca-c65c8503512f",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "GlucoScanWidgets",
+                  "bundleIdentifier": "com.mistergooddeal.glucoscan.GlucoScanWidgets",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.mistergooddeal.glucoscan"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
     }
   }
