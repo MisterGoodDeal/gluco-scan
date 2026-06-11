@@ -1,4 +1,4 @@
-import { useThemeColor } from 'heroui-native';
+import { Input } from 'heroui-native';
 import { type FC } from 'react';
 import { TextInput, type KeyboardTypeOptions } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -29,33 +29,42 @@ export const SearchInput: FC<SearchInputProps> = ({
   variant = 'default',
 }) => {
   const { t } = useTranslation();
-  const placeholderColor = useThemeColor('field-placeholder');
 
-  const baseClasses =
-    variant === 'plain'
-      ? 'h-10 p-0 bg-transparent text-foreground'
-      : 'h-10 px-4 rounded-field border border-field-border bg-field text-field-foreground';
+  const className = [
+    flex ? 'flex-1 min-w-0' : 'w-full',
+    mono ? 'font-mono text-sm font-semibold' : '',
+    editable ? '' : 'opacity-85',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const sharedProps = {
+    value,
+    onChangeText,
+    placeholder: placeholder ?? t('common.searchPlaceholder'),
+    autoCapitalize: 'none' as const,
+    autoCorrect: false,
+    clearButtonMode: 'while-editing' as const,
+    editable,
+    keyboardType,
+    autoFocus,
+  };
+
+  if (variant === 'plain') {
+    return (
+      <TextInput
+        className={[className, 'bg-transparent text-foreground'].filter(Boolean).join(' ')}
+        placeholderTextColorClassName="accent-field-placeholder"
+        {...sharedProps}
+      />
+    );
+  }
 
   return (
-    <TextInput
-      className={[
-        baseClasses,
-        mono ? 'font-mono text-sm font-semibold' : 'text-base',
-        flex ? 'flex-1' : '',
-        editable ? '' : 'opacity-85',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      value={value}
-      onChangeText={onChangeText}
-      placeholder={placeholder ?? t('common.searchPlaceholder')}
-      placeholderTextColor={placeholderColor}
-      autoCapitalize="none"
-      autoCorrect={false}
-      clearButtonMode="while-editing"
-      editable={editable}
-      keyboardType={keyboardType}
-      autoFocus={autoFocus}
+    <Input
+      className={className || undefined}
+      placeholderColorClassName="accent-field-placeholder"
+      {...sharedProps}
     />
   );
 };

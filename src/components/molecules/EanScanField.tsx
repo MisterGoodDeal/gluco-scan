@@ -60,7 +60,6 @@ export const EanScanField: FC<EanScanFieldProps> = ({ onScan }) => {
   return (
     <>
       <AppButton
-        size="sm"
         variant="tertiary"
         className="self-start mt-2"
         onPress={() => void handleToggleScan()}
@@ -96,7 +95,6 @@ export const EanScanField: FC<EanScanFieldProps> = ({ onScan }) => {
         <View className="mt-2 p-2 rounded-lg border border-border bg-surface gap-2">
           <Text className="text-muted text-sm">{t('modal.cameraRequired')}</Text>
           <AppButton
-            size="sm"
             variant="primary"
             className="self-start"
             onPress={() => void requestPermission()}>

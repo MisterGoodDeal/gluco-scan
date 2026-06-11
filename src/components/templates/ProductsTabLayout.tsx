@@ -146,9 +146,7 @@ export const ProductsTabLayout: FC = () => {
           </View>
           <View className="flex-row items-center gap-2 mt-2">
             <TutorialAnchor id="tutorial-products-search" style={{ flex: 1, minWidth: 0 }}>
-              <View className="flex-1 min-w-0">
-                <SearchInput value={query} onChangeText={setQuery} flex />
-              </View>
+              <SearchInput value={query} onChangeText={setQuery} flex />
             </TutorialAnchor>
             <ButtonIcon
               onPress={toggleCompactList}

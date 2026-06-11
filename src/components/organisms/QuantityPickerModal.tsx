@@ -290,7 +290,6 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
                         <View className="flex-row items-center justify-center gap-4 my-5">
                           <AppButton
                             isIconOnly
-                            size="sm"
                             variant="tertiary"
                             onPress={() => setQuantity((q) => Math.max(1, q - 1))}
                             accessibilityLabel="-">
@@ -301,7 +300,6 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
                           </Text>
                           <AppButton
                             isIconOnly
-                            size="sm"
                             variant="tertiary"
                             onPress={() => setQuantity((q) => q + 1)}
                             accessibilityLabel="+">

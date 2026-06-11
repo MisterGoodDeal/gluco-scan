@@ -64,6 +64,7 @@ export type TranslationSchema = {
     refreshFromOffA11y: string;
     refreshNoEan: string;
     refreshNoData: string;
+    refreshSuccess: string;
     photo: string;
     addPhoto: string;
     changePhoto: string;
@@ -394,6 +395,7 @@ export const fr: TranslationSchema = {
     refreshFromOffA11y: 'Actualiser depuis Open Food Facts',
     refreshNoEan: 'Ajoutez un code EAN pour actualiser les informations.',
     refreshNoData: 'Aucune donnée trouvée sur Open Food Facts pour ce code.',
+    refreshSuccess: 'Informations mises à jour depuis Open Food Facts.',
     photo: 'Photo',
     addPhoto: 'Ajouter une photo',
     changePhoto: 'Changer la photo',

@@ -234,7 +234,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           return false;
         }
         applyOffPartial(partial);
-        triggerNotificationSuccess();
+        toast.success(t('products.refreshSuccess'));
         return true;
       } catch (err) {
         showError(getErrorMessage(err));
@@ -243,7 +243,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         setIsLookupLoading(false);
       }
     },
-    [applyOffPartial, showError, t],
+    [applyOffPartial, showError, t, toast],
   );
 
   const handleLookup = async (scannedEan: string) => {
@@ -409,14 +409,12 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
               <View className="gap-1 mt-4">
                 <Text className="text-muted text-sm">{t('modal.nameLabel')}</Text>
                 <View className="flex-row items-center gap-2">
-                  <View className="flex-1">
-                    <SearchInput
-                      value={name}
-                      onChangeText={setName}
-                      placeholder={t('modal.namePlaceholder')}
-                      flex
-                    />
-                  </View>
+                  <SearchInput
+                    value={name}
+                    onChangeText={setName}
+                    placeholder={t('modal.namePlaceholder')}
+                    flex
+                  />
                   <ButtonIcon
                     onPress={() => {
                       if (!canRefreshFromOff || isLookupLoading) return;

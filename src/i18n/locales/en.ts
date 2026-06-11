@@ -66,6 +66,7 @@ export const en: TranslationSchema = {
     refreshFromOffA11y: 'Refresh from Open Food Facts',
     refreshNoEan: 'Add an EAN code to refresh product information.',
     refreshNoData: 'No data found on Open Food Facts for this code.',
+    refreshSuccess: 'Product information updated from Open Food Facts.',
     photo: 'Photo',
     addPhoto: 'Add photo',
     changePhoto: 'Change photo',

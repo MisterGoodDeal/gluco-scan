@@ -1,13 +1,14 @@
 import { type FC, type ReactNode } from 'react';
 import { type AccessibilityState } from 'react-native';
 
-import { AppPressable } from '@/components/ui/AppPressable';
+import { AppButton, type AppButtonProps } from '@/components/ui/AppButton';
 
 type ButtonIconProps = {
   onPress: () => void;
   children: ReactNode;
   accessibilityLabel: string;
   accessibilityState?: AccessibilityState;
+  variant?: AppButtonProps['variant'];
 };
 
 export const ButtonIcon: FC<ButtonIconProps> = ({
@@ -15,14 +16,14 @@ export const ButtonIcon: FC<ButtonIconProps> = ({
   children,
   accessibilityLabel,
   accessibilityState,
+  variant = 'tertiary',
 }) => (
-  <AppPressable
-    className="w-10 h-10 rounded-xl items-center justify-center bg-surface border border-border"
+  <AppButton
+    isIconOnly
+    variant={variant}
     onPress={onPress}
     accessibilityLabel={accessibilityLabel}
-    accessibilityState={accessibilityState}
-    accessibilityRole="button"
-    hitSlop={8}>
+    accessibilityState={accessibilityState}>
     {children}
-  </AppPressable>
+  </AppButton>
 );

@@ -84,7 +84,7 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
           keyboardVerticalOffset={topScreenSpace}>
           <View className="flex-1" style={{ paddingTop: topScreenSpace }}>
             <View className="p-4">
-              <View className="flex-row items-center gap-2 px-4 py-2 rounded-xl border border-border bg-surface/80 overflow-hidden">
+              <View className="flex-row items-center gap-2 px-4 min-h-12 rounded-xl border border-border bg-surface/80 overflow-hidden">
                 <FaIcon name="magnifying-glass" size={20} color={mutedColor} />
                 <View className="flex-1">
                   <SearchInput
