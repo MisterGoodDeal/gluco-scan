@@ -1,9 +1,7 @@
 import { type FC, type ReactNode } from 'react';
-import { Pressable } from 'react-native';
-import styled from 'styled-components/native';
+import { Text } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
-import { INPUT_HEIGHT, inputFieldStyles } from '@/styles/input';
+import { AppPressable } from '@/components/ui/AppPressable';
 
 type PickerFieldProps = {
   value: string;
@@ -12,31 +10,20 @@ type PickerFieldProps = {
   rightAdornment?: ReactNode;
 };
 
-const FieldButton = styled(Pressable)`
-  ${inputFieldStyles}
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-`;
-
 export const PickerField: FC<PickerFieldProps> = ({
   value,
   onPress,
   accessibilityLabel,
   rightAdornment,
 }) => (
-  <FieldButton
+  <AppPressable
+    className="min-h-10 flex-row items-center justify-between rounded-field border border-field-border bg-field px-3 py-2"
     onPress={onPress}
     accessibilityRole="button"
-    accessibilityLabel={accessibilityLabel ?? value}
-    style={{ minHeight: INPUT_HEIGHT }}>
-    <Text $variant="body" numberOfLines={1} style={{ flex: 1 }}>
+    accessibilityLabel={accessibilityLabel ?? value}>
+    <Text className="flex-1 text-field-foreground text-base" numberOfLines={1}>
       {value}
     </Text>
-    {rightAdornment ?? (
-      <Text $variant="caption" $color="textSecondary">
-        ›
-      </Text>
-    )}
-  </FieldButton>
+    {rightAdornment ?? <Text className="text-muted text-sm">›</Text>}
+  </AppPressable>
 );

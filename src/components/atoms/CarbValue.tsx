@@ -1,7 +1,7 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Text } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
 import { formatDecimal } from '@/utils/format';
 
 type CarbValueProps = {
@@ -13,7 +13,7 @@ export const CarbValue: FC<CarbValueProps> = ({ grams, suffix }) => {
   const { t } = useTranslation();
 
   return (
-    <Text $variant="mono" $color="accent">
+    <Text className="text-accent font-mono text-sm font-semibold">
       {formatDecimal(grams)} {suffix ?? t('common.gramsUnit')}
     </Text>
   );

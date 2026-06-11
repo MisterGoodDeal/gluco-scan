@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
+import { useThemeColor } from 'heroui-native';
 import { type FC } from 'react';
-import { useTheme } from 'styled-components/native';
 
 import { resolveProductImageUri } from '@/services/productImage.service';
 
@@ -14,10 +14,9 @@ type ProductImageProps = {
 };
 
 export const ProductImage: FC<ProductImageProps> = ({ uri, size = DEFAULT_SIZE }) => {
-  const theme = useTheme();
+  const [surfaceColor, borderColor] = useThemeColor(['surface-secondary', 'border']);
   const resolvedUri = resolveProductImageUri(uri);
-  const borderRadius =
-    size <= THUMB_MAX_SIZE ? PRODUCT_IMAGE_THUMB_RADIUS : theme.radius.sm;
+  const borderRadius = size <= THUMB_MAX_SIZE ? PRODUCT_IMAGE_THUMB_RADIUS : 12;
 
   if (!resolvedUri) return null;
 
@@ -28,9 +27,9 @@ export const ProductImage: FC<ProductImageProps> = ({ uri, size = DEFAULT_SIZE }
         width: size,
         height: size,
         borderRadius,
-        backgroundColor: theme.colors.glass.background,
+        backgroundColor: surfaceColor,
         borderWidth: 1,
-        borderColor: theme.colors.glass.border,
+        borderColor,
       }}
       contentFit="cover"
       accessibilityIgnoresInvertColors

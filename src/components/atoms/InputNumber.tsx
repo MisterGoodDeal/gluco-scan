@@ -1,7 +1,6 @@
+import { useThemeColor } from 'heroui-native';
 import { type FC } from 'react';
-import styled, { useTheme } from 'styled-components/native';
-
-import { inputFieldStyles } from '@/styles/input';
+import { TextInput } from 'react-native';
 
 type InputNumberProps = {
   value: string;
@@ -10,31 +9,24 @@ type InputNumberProps = {
   placeholder?: string;
 };
 
-const StyledInput = styled.TextInput`
-  ${inputFieldStyles}
-  min-width: 72px;
-  font-size: ${({ theme }) => theme.typography.mono.fontSize}px;
-  font-weight: ${({ theme }) => theme.typography.mono.fontWeight};
-  font-family: ${({ theme }) => theme.typography.mono.fontFamily};
-  text-align: center;
-`;
-
 export const InputNumber: FC<InputNumberProps> = ({
   value,
   onChangeText,
   onBlur,
   placeholder = '100',
 }) => {
-  const theme = useTheme();
+  const placeholderColor = useThemeColor('field-placeholder');
+
   return (
-  <StyledInput
-    value={value}
-    onChangeText={onChangeText}
-    onBlur={onBlur}
-    placeholder={placeholder}
-    placeholderTextColor={theme.colors.textSecondary}
-    keyboardType="decimal-pad"
-    returnKeyType="done"
-  />
+    <TextInput
+      className="h-10 min-w-[72px] px-4 rounded-field border border-field-border bg-field text-field-foreground text-center font-mono text-sm font-semibold"
+      value={value}
+      onChangeText={onChangeText}
+      onBlur={onBlur}
+      placeholder={placeholder}
+      placeholderTextColor={placeholderColor}
+      keyboardType="decimal-pad"
+      returnKeyType="done"
+    />
   );
 };
