@@ -1,9 +1,9 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components/native';
+import { View } from 'react-native';
 
 import { TagIcon } from '@/components/atoms/TagIcon';
-import { Text } from '@/components/atoms/Text';
+import { AppChip } from '@/components/ui/AppChip';
 import type { ProductTag } from '@/types/productTag';
 import { getTagMetadata } from '@/utils/tags/getTagMetadata';
 
@@ -15,22 +15,6 @@ export type TagChipProps = {
 };
 
 const withAlpha = (color: string, alpha: string): string => `${color}${alpha}`;
-
-const ExpandedChip = styled.Pressable<{ $color: string; $selected?: boolean }>`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  border-width: 1px;
-  border-color: ${({ $color }) => $color};
-  background-color: ${({ $color, $selected }) =>
-    $selected ? withAlpha($color, '55') : withAlpha($color, '22')};
-`;
-
-const CompactChip = styled.View`
-  padding: 2px;
-`;
 
 export const TagChip: FC<TagChipProps> = ({
   tag,
@@ -44,25 +28,29 @@ export const TagChip: FC<TagChipProps> = ({
 
   if (variant === 'compact') {
     return (
-      <CompactChip accessibilityLabel={label}>
+      <View className="p-0.5" accessibilityLabel={label}>
         <TagIcon tag={tag} size={18} />
-      </CompactChip>
+      </View>
     );
   }
 
   return (
-    <ExpandedChip
-      $color={metadata.color}
-      $selected={selected}
+    <AppChip
+      size="sm"
+      variant="soft"
+      label={selected ? `✓ ${label}` : label}
+      startContent={<TagIcon tag={tag} size={14} />}
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityState={onPress ? { selected } : undefined}
-      accessibilityLabel={label}>
-      <TagIcon tag={tag} size={14} />
-      <Text $variant="caption" style={{ color: metadata.color, fontWeight: selected ? '600' : '500' }}>
-        {selected ? `✓ ${label}` : label}
-      </Text>
-    </ExpandedChip>
+      accessibilityLabel={label}
+      style={{
+        borderWidth: 1,
+        borderColor: metadata.color,
+        backgroundColor: withAlpha(metadata.color, selected ? '55' : '22'),
+      }}
+      labelStyle={{ color: metadata.color }}
+    />
   );
 };

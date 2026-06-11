@@ -1,141 +1,124 @@
-import { FaIcon } from '@/components/atoms/FaIcon';
-import { memo, type FC, type RefObject } from 'react';
+import { Card, useThemeColor } from 'heroui-native';
+import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { Text, View } from 'react-native';
 
-import { ButtonIcon } from '@/components/atoms/ButtonIcon';
-import { GlassPanel } from '@/components/atoms/GlassPanel';
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { ProductImage } from '@/components/atoms/ProductImage';
-import { resolveProductImageUri } from '@/services/productImage.service';
-import { Text } from '@/components/atoms/Text';
 import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppPressable } from '@/components/ui/AppPressable';
+import { resolveProductImageUri } from '@/services/productImage.service';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
 
 type ProductRowProps = {
   product: Product;
   compact?: boolean;
-  blurTarget?: RefObject<View | null>;
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
 };
 
-const Row = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
+type RowActionsProps = {
+  iconSize: number;
+  onEdit: () => void;
+  onDelete: () => void;
+};
 
-const Info = styled(Pressable)`
-  flex: 1;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
+const RowActions: FC<RowActionsProps> = ({ iconSize, onEdit, onDelete }) => {
+  const { t } = useTranslation();
+  const [mutedColor, dangerColor] = useThemeColor(['muted', 'danger']);
 
-const CompactInfo = styled(Pressable)`
-  flex: 1;
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-  min-width: 0;
-`;
-
-const Actions = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
+  return (
+    <View className="flex-row items-center gap-1">
+      <AppButton
+        isIconOnly
+        size="sm"
+        variant="ghost"
+        onPress={onEdit}
+        accessibilityLabel={t('products.editA11y')}>
+        <FaIcon name="pen" size={iconSize} color={mutedColor} />
+      </AppButton>
+      <AppButton
+        isIconOnly
+        size="sm"
+        variant="ghost"
+        onPress={onDelete}
+        accessibilityLabel={t('products.deleteA11y')}>
+        <FaIcon name="xmark" size={iconSize} color={dangerColor} />
+      </AppButton>
+    </View>
+  );
+};
 
 export const ProductRow: FC<ProductRowProps> = memo(
-  ({ product, compact = false, blurTarget, onEdit, onDelete }) => {
+  ({ product, compact = false, onEdit, onDelete }) => {
     const { t } = useTranslation();
-    const theme = useTheme();
     const carbsLabel = t('common.carbsPer100g', { value: formatDecimal(product.carbsPer100g) });
 
     if (compact) {
       return (
-        <GlassPanel
-          blurTarget={blurTarget}
-          padding={theme.spacing.sm}
-          borderRadius={theme.radius.sm}>
-          <Row>
-            <CompactInfo
+        <Card className="px-3 py-2">
+          <View className="flex-row items-center gap-2">
+            <AppPressable
+              className="flex-1 min-w-0"
               onPress={() => onEdit(product)}
               accessibilityRole="button"
               accessibilityLabel={t('products.editA11y')}>
-              <Text $variant="body" numberOfLines={1} style={{ flexShrink: 1 }}>
-                {product.name}
-              </Text>
-              <TagChipList tags={product.tags} variant="compact" />
-              <Text $variant="caption" $color="textSecondary" numberOfLines={1}>
-                {carbsLabel}
-              </Text>
-            </CompactInfo>
-            <Actions>
-              <ButtonIcon
-                onPress={() => onEdit(product)}
-                accessibilityLabel={t('products.editA11y')}>
-                <View pointerEvents="none">
-                  <FaIcon name="pen" size={16} color={theme.colors.textSecondary} />
-                </View>
-              </ButtonIcon>
-              <ButtonIcon
-                onPress={() => onDelete(product.id)}
-                accessibilityLabel={t('products.deleteA11y')}>
-                <View pointerEvents="none">
-                  <FaIcon name="xmark" size={16} color={theme.colors.error} />
-                </View>
-              </ButtonIcon>
-            </Actions>
-          </Row>
-        </GlassPanel>
+              <View className="flex-row items-center gap-1 min-w-0">
+                <Text className="text-foreground text-base shrink" numberOfLines={1}>
+                  {product.name}
+                </Text>
+                <TagChipList tags={product.tags} variant="compact" />
+                <Text className="text-muted text-xs" numberOfLines={1}>
+                  {carbsLabel}
+                </Text>
+              </View>
+            </AppPressable>
+            <RowActions
+              iconSize={16}
+              onEdit={() => onEdit(product)}
+              onDelete={() => onDelete(product.id)}
+            />
+          </View>
+        </Card>
       );
     }
 
     const showImage = resolveProductImageUri(product.imageUrl) != null;
 
     return (
-      <GlassPanel blurTarget={blurTarget}>
-        <Row>
+      <Card className="p-4">
+        <View className="flex-row items-center gap-2">
           {showImage && <ProductImage uri={product.imageUrl} />}
-          <Info
+          <AppPressable
+            className="flex-1"
             onPress={() => onEdit(product)}
             accessibilityRole="button"
             accessibilityLabel={t('products.editA11y')}>
-            <Text $variant="subtitle">{product.name}</Text>
-            <TagChipList tags={product.tags} variant="compact" />
-            <Text $variant="caption" $color="textSecondary">
-              {carbsLabel}
-            </Text>
-            {product.eans.length > 0 && (
-              <Text $variant="caption" $color="textSecondary">
-                {product.eans.length === 1
-                  ? t('common.ean', { ean: product.eans[0] })
-                  : t('products.eanCount', { count: product.eans.length })}
+            <View className="gap-1">
+              <Text className="text-foreground text-base font-semibold">{product.name}</Text>
+              <TagChipList tags={product.tags} variant="compact" />
+              <Text className="text-muted text-xs">{carbsLabel}</Text>
+              {product.eans.length > 0 && (
+                <Text className="text-muted text-xs">
+                  {product.eans.length === 1
+                    ? t('common.ean', { ean: product.eans[0] })
+                    : t('products.eanCount', { count: product.eans.length })}
+                </Text>
+              )}
+              <Text className="text-muted text-xs">
+                {t('common.usageCount', { count: product.usageCount ?? 0 })}
               </Text>
-            )}
-            <Text $variant="caption" $color="textSecondary">
-              {t('common.usageCount', { count: product.usageCount ?? 0 })}
-            </Text>
-          </Info>
-          <Actions>
-            <ButtonIcon
-              onPress={() => onEdit(product)}
-              accessibilityLabel={t('products.editA11y')}>
-              <View pointerEvents="none">
-                <FaIcon name="pen" size={18} color={theme.colors.textSecondary} />
-              </View>
-            </ButtonIcon>
-            <ButtonIcon
-              onPress={() => onDelete(product.id)}
-              accessibilityLabel={t('products.deleteA11y')}>
-              <View pointerEvents="none">
-                <FaIcon name="xmark" size={18} color={theme.colors.error} />
-              </View>
-            </ButtonIcon>
-          </Actions>
-        </Row>
-      </GlassPanel>
+            </View>
+          </AppPressable>
+          <RowActions
+            iconSize={18}
+            onEdit={() => onEdit(product)}
+            onDelete={() => onDelete(product.id)}
+          />
+        </View>
+      </Card>
     );
   },
 );

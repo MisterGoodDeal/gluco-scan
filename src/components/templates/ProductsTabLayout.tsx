@@ -1,21 +1,22 @@
 import { BlurTargetView } from 'expo-blur';
-import { FaIcon } from '@/components/atoms/FaIcon';
 import { useFocusEffect } from 'expo-router';
+import { useThemeColor } from 'heroui-native';
 import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { Text, View } from 'react-native';
 
+import { FaIcon } from '@/components/atoms/FaIcon';
 import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { SearchInput } from '@/components/atoms/SearchInput';
-import { Text } from '@/components/atoms/Text';
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
 import { ProductList } from '@/components/organisms/ProductList';
 import { ProductTagFilterBar } from '@/components/molecules/ProductTagFilterBar';
+import { AppButton } from '@/components/ui/AppButton';
+import { useAppToast } from '@/components/ui/useAppToast';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useProductStore } from '@/store/product.store';
 import { useTutorialStore } from '@/store/tutorial.store';
@@ -24,36 +25,12 @@ import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
 import { productMatchesTagFilters } from '@/utils/productTagFilter';
-import { Screen } from '@/styles/global';
-import { mutedButtonStyles } from '@/styles/button';
 import { consumePendingAddProduct } from '@/features/widgets/deepLink/pendingAction';
-import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
-
-const TitleRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const SearchRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const SearchField = styled.View`
-  flex: 1;
-  min-width: 0;
-`;
-
-const AddButton = styled.Pressable`
-  ${mutedButtonStyles}
-`;
 
 export const ProductsTabLayout: FC = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const toast = useAppToast();
+  const [accentColor, mutedColor] = useThemeColor(['accent', 'muted']);
   const blurTargetRef = useRef<View>(null);
   const { headerHeight, onHeaderLayout } = useBlurHeaderInset(1);
   const hydrate = useProductStore((s) => s.hydrate);
@@ -135,7 +112,7 @@ export const ProductsTabLayout: FC = () => {
   };
 
   return (
-    <Screen>
+    <View className="flex-1 bg-background">
       <TabBarHeightReporter />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
@@ -143,34 +120,35 @@ export const ProductsTabLayout: FC = () => {
           <ProductList
             products={filteredProducts}
             compact={compactList}
-            blurTarget={blurTargetRef}
-            contentInsetTop={headerHeight + theme.spacing.sm}
+            contentInsetTop={headerHeight + 8}
             onEdit={openEdit}
             onDelete={(id) => {
               void remove(id)
-                .then(() => triggerNotificationSuccess())
-                .catch(() => triggerNotificationError());
+                .then(() => toast.success(t('products.deleteSuccess')))
+                .catch(() => toast.error(t('products.deleteError')));
             }}
             refreshing={isLoading}
             onRefresh={() => void loadProducts()}
           />
         </TutorialAnchor>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
-          <TitleRow>
-            <Text $variant="subtitle">{t('products.title')}</Text>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-foreground text-lg font-semibold">{t('products.title')}</Text>
             <TutorialAnchor id="tutorial-products-add">
-            <AddButton onPress={openAdd} accessibilityLabel={t('common.add')}>
-              <Text $variant="caption" $color="accent">
-                {t('products.addButton')}
-              </Text>
-            </AddButton>
+            <AppButton
+              size="sm"
+              variant="tertiary"
+              onPress={openAdd}
+              accessibilityLabel={t('common.add')}>
+              {t('products.addButton')}
+            </AppButton>
             </TutorialAnchor>
-          </TitleRow>
-          <SearchRow>
+          </View>
+          <View className="flex-row items-center gap-2 mt-2">
             <TutorialAnchor id="tutorial-products-search" style={{ flex: 1, minWidth: 0 }}>
-              <SearchField>
+              <View className="flex-1 min-w-0">
                 <SearchInput value={query} onChangeText={setQuery} flex />
-              </SearchField>
+              </View>
             </TutorialAnchor>
             <ButtonIcon
               onPress={toggleCompactList}
@@ -181,10 +159,10 @@ export const ProductsTabLayout: FC = () => {
               <FaIcon
                 name={compactList ? 'grip-lines' : 'list'}
                 size={20}
-                color={compactList ? theme.colors.accent : theme.colors.textSecondary}
+                color={compactList ? accentColor : mutedColor}
               />
             </ButtonIcon>
-          </SearchRow>
+          </View>
           <ProductTagFilterBar
             value={tagFilters}
             onToggle={toggleTagFilter}
@@ -197,6 +175,6 @@ export const ProductsTabLayout: FC = () => {
         product={editingProduct}
         onClose={closeModal}
       />
-    </Screen>
+    </View>
   );
 };

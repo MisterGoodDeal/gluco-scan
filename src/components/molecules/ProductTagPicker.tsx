@@ -1,6 +1,6 @@
 import { type FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components/native';
+import { View } from 'react-native';
 
 import { PickerField } from '@/components/atoms/PickerField';
 import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
@@ -13,10 +13,6 @@ type ProductTagPickerProps = {
   value: ProductTag[];
   onChange: (tags: ProductTag[]) => void;
 };
-
-const FieldWrap = styled.View`
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
 
 export const ProductTagPicker: FC<ProductTagPickerProps> = ({ value, onChange }) => {
   const { t } = useTranslation();
@@ -31,14 +27,14 @@ export const ProductTagPicker: FC<ProductTagPickerProps> = ({ value, onChange })
 
   return (
     <>
-      <FieldWrap>
+      <View className="gap-1">
         <PickerField
           value={fieldLabel}
           onPress={() => setSheetVisible(true)}
           accessibilityLabel={t('products.tagsSection')}
         />
         {value.length > 0 ? <TagChipList tags={value} variant="compact" /> : null}
-      </FieldWrap>
+      </View>
       <TagPickerSheet
         visible={sheetVisible}
         value={value}
