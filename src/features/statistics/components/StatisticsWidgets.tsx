@@ -1,8 +1,7 @@
 import { type FC } from 'react';
-import styled from 'styled-components/native';
+import { Text, View, type ViewProps } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@/components/atoms/Text';
 import { ContributionHeatmap } from '@/components/organisms/ContributionHeatmap';
 import { HorizontalBarChart } from '@/features/statistics/components/charts/HorizontalBarChart';
 import { LineChart } from '@/features/statistics/components/charts/LineChart';
@@ -23,18 +22,15 @@ type StatisticsWidgetsProps = {
   onHeatmapDayPress?: (date: string, carbs: number) => void;
 };
 
-const ListRow = styled.View`
-  padding: ${({ theme }) => theme.spacing.sm}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
-`;
+const ListRow: FC<ViewProps> = ({ children, ...rest }) => (
+  <View className="py-2 border-b border-separator" {...rest}>
+    {children}
+  </View>
+);
 
 const RecordLine: FC<{ label: string; value: string }> = ({ label, value }) => (
-  <Text $variant="body">
-    {label}{' '}
-    <Text $variant="body" style={{ fontWeight: '700' }}>
-      {value}
-    </Text>
+  <Text className="text-foreground text-base">
+    {label} <Text className="font-bold">{value}</Text>
   </Text>
 );
 
@@ -168,8 +164,8 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
         emptyDescription={emptyDescription}>
         {stats.favoriteMeals.map((entry) => (
           <ListRow key={entry.fingerprint}>
-            <Text $variant="body">{entry.name}</Text>
-            <Text $variant="caption" $color="textSecondary">
+            <Text className="text-foreground text-base">{entry.name}</Text>
+            <Text className="text-muted text-sm">
               {t('statistics.favoriteMeals.line', {
                 count: entry.count,
                 average: formatDecimal(entry.averageCarbs),
@@ -205,10 +201,8 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
         empty={stats.consistency.dayCount < 2}
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}>
-        <Text $variant="title" $color="accent">
-          {stats.consistency.score}%
-        </Text>
-        <Text $variant="caption" $color="textSecondary" style={{ fontStyle: 'italic' }}>
+        <Text className="text-accent text-3xl font-bold">{stats.consistency.score}%</Text>
+        <Text className="text-muted text-sm italic">
           {t('statistics.consistency.description')}
         </Text>
       </StatisticsWidgetCard>
@@ -220,10 +214,8 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
         emptyDescription={emptyDescription}>
         {stats.bestDays.map((entry) => (
           <ListRow key={entry.date}>
-            <Text $variant="body">{formatDateLabel(entry.date, locale)}</Text>
-            <Text $variant="caption" $color="accent">
-              {formatDecimal(entry.carbs)} g
-            </Text>
+            <Text className="text-foreground text-base">{formatDateLabel(entry.date, locale)}</Text>
+            <Text className="text-accent text-sm">{formatDecimal(entry.carbs)} g</Text>
           </ListRow>
         ))}
       </StatisticsWidgetCard>

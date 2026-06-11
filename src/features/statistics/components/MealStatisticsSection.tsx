@@ -1,8 +1,7 @@
-import { type FC, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components/native';
+import { type FC, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@/components/atoms/Text';
 import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
 import { loadEnrichedMeals } from '@/features/statistics/services/statisticsData.service';
 import { selectMealDetailStats } from '@/features/statistics/selectors/mealDetail.selectors';
@@ -17,16 +16,9 @@ type MealStatisticsSectionProps = {
   productsById: Record<string, Product>;
 };
 
-const Section = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.lg}px;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const StatRow = styled.View`
-  padding: ${({ theme }) => theme.spacing.xs}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
-`;
+const StatRow: FC<{ children: ReactNode }> = ({ children }) => (
+  <View className="py-1 border-b border-separator">{children}</View>
+);
 
 const toEnrichedMeal = (meal: Meal, productsById: Record<string, Product>): EnrichedMealRecord => ({
   id: meal.id,
@@ -62,54 +54,46 @@ export const MealStatisticsSection: FC<MealStatisticsSectionProps> = ({ meal, pr
   }, [allMeals, meal, productsById]);
 
   return (
-    <Section>
-      <Text $variant="body">{t('statistics.mealDetail.title')}</Text>
+    <View className="mt-6 gap-2">
+      <Text className="text-foreground text-base font-medium">
+        {t('statistics.mealDetail.title')}
+      </Text>
       {stats.dayPercentage != null ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
-            {t('statistics.mealDetail.dayPercentage')}
-          </Text>
-          <Text $variant="caption">{formatDecimal(stats.dayPercentage)}%</Text>
+          <Text className="text-muted text-sm">{t('statistics.mealDetail.dayPercentage')}</Text>
+          <Text className="text-foreground text-sm">{formatDecimal(stats.dayPercentage)}%</Text>
         </StatRow>
       ) : null}
       {stats.equivalentRawWeight != null ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
-            {t('statistics.mealDetail.equivalentRaw')}
-          </Text>
-          <Text $variant="caption">
+          <Text className="text-muted text-sm">{t('statistics.mealDetail.equivalentRaw')}</Text>
+          <Text className="text-foreground text-sm">
             {formatDecimal(stats.equivalentRawWeight)} {t('common.gramsUnit')}
           </Text>
         </StatRow>
       ) : null}
       {stats.equivalentCookedWeight != null ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
-            {t('statistics.mealDetail.equivalentCooked')}
-          </Text>
-          <Text $variant="caption">
+          <Text className="text-muted text-sm">{t('statistics.mealDetail.equivalentCooked')}</Text>
+          <Text className="text-foreground text-sm">
             {formatDecimal(stats.equivalentCookedWeight)} {t('common.gramsUnit')}
           </Text>
         </StatRow>
       ) : null}
       {stats.tags.length > 0 ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
-            {t('statistics.mealDetail.tags')}
-          </Text>
+          <Text className="text-muted text-sm">{t('statistics.mealDetail.tags')}</Text>
           <TagChipList tags={stats.tags} variant="compact" />
         </StatRow>
       ) : null}
       {stats.mostCarbRichProduct ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
-            {t('statistics.mealDetail.mostCarbRich')}
-          </Text>
-          <Text $variant="caption">
+          <Text className="text-muted text-sm">{t('statistics.mealDetail.mostCarbRich')}</Text>
+          <Text className="text-foreground text-sm">
             {stats.mostCarbRichProduct.name} ({formatDecimal(stats.mostCarbRichProduct.carbs)} g)
           </Text>
         </StatRow>
       ) : null}
-    </Section>
+    </View>
   );
 };

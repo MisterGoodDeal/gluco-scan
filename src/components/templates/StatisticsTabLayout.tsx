@@ -1,23 +1,14 @@
 import { BlurTargetView } from 'expo-blur';
 import { type FC, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
-import styled from 'styled-components/native';
+import { Text, View } from 'react-native';
 
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
-import { Text } from '@/components/atoms/Text';
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { StatisticsHomeScreen } from '@/features/statistics/screens/StatisticsHomeScreen';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
-import { Screen } from '@/styles/global';
-
-const TitleRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-`;
 
 export const StatisticsTabLayout: FC = () => {
   const { t } = useTranslation();
@@ -26,17 +17,17 @@ export const StatisticsTabLayout: FC = () => {
   const bottomInset = useTabBarBottomInset();
 
   return (
-    <Screen>
+    <View className="flex-1 bg-background">
       <TabBarHeightReporter />
       <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
         <BackgroundGradient />
         <StatisticsHomeScreen headerInset={headerHeight} bottomInset={bottomInset} />
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
-          <TitleRow>
-            <Text $variant="title">{t('statistics.title')}</Text>
-          </TitleRow>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-foreground text-lg font-semibold">{t('statistics.title')}</Text>
+          </View>
         </BlurScreenHeader>
       </BlurTargetView>
-    </Screen>
+    </View>
   );
 };

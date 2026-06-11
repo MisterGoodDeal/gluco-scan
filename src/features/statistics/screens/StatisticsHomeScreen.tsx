@@ -1,9 +1,7 @@
 import { type FC, useState } from 'react';
-import { ActivityIndicator, ScrollView } from 'react-native';
-import styled from 'styled-components/native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@/components/atoms/Text';
 import { HeatmapDayDetailSheet } from '@/features/statistics/components/HeatmapDayDetailSheet';
 import { StatisticsPeriodSelector } from '@/features/statistics/components/StatisticsPeriodSelector';
 import { StatisticsSummaryCards } from '@/features/statistics/components/StatisticsSummaryCards';
@@ -16,21 +14,6 @@ type StatisticsHomeScreenProps = {
   bottomInset: number;
 };
 
-const Container = styled.View`
-  flex: 1;
-`;
-
-const Content = styled.View`
-  padding: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const LoadingWrap = styled.View`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacing.xl}px;
-`;
-
 export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInset, bottomInset }) => {
   const { t } = useTranslation();
   const { period, setPeriod } = useStatisticsPeriod();
@@ -39,26 +22,26 @@ export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInse
 
   if (loading) {
     return (
-      <LoadingWrap style={{ paddingTop: headerInset }}>
+      <View
+        className="flex-1 items-center justify-center p-8"
+        style={{ paddingTop: headerInset }}>
         <ActivityIndicator size="large" />
-        <Text $variant="caption" $color="textSecondary">
-          {t('common.loading')}
-        </Text>
-      </LoadingWrap>
+        <Text className="text-muted text-sm">{t('common.loading')}</Text>
+      </View>
     );
   }
 
   const isEmpty = stats.summary.mealCount === 0;
 
   return (
-    <Container>
+    <View className="flex-1">
       <ScrollView
         contentContainerStyle={{
           paddingTop: headerInset,
           paddingBottom: bottomInset,
         }}
         showsVerticalScrollIndicator={false}>
-        <Content>
+        <View className="p-4">
           <StatisticsPeriodSelector value={period} onChange={setPeriod} />
 
           {isEmpty ? (
@@ -76,7 +59,7 @@ export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInse
               />
             </>
           )}
-        </Content>
+        </View>
       </ScrollView>
 
       <HeatmapDayDetailSheet
@@ -85,6 +68,6 @@ export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInse
         meals={meals}
         onClose={() => setSelectedHeatmapDay(null)}
       />
-    </Container>
+    </View>
   );
 };

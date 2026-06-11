@@ -1,7 +1,7 @@
+import { useThemeColor } from 'heroui-native';
 import { type FC, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components/native';
+import { Text, View } from 'react-native';
 
-import { Text } from '@/components/atoms/Text';
 import {
   aggregateBarChartPoints,
   getChartMaxValue,
@@ -21,48 +21,8 @@ type VerticalBarChartProps = {
 
 const MIN_IN_BAR_VALUE_HEIGHT = 22;
 
-const ChartArea = styled.View<{ $height: number }>`
-  width: 100%;
-  height: ${({ $height }) => $height}px;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const BarColumn = styled.View`
-  flex: 1;
-  min-width: 0;
-  align-items: center;
-`;
-
-const BarTrack = styled.View<{ $height: number }>`
-  width: 100%;
-  max-width: 32px;
-  align-self: center;
-  height: ${({ $height }) => $height}px;
-  justify-content: flex-end;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  background-color: ${({ theme }) => theme.colors.glass.border};
-  overflow: hidden;
-`;
-
-const BarFill = styled.View<{ $fillHeight: number }>`
-  width: 100%;
-  height: ${({ $fillHeight }) => $fillHeight}px;
-  background-color: ${({ theme }) => theme.colors.accent};
-  border-radius: ${({ theme }) => theme.radius.sm}px;
-  justify-content: center;
-  align-items: center;
-`;
-
-const LabelWrap = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.xs}px;
-  width: 100%;
-  align-items: center;
-`;
-
 export const VerticalBarChart: FC<VerticalBarChartProps> = ({ data, height = 160, maxBars }) => {
-  const theme = useTheme();
+  const accentForeground = useThemeColor('accent-foreground');
 
   const chartData = useMemo(() => {
     if (maxBars == null) return data;
@@ -74,21 +34,24 @@ export const VerticalBarChart: FC<VerticalBarChartProps> = ({ data, height = 160
   const compact = chartData.length > 10;
 
   return (
-    <ChartArea $height={height}>
+    <View className="w-full flex-row items-end gap-1" style={{ height }}>
       {chartData.map((point, index) => {
         const fillHeight = maxValue > 0 ? (point.value / maxValue) * trackHeight : 0;
         const barHeight = Math.max(fillHeight, point.value > 0 ? 4 : 0);
         const showValueInBar = barHeight >= MIN_IN_BAR_VALUE_HEIGHT && point.value > 0;
 
         return (
-          <BarColumn key={`${point.label}-${index}`}>
-            <BarTrack $height={trackHeight}>
-              <BarFill $fillHeight={barHeight}>
+          <View key={`${point.label}-${index}`} className="flex-1 min-w-0 items-center">
+            <View
+              className="w-full max-w-8 self-center justify-end rounded-lg bg-default overflow-hidden"
+              style={{ height: trackHeight }}>
+              <View
+                className="w-full rounded-lg bg-accent justify-center items-center"
+                style={{ height: barHeight }}>
                 {showValueInBar ? (
                   <Text
-                    $variant="caption"
                     style={{
-                      color: theme.colors.onAccent,
+                      color: accentForeground,
                       fontWeight: '700',
                       fontSize: 9,
                       textAlign: 'center',
@@ -97,21 +60,20 @@ export const VerticalBarChart: FC<VerticalBarChartProps> = ({ data, height = 160
                     {formatDecimal(point.value)}
                   </Text>
                 ) : null}
-              </BarFill>
-            </BarTrack>
+              </View>
+            </View>
 
-            <LabelWrap>
+            <View className="mt-1 w-full items-center">
               <Text
-                $variant="caption"
-                $color="textSecondary"
+                className="text-muted"
                 numberOfLines={2}
                 style={{ fontSize: compact ? 9 : 10, textAlign: 'center', width: '100%' }}>
                 {point.label}
               </Text>
-            </LabelWrap>
-          </BarColumn>
+            </View>
+          </View>
         );
       })}
-    </ChartArea>
+    </View>
   );
 };

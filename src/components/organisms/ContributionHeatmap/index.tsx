@@ -1,9 +1,9 @@
 import { type FC, useMemo, useState } from 'react';
-import { Pressable, type LayoutChangeEvent } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { Text, View, type LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUniwind } from 'uniwind';
 
-import { Text } from '@/components/atoms/Text';
+import { AppPressable } from '@/components/ui/AppPressable';
 import {
   getHeatmapLevel,
   getHeatmapLevelColors,
@@ -23,40 +23,6 @@ export interface ContributionHeatmapProps {
 const CELL_GAP = 3;
 const LEGEND_SWATCH_SIZE = 10;
 const CELL_RADIUS_RATIO = 0.24;
-
-const Container = styled.View`
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const Grid = styled.View`
-  flex-direction: row;
-  gap: ${CELL_GAP}px;
-`;
-
-const Column = styled.View`
-  flex: 1;
-  gap: ${CELL_GAP}px;
-`;
-
-const LegendRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const Cell = styled.View<{ $color: string; $radius: number }>`
-  width: 100%;
-  border-radius: ${({ $radius }) => $radius}px;
-  background-color: ${({ $color }) => $color};
-`;
-
-const LegendSwatch = styled.View<{ $color: string; $radius: number }>`
-  width: ${LEGEND_SWATCH_SIZE}px;
-  height: ${LEGEND_SWATCH_SIZE}px;
-  border-radius: ${({ $radius }) => $radius}px;
-  background-color: ${({ $color }) => $color};
-`;
 
 const getCellRadius = (gridWidth: number): number => {
   const cellWidth =
@@ -83,11 +49,14 @@ const buildGridColumns = (
 
 export const ContributionHeatmap: FC<ContributionHeatmapProps> = ({ values, onDayPress }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const { theme } = useUniwind();
   const [cellRadius, setCellRadius] = useState(4);
 
   const maxCarbs = useMemo(() => getHeatmapMaxCarbs(values), [values]);
-  const levelColors = useMemo(() => getHeatmapLevelColors(theme.mode), [theme.mode]);
+  const levelColors = useMemo(
+    () => getHeatmapLevelColors(theme === 'dark' ? 'dark' : 'light'),
+    [theme],
+  );
   const columns = useMemo(() => buildGridColumns(values), [values]);
   const legendRadius = Math.max(2, Math.round(LEGEND_SWATCH_SIZE * CELL_RADIUS_RATIO));
 
@@ -96,18 +65,21 @@ export const ContributionHeatmap: FC<ContributionHeatmapProps> = ({ values, onDa
   };
 
   return (
-    <Container>
-      <Grid onLayout={handleGridLayout}>
+    <View className="gap-2">
+      <View className="flex-row" style={{ gap: CELL_GAP }} onLayout={handleGridLayout}>
         {columns.map((column, columnIndex) => (
-          <Column key={`col-${columnIndex}`}>
+          <View key={`col-${columnIndex}`} className="flex-1" style={{ gap: CELL_GAP }}>
             {column.map((day, rowIndex) => {
               if (!day) {
                 return (
-                  <Cell
+                  <View
                     key={`empty-${columnIndex}-${rowIndex}`}
-                    $color={levelColors[0]}
-                    $radius={cellRadius}
-                    style={{ aspectRatio: 1 }}
+                    style={{
+                      width: '100%',
+                      aspectRatio: 1,
+                      borderRadius: cellRadius,
+                      backgroundColor: levelColors[0],
+                    }}
                   />
                 );
               }
@@ -115,34 +87,45 @@ export const ContributionHeatmap: FC<ContributionHeatmapProps> = ({ values, onDa
               const level = getHeatmapLevel(day.carbs, maxCarbs);
 
               return (
-                <Pressable
+                <AppPressable
                   key={day.date}
                   onPress={() => onDayPress?.(day.date, day.carbs)}
                   accessibilityRole="button"
                   accessibilityLabel={`${day.date}: ${day.carbs}g`}>
-                  <Cell $color={levelColors[level]} $radius={cellRadius} style={{ aspectRatio: 1 }} />
-                </Pressable>
+                  <View
+                    style={{
+                      width: '100%',
+                      aspectRatio: 1,
+                      borderRadius: cellRadius,
+                      backgroundColor: levelColors[level],
+                    }}
+                  />
+                </AppPressable>
               );
             })}
-          </Column>
+          </View>
         ))}
-      </Grid>
+      </View>
 
-      <LegendRow>
-        <Text $variant="caption" $color="textSecondary" style={{ fontSize: 10 }}>
+      <View className="flex-row items-center justify-end gap-1">
+        <Text className="text-muted" style={{ fontSize: 10 }}>
           {t('statistics.heatmap.less')}
         </Text>
         {[0, 1, 2, 3, 4].map((level) => (
-          <LegendSwatch
+          <View
             key={level}
-            $color={levelColors[level as 0 | 1 | 2 | 3 | 4]}
-            $radius={legendRadius}
+            style={{
+              width: LEGEND_SWATCH_SIZE,
+              height: LEGEND_SWATCH_SIZE,
+              borderRadius: legendRadius,
+              backgroundColor: levelColors[level as 0 | 1 | 2 | 3 | 4],
+            }}
           />
         ))}
-        <Text $variant="caption" $color="textSecondary" style={{ fontSize: 10 }}>
+        <Text className="text-muted" style={{ fontSize: 10 }}>
           {t('statistics.heatmap.more')}
         </Text>
-      </LegendRow>
-    </Container>
+      </View>
+    </View>
   );
 };

@@ -1,9 +1,7 @@
 import { type FC, useMemo } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useTheme } from 'styled-components/native';
 
-import { Text } from '@/components/atoms/Text';
 import {
   describeDonutSlice,
   getChartColor,
@@ -21,7 +19,6 @@ type PieChartProps = {
 };
 
 export const PieChart: FC<PieChartProps> = ({ data, radius = 80 }) => {
-  const theme = useTheme();
   const innerRadius = radius * 0.55;
   const size = radius * 2;
   const center = radius;
@@ -50,26 +47,20 @@ export const PieChart: FC<PieChartProps> = ({ data, radius = 80 }) => {
   if (slices.length === 0) return null;
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+    <View className="flex-row items-center gap-4">
       <Svg width={size} height={size}>
         {slices.map((slice) => (
           <Path key={slice.label} d={slice.path} fill={slice.color} />
         ))}
       </Svg>
-      <View style={{ flex: 1, gap: theme.spacing.xs }}>
+      <View className="flex-1 gap-1">
         {slices.map((slice) => (
-          <View key={slice.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View key={slice.label} className="flex-row items-center gap-2">
             <View
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: slice.color,
-              }}
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ backgroundColor: slice.color }}
             />
-            <Text $variant="caption" $color="textSecondary" style={{ flex: 1 }}>
-              {slice.label}
-            </Text>
+            <Text className="text-muted text-sm flex-1">{slice.label}</Text>
           </View>
         ))}
       </View>

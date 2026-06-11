@@ -1,32 +1,14 @@
+import { Card } from 'heroui-native';
 import { type FC } from 'react';
-import styled from 'styled-components/native';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@/components/atoms/Text';
 import type { SummaryStats } from '@/features/statistics/selectors/summary.selectors';
 import { formatDecimal } from '@/utils/format';
 
 type StatisticsSummaryCardsProps = {
   summary: SummaryStats;
 };
-
-const Grid = styled.View`
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const Card = styled.View`
-  width: 48%;
-  flex-grow: 1;
-  padding: ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.radius.md}px;
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glass.border};
-  background-color: ${({ theme }) => theme.colors.glass.background};
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
 
 export const StatisticsSummaryCards: FC<StatisticsSummaryCardsProps> = ({ summary }) => {
   const { t } = useTranslation();
@@ -55,17 +37,13 @@ export const StatisticsSummaryCards: FC<StatisticsSummaryCardsProps> = ({ summar
   ];
 
   return (
-    <Grid>
+    <View className="flex-row flex-wrap gap-2 mb-4">
       {cards.map((card) => (
-        <Card key={card.label}>
-          <Text $variant="caption" $color="textSecondary">
-            {card.label}
-          </Text>
-          <Text $variant="subtitle" $color="accent">
-            {card.value}
-          </Text>
+        <Card key={card.label} className="w-[48%] grow p-4 gap-1">
+          <Text className="text-muted text-sm">{card.label}</Text>
+          <Text className="text-accent text-lg font-semibold">{card.value}</Text>
         </Card>
       ))}
-    </Grid>
+    </View>
   );
 };

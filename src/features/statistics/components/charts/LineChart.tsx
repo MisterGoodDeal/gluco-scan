@@ -1,9 +1,8 @@
+import { useThemeColor } from 'heroui-native';
 import { type FC, useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import Svg, { Circle, Path, Polyline } from 'react-native-svg';
-import styled, { useTheme } from 'styled-components/native';
 
-import { Text } from '@/components/atoms/Text';
 import {
   getChartMaxValue,
   shouldShowChartLabel,
@@ -19,24 +18,8 @@ type LineChartProps = {
   height?: number;
 };
 
-const Wrapper = styled.View`
-  width: 100%;
-  gap: ${({ theme }) => theme.spacing.xs}px;
-`;
-
-const LabelsRow = styled.View`
-  flex-direction: row;
-  width: 100%;
-`;
-
-const LabelCell = styled.View`
-  flex: 1;
-  align-items: center;
-  min-width: 0;
-`;
-
 export const LineChart: FC<LineChartProps> = ({ data, height = 160 }) => {
-  const theme = useTheme();
+  const [accentColor, borderColor] = useThemeColor(['accent', 'border']);
   const chartHeight = height - 20;
   const padding = 12;
   const [width, setWidth] = useState(0);
@@ -59,7 +42,7 @@ export const LineChart: FC<LineChartProps> = ({ data, height = 160 }) => {
   }, [chartHeight, data, maxValue, padding, width]);
 
   return (
-    <Wrapper>
+    <View className="w-full gap-1">
       <View
         onLayout={(event) => {
           const nextWidth = event.nativeEvent.layout.width;
@@ -74,7 +57,7 @@ export const LineChart: FC<LineChartProps> = ({ data, height = 160 }) => {
                   key={ratio}
                   points={`${padding},${y} ${width - padding},${y}`}
                   fill="none"
-                  stroke={theme.colors.glass.border}
+                  stroke={borderColor}
                   strokeWidth={1}
                 />
               );
@@ -83,7 +66,7 @@ export const LineChart: FC<LineChartProps> = ({ data, height = 160 }) => {
               <Path
                 d={`M ${points.map((point) => `${point.x} ${point.y}`).join(' L ')}`}
                 fill="none"
-                stroke={theme.colors.accent}
+                stroke={accentColor}
                 strokeWidth={2}
               />
             ) : null}
@@ -93,7 +76,7 @@ export const LineChart: FC<LineChartProps> = ({ data, height = 160 }) => {
                 cx={point.x}
                 cy={point.y}
                 r={data.length <= 14 ? 3 : 0}
-                fill={theme.colors.accent}
+                fill={accentColor}
               />
             ))}
           </Svg>
@@ -101,24 +84,23 @@ export const LineChart: FC<LineChartProps> = ({ data, height = 160 }) => {
           <View style={{ height: chartHeight }} />
         )}
       </View>
-      <LabelsRow>
+      <View className="flex-row w-full">
         {data.map((point, index) => {
           const showLabel = shouldShowChartLabel(index, data.length);
           return (
-            <LabelCell key={`label-${point.label}-${index}`}>
+            <View key={`label-${point.label}-${index}`} className="flex-1 items-center min-w-0">
               {showLabel ? (
                 <Text
-                  $variant="caption"
-                  $color="textSecondary"
+                  className="text-muted"
                   numberOfLines={1}
                   style={{ fontSize: compact ? 8 : 10, textAlign: 'center', width: '100%' }}>
                   {point.label}
                 </Text>
               ) : null}
-            </LabelCell>
+            </View>
           );
         })}
-      </LabelsRow>
-    </Wrapper>
+      </View>
+    </View>
   );
 };

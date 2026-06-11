@@ -1,8 +1,7 @@
-import { type FC } from 'react';
-import styled from 'styled-components/native';
+import { type FC, type ReactNode } from 'react';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@/components/atoms/Text';
 import { useProductStatistics } from '@/features/statistics/hooks/useStatistics';
 import { formatDecimal } from '@/utils/format';
 import { formatDateLabel } from '@/utils/date';
@@ -13,16 +12,9 @@ type ProductStatisticsSectionProps = {
   productId: string;
 };
 
-const Section = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.lg}px;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const StatRow = styled.View`
-  padding: ${({ theme }) => theme.spacing.xs}px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.glass.border};
-`;
+const StatRow: FC<{ children: ReactNode }> = ({ children }) => (
+  <View className="py-1 border-b border-separator">{children}</View>
+);
 
 export const ProductStatisticsSection: FC<ProductStatisticsSectionProps> = ({ productId }) => {
   const { t } = useTranslation();
@@ -32,68 +24,64 @@ export const ProductStatisticsSection: FC<ProductStatisticsSectionProps> = ({ pr
   if (!stats || stats.timesConsumed === 0) return null;
 
   return (
-    <Section>
-      <Text $variant="body">{t('statistics.productDetail.title')}</Text>
+    <View className="mt-6 gap-2">
+      <Text className="text-foreground text-base font-medium">
+        {t('statistics.productDetail.title')}
+      </Text>
       <StatRow>
-        <Text $variant="caption" $color="textSecondary">
-          {t('statistics.productDetail.timesConsumed')}
-        </Text>
-        <Text $variant="caption">{stats.timesConsumed}</Text>
+        <Text className="text-muted text-sm">{t('statistics.productDetail.timesConsumed')}</Text>
+        <Text className="text-foreground text-sm">{stats.timesConsumed}</Text>
       </StatRow>
       <StatRow>
-        <Text $variant="caption" $color="textSecondary">
-          {t('statistics.productDetail.lastConsumed')}
-        </Text>
-        <Text $variant="caption">
+        <Text className="text-muted text-sm">{t('statistics.productDetail.lastConsumed')}</Text>
+        <Text className="text-foreground text-sm">
           {stats.lastConsumedDate
             ? formatDateLabel(stats.lastConsumedDate, locale)
             : t('statistics.productDetail.never')}
         </Text>
       </StatRow>
       <StatRow>
-        <Text $variant="caption" $color="textSecondary">
-          {t('statistics.productDetail.totalCarbs')}
-        </Text>
-        <Text $variant="caption">{formatDecimal(stats.totalCarbs)} g</Text>
+        <Text className="text-muted text-sm">{t('statistics.productDetail.totalCarbs')}</Text>
+        <Text className="text-foreground text-sm">{formatDecimal(stats.totalCarbs)} g</Text>
       </StatRow>
       {stats.averagePortion != null ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
-            {t('statistics.productDetail.averagePortion')}
-          </Text>
-          <Text $variant="caption">
+          <Text className="text-muted text-sm">{t('statistics.productDetail.averagePortion')}</Text>
+          <Text className="text-foreground text-sm">
             {formatDecimal(stats.averagePortion)} {t('common.gramsUnit')}
           </Text>
         </StatRow>
       ) : null}
       {stats.averageCookedPortion != null ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
+          <Text className="text-muted text-sm">
             {t('statistics.productDetail.averageCookedPortion')}
           </Text>
-          <Text $variant="caption">
+          <Text className="text-foreground text-sm">
             {formatDecimal(stats.averageCookedPortion)} {t('common.gramsUnit')}
           </Text>
         </StatRow>
       ) : null}
       {stats.averageRawPortion != null ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
+          <Text className="text-muted text-sm">
             {t('statistics.productDetail.averageRawPortion')}
           </Text>
-          <Text $variant="caption">
+          <Text className="text-foreground text-sm">
             {formatDecimal(stats.averageRawPortion)} {t('common.gramsUnit')}
           </Text>
         </StatRow>
       ) : null}
       {stats.favoriteMealType ? (
         <StatRow>
-          <Text $variant="caption" $color="textSecondary">
+          <Text className="text-muted text-sm">
             {t('statistics.productDetail.favoriteMealType')}
           </Text>
-          <Text $variant="caption">{t(getMealTypeLabelKey(stats.favoriteMealType))}</Text>
+          <Text className="text-foreground text-sm">
+            {t(getMealTypeLabelKey(stats.favoriteMealType))}
+          </Text>
         </StatRow>
       ) : null}
-    </Section>
+    </View>
   );
 };
