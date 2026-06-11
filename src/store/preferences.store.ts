@@ -5,7 +5,7 @@ import { appPreferencesRepository } from '@/repositories/appPreferences.reposito
 import type { AppPreferences } from '@/types/appPreferences';
 import { defaultAppPreferences } from '@/types/appPreferences';
 import type { SupportedLocale } from '@/i18n/types';
-import type { ThemePreference } from '@/styles/theme';
+import type { ThemePreference } from '@/types/theme';
 import type { UnitSystem } from '@/types/unitSystem';
 
 type PreferencesStore = AppPreferences & {

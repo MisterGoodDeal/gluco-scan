@@ -3,7 +3,7 @@ import { createMMKV } from 'react-native-mmkv';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { SupportedLocale } from '@/i18n/types';
-import type { ThemePreference } from '@/styles/theme';
+import type { ThemePreference } from '@/types/theme';
 
 const storage = createMMKV({ id: 'glucoscan-settings' });
 const MIGRATION_FLAG = 'preferences_migrated_to_sqlite';

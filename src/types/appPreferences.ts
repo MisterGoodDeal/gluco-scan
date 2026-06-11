@@ -1,5 +1,5 @@
 import type { SupportedLocale } from '@/i18n/types';
-import type { ThemePreference } from '@/styles/theme';
+import type { ThemePreference } from '@/types/theme';
 import type { UnitSystem } from '@/types/unitSystem';
 
 export interface AppPreferences {

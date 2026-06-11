@@ -3,7 +3,7 @@ import type { AppPreferences } from '@/types/appPreferences';
 import { defaultAppPreferences } from '@/types/appPreferences';
 import type { SupportedLocale } from '@/i18n/types';
 import { supportedLocales } from '@/i18n/types';
-import type { ThemePreference } from '@/styles/theme';
+import type { ThemePreference } from '@/types/theme';
 import { unitSystems, type UnitSystem } from '@/types/unitSystem';
 
 const PREF_ID = 'default';
