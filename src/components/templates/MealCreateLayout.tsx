@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useThemeColor } from 'heroui-native';
-import { type FC, useEffect, useState } from 'react';
+import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,16 +8,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FaIcon } from '@/components/atoms/FaIcon';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { TutorialMealCreateBanner } from '@/components/organisms/TutorialMealCreateBanner';
-import { PickerField } from '@/components/atoms/PickerField';
-import {
-  MealMetaPickerSheet,
-  type MealMetaPickerField,
-} from '@/components/organisms/MealMetaPickerSheet';
 import { ProductSpotlightSearch } from '@/components/organisms/ProductSpotlightSearch';
 import { QuantityPickerModal } from '@/components/organisms/QuantityPickerModal';
 import { ScannerView } from '@/components/organisms/ScannerView';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppPressable } from '@/components/ui/AppPressable';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { useAppToast } from '@/components/ui/useAppToast';
 import {
   persistOffProduct,
@@ -32,10 +28,11 @@ import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import type { Product } from '@/types/product';
 import { generateId } from '@/utils/id';
-import { formatDateLabel } from '@/utils/date';
+import { addDays, formatDateLabel, toDateKey } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
 import { MealItemConversionLine } from '@/components/molecules/MealItemConversionLine';
 import { getMealTypeLabelKey } from '@/utils/mealType';
+import { MEAL_TYPES, MealType } from '@/types/mealType';
 import { hp, topScreenSpace } from '@/utils/screen';
 
 export const MealCreateLayout: FC = () => {
@@ -71,12 +68,51 @@ export const MealCreateLayout: FC = () => {
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
-  const [openMetaPicker, setOpenMetaPicker] = useState<MealMetaPickerField | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const { handleScan, isLoading, error, warning, clearMessages } = useMealProductScan();
 
-  const timeLabel = `${String(draftMeta.hours).padStart(2, '0')}:${String(draftMeta.minutes).padStart(2, '0')}`;
   const scannerActive = step === 1 && pickerProduct === null && !searchVisible;
+
+  const dateOptions = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, index) => addDays(toDateKey(new Date()), index - 7)).map(
+        (dateKey) => ({
+          value: dateKey,
+          label: formatDateLabel(dateKey, locale),
+        }),
+      ),
+    [locale],
+  );
+  const mealTypeOptions = useMemo(
+    () =>
+      MEAL_TYPES.map((type) => ({
+        value: type,
+        label: t(getMealTypeLabelKey(type)),
+      })),
+    [t],
+  );
+  const hourOptions = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, hour) => ({
+        value: String(hour),
+        label: String(hour).padStart(2, '0'),
+      })),
+    [],
+  );
+  const minuteOptions = useMemo(
+    () =>
+      Array.from({ length: 60 }, (_, minute) => ({
+        value: String(minute),
+        label: String(minute).padStart(2, '0'),
+      })),
+    [],
+  );
+  const selectedMealType = mealTypeOptions.find((option) => option.value === draftMeta.type);
+  const selectedDate = dateOptions.find((option) => option.value === draftMeta.dateKey);
+  const selectedHour = hourOptions.find((option) => option.value === String(draftMeta.hours));
+  const selectedMinute = minuteOptions.find(
+    (option) => option.value === String(draftMeta.minutes),
+  );
 
   useEffect(() => {
     if (error) {
@@ -131,10 +167,6 @@ export const MealCreateLayout: FC = () => {
   useEffect(() => {
     void hydrateSettings();
   }, [hydrateSettings]);
-
-  useEffect(() => {
-    if (step !== 0) setOpenMetaPicker(null);
-  }, [step]);
 
   const draftTotal = draftItems.reduce((sum, item) => sum + item.carbs, 0);
 
@@ -233,27 +265,57 @@ export const MealCreateLayout: FC = () => {
           <>
             <View className="m-4 mb-0 gap-1">
               <Text className="text-muted text-sm">{t('meals.mealType')}</Text>
-              <PickerField
-                value={t(getMealTypeLabelKey(draftMeta.type))}
-                onPress={() => setOpenMetaPicker('mealType')}
-                accessibilityLabel={t('meals.mealType')}
+              <AppSelect
+                value={selectedMealType}
+                onValueChange={(option) => {
+                  if (option) setDraftMeta({ type: option.value as MealType });
+                }}
+                options={mealTypeOptions}
+                placeholder={t('meals.mealType')}
+                listLabel={t('meals.mealType')}
               />
             </View>
             <View className="m-4 mb-0 gap-1">
               <Text className="text-muted text-sm">{t('meals.date')}</Text>
-              <PickerField
-                value={formatDateLabel(draftMeta.dateKey, locale)}
-                onPress={() => setOpenMetaPicker('date')}
-                accessibilityLabel={t('meals.date')}
+              <AppSelect
+                value={selectedDate}
+                onValueChange={(option) => {
+                  if (option) setDraftMeta({ dateKey: option.value });
+                }}
+                options={dateOptions}
+                placeholder={t('meals.date')}
+                listLabel={t('meals.date')}
+                scrollable
               />
             </View>
             <View className="m-4 gap-1">
               <Text className="text-muted text-sm">{t('meals.time')}</Text>
-              <PickerField
-                value={timeLabel}
-                onPress={() => setOpenMetaPicker('time')}
-                accessibilityLabel={t('meals.time')}
-              />
+              <View className="flex-row gap-2">
+                <View className="flex-1">
+                  <AppSelect
+                    value={selectedHour}
+                    onValueChange={(option) => {
+                      if (option) setDraftMeta({ hours: Number(option.value) });
+                    }}
+                    options={hourOptions}
+                    placeholder="00"
+                    listLabel={t('meals.time')}
+                    scrollable
+                  />
+                </View>
+                <View className="flex-1">
+                  <AppSelect
+                    value={selectedMinute}
+                    onValueChange={(option) => {
+                      if (option) setDraftMeta({ minutes: Number(option.value) });
+                    }}
+                    options={minuteOptions}
+                    placeholder="00"
+                    listLabel={t('meals.time')}
+                    scrollable
+                  />
+                </View>
+              </View>
             </View>
           </>
         )}
@@ -368,12 +430,6 @@ export const MealCreateLayout: FC = () => {
           }
           closeProductPicker();
         }}
-      />
-      <MealMetaPickerSheet
-        field={openMetaPicker}
-        draftMeta={draftMeta}
-        onChange={setDraftMeta}
-        onClose={() => setOpenMetaPicker(null)}
       />
       <ProductSpotlightSearch
         visible={searchVisible}
