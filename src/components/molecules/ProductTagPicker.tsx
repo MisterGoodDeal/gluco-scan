@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { TagIcon } from '@/components/atoms/TagIcon';
-import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { ALL_PRODUCT_TAGS, type ProductTag } from '@/types/productTag';
 import { getTagMetadata } from '@/utils/tags/getTagMetadata';
@@ -37,26 +36,23 @@ export const ProductTagPicker: FC<ProductTagPickerProps> = ({ value, onChange })
   );
 
   return (
-    <View className="gap-1">
-      <AppSelect
-        selectionMode="multiple"
-        value={selected}
-        onValueChange={(next) => onChange(next.map((option) => option.value as ProductTag))}
-        options={options}
-        placeholder={t('products.tagsPlaceholder')}
-        listLabel={t('products.tagsSection')}
-        scrollable
-        renderItem={(option, isSelected) => (
-          <>
-            <View className="flex-row items-center gap-2 flex-1">
-              <TagIcon tag={option.value as ProductTag} size={20} />
-              <Select.ItemLabel />
-            </View>
-            {isSelected ? <Select.ItemIndicator /> : null}
-          </>
-        )}
-      />
-      {value.length > 0 ? <TagChipList tags={value} variant="compact" /> : null}
-    </View>
+    <AppSelect
+      selectionMode="multiple"
+      value={selected}
+      onValueChange={(next) => onChange(next.map((option) => option.value as ProductTag))}
+      options={options}
+      placeholder={t('products.tagsPlaceholder')}
+      listLabel={t('products.tagsSection')}
+      scrollable
+      renderItem={(option, isSelected) => (
+        <>
+          <View className="flex-row items-center gap-2 flex-1">
+            <TagIcon tag={option.value as ProductTag} size={20} />
+            <Select.ItemLabel />
+          </View>
+          {isSelected ? <Select.ItemIndicator /> : null}
+        </>
+      )}
+    />
   );
 };
