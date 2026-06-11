@@ -27,6 +27,8 @@ export type TranslationSchema = {
     next: string;
     previous: string;
     loading: string;
+    fieldRequired: string;
+    invalidValue: string;
   };
   scanner: {
     cameraPermission: string;
@@ -80,6 +82,8 @@ export type TranslationSchema = {
     cookingFactor: string;
     cookingConversionPreview: string;
     filterAll: string;
+    deleteSuccess: string;
+    deleteError: string;
   };
   tags: {
     starch: string;
@@ -152,6 +156,12 @@ export type TranslationSchema = {
     itemCount: string;
     editMealA11y: string;
     viewDetailsA11y: string;
+    deleteConfirmTitle: string;
+    deleteConfirmMessage: string;
+    deleteSuccess: string;
+    deleteError: string;
+    saveSuccess: string;
+    saveError: string;
   };
   settings: {
     title: string;
@@ -180,6 +190,8 @@ export type TranslationSchema = {
     importError: string;
     cookingConversions: string;
     cookingConversionsHint: string;
+    unitDeleted: string;
+    unitDeleteError: string;
   };
   modal: {
     eanLabel: string;
@@ -345,6 +357,8 @@ export const fr: TranslationSchema = {
     next: 'Suivant',
     previous: 'Précédent',
     loading: 'Chargement…',
+    fieldRequired: 'Champ requis',
+    invalidValue: 'Valeur invalide',
   },
   scanner: {
     cameraPermission: 'GlucoScan a besoin de la caméra pour scanner les codes-barres.',
@@ -398,6 +412,8 @@ export const fr: TranslationSchema = {
     cookingFactor: 'Facteur cuisson',
     cookingConversionPreview: '{{raw}} {{rawUnit}} cru = {{cooked}} {{cookedUnit}} cuit',
     filterAll: 'Tous',
+    deleteSuccess: 'Produit supprimé',
+    deleteError: 'Impossible de supprimer le produit',
   },
   tags: {
     starch: 'Féculent',
@@ -471,6 +487,12 @@ export const fr: TranslationSchema = {
     itemCount: '{{count}} aliments',
     editMealA11y: 'Modifier le repas',
     viewDetailsA11y: 'Voir le détail du repas',
+    deleteConfirmTitle: 'Supprimer ce repas ?',
+    deleteConfirmMessage: 'Cette action est irréversible.',
+    deleteSuccess: 'Repas supprimé',
+    deleteError: 'Impossible de supprimer le repas',
+    saveSuccess: 'Repas enregistré',
+    saveError: 'Impossible d\'enregistrer le repas',
   },
   settings: {
     title: 'Paramètres',
@@ -499,6 +521,8 @@ export const fr: TranslationSchema = {
     importError: 'Import impossible',
     cookingConversions: 'Conversions de cuisson',
     cookingConversionsHint: 'Affecte uniquement les futurs repas.',
+    unitDeleted: 'Unité supprimée',
+    unitDeleteError: 'Impossible de supprimer l\'unité',
   },
   tutorial: {
     welcome: {

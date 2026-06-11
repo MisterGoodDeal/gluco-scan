@@ -29,6 +29,8 @@ export const en: TranslationSchema = {
     next: 'Next',
     previous: 'Previous',
     loading: 'Loading…',
+    fieldRequired: 'Required field',
+    invalidValue: 'Invalid value',
   },
   scanner: {
     cameraPermission: 'GlucoScan needs the camera to scan barcodes.',
@@ -82,6 +84,8 @@ export const en: TranslationSchema = {
     cookingFactor: 'Cooking factor',
     cookingConversionPreview: '{{raw}} {{rawUnit}} raw = {{cooked}} {{cookedUnit}} cooked',
     filterAll: 'All',
+    deleteSuccess: 'Product deleted',
+    deleteError: 'Could not delete the product',
   },
   tags: {
     starch: 'Starch',
@@ -155,6 +159,12 @@ export const en: TranslationSchema = {
     itemCount: '{{count}} items',
     editMealA11y: 'Edit meal',
     viewDetailsA11y: 'View meal details',
+    deleteConfirmTitle: 'Delete this meal?',
+    deleteConfirmMessage: 'This action cannot be undone.',
+    deleteSuccess: 'Meal deleted',
+    deleteError: 'Could not delete the meal',
+    saveSuccess: 'Meal saved',
+    saveError: 'Could not save the meal',
   },
   settings: {
     title: 'Settings',
@@ -183,6 +193,8 @@ export const en: TranslationSchema = {
     importError: 'Import failed',
     cookingConversions: 'Cooking conversions',
     cookingConversionsHint: 'Affects future meals only.',
+    unitDeleted: 'Unit deleted',
+    unitDeleteError: 'Could not delete the unit',
   },
   tutorial: {
     welcome: {
