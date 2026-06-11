@@ -2,9 +2,11 @@ import { Tabs } from 'expo-router';
 import { useThemeColor } from 'heroui-native';
 import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabBarIcon } from '@/components/atoms/TabBarIcon';
 import { TabBarBackground } from '@/components/navigation/TabBarBackground';
+import { TAB_BAR_CONTENT_HEIGHT } from '@/constants/tabBar';
 import { triggerImpactLight } from '@/utils/haptics';
 
 export const unstable_settings = {
@@ -19,6 +21,7 @@ const hapticTabListeners = {
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [accentColor, mutedColor, borderColor] = useThemeColor(['accent', 'muted', 'border']);
 
   return (
@@ -26,8 +29,21 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarBackground: () => <TabBarBackground />,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          marginTop: 0,
+        },
+        tabBarIconStyle: {
+          marginBottom: 0,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
+        },
         tabBarStyle: {
           position: 'absolute',
+          height: TAB_BAR_CONTENT_HEIGHT + insets.bottom,
+          paddingTop: 2,
+          paddingBottom: insets.bottom,
           backgroundColor: 'transparent',
           borderTopWidth: 1,
           borderTopColor: borderColor,

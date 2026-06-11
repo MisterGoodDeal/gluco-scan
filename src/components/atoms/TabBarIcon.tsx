@@ -10,6 +10,6 @@ type TabBarIconProps = {
   size?: number;
 };
 
-export const TabBarIcon: FC<TabBarIconProps> = ({ name, color, size = 22 }) => (
+export const TabBarIcon: FC<TabBarIconProps> = ({ name, color, size = 20 }) => (
   <FaIcon name={name} size={size} color={color} />
 );
