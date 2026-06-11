@@ -1,10 +1,11 @@
+import { Tabs } from 'heroui-native';
 import { type FC } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { AppChip } from '@/components/ui/AppChip';
 import type { StatisticsPeriod } from '@/features/statistics/types/statisticsPeriod';
 import { STATISTICS_PERIODS } from '@/features/statistics/types/statisticsPeriod';
+import { triggerImpactLight } from '@/utils/haptics';
 
 type StatisticsPeriodSelectorProps = {
   value: StatisticsPeriod;
@@ -15,22 +16,25 @@ export const StatisticsPeriodSelector: FC<StatisticsPeriodSelectorProps> = ({ va
   const { t } = useTranslation();
 
   return (
-    <View className="flex-row gap-1 mb-4">
-      {STATISTICS_PERIODS.map((period) => {
-        const selected = value === period;
-        return (
-          <AppChip
-            key={period}
-            size="sm"
-            variant={selected ? 'soft' : 'tertiary'}
-            color={selected ? 'accent' : 'default'}
-            label={t(`statistics.period.${period}`)}
-            onPress={() => onChange(period)}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-          />
-        );
-      })}
+    <View className="mb-4">
+      <Tabs
+        value={value}
+        onValueChange={(next) => {
+          triggerImpactLight();
+          onChange(next as StatisticsPeriod);
+        }}
+        variant="primary">
+        <Tabs.List className="w-full self-stretch">
+          <Tabs.Indicator />
+          {STATISTICS_PERIODS.map((period) => (
+            <Tabs.Trigger key={period} value={period} className="flex-1">
+              <Tabs.Label className="text-center text-xs">
+                {t(`statistics.period.${period}`)}
+              </Tabs.Label>
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+      </Tabs>
     </View>
   );
 };
