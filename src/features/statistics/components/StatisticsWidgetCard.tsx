@@ -3,6 +3,7 @@ import { type FC, type ReactNode } from 'react';
 import { Text, View } from 'react-native';
 
 import { FaIcon } from '@/components/atoms/FaIcon';
+import { ScrollReveal } from '@/components/animations/ScrollReveal';
 
 type StatisticsEmptyStateProps = {
   title: string;
@@ -27,6 +28,7 @@ type StatisticsWidgetCardProps = {
   empty?: boolean;
   emptyTitle?: string;
   emptyDescription?: string;
+  revealDelay?: number;
 };
 
 export const StatisticsWidgetCard: FC<StatisticsWidgetCardProps> = ({
@@ -35,8 +37,9 @@ export const StatisticsWidgetCard: FC<StatisticsWidgetCardProps> = ({
   empty = false,
   emptyTitle,
   emptyDescription,
+  revealDelay = 0,
 }) => (
-  <View className="mb-4">
+  <ScrollReveal delay={revealDelay} className="mb-4">
     <Text className="text-foreground text-lg font-semibold mb-2">{title}</Text>
     <Card className="p-4">
       {empty ? (
@@ -48,5 +51,5 @@ export const StatisticsWidgetCard: FC<StatisticsWidgetCardProps> = ({
         children
       )}
     </Card>
-  </View>
+  </ScrollReveal>
 );

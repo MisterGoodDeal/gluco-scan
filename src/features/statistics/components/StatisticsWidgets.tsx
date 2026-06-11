@@ -1,7 +1,8 @@
-import { type FC } from 'react';
+import { type FC, type ReactNode } from 'react';
 import { Text, View, type ViewProps } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { CountUpText } from '@/components/animations/CountUpText';
 import { ContributionHeatmap } from '@/components/organisms/ContributionHeatmap';
 import { HorizontalBarChart } from '@/features/statistics/components/charts/HorizontalBarChart';
 import { LineChart } from '@/features/statistics/components/charts/LineChart';
@@ -28,9 +29,9 @@ const ListRow: FC<ViewProps> = ({ children, ...rest }) => (
   </View>
 );
 
-const RecordLine: FC<{ label: string; value: string }> = ({ label, value }) => (
+const RecordLine: FC<{ label: string; children: ReactNode }> = ({ label, children }) => (
   <Text className="text-foreground text-base">
-    {label} <Text className="font-bold">{value}</Text>
+    {label} {children}
   </Text>
 );
 
@@ -48,6 +49,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
   return (
     <>
       <StatisticsWidgetCard
+        revealDelay={40}
         title={t('statistics.widgets.dailyCarbs')}
         empty={stats.dailyCarbs.every((point) => point.carbs === 0)}
         emptyTitle={emptyTitle}
@@ -59,6 +61,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={80}
         title={t('statistics.widgets.trend')}
         empty={stats.trend.every((point) => point.carbs === 0)}
         emptyTitle={emptyTitle}
@@ -67,6 +70,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={120}
         title={t('statistics.widgets.byMealType')}
         empty={stats.carbsByMealType.length === 0}
         emptyTitle={emptyTitle}
@@ -80,6 +84,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={160}
         title={t('statistics.widgets.byCategory')}
         empty={stats.carbsByCategory.length === 0}
         emptyTitle={emptyTitle}
@@ -93,6 +98,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={200}
         title={t('statistics.widgets.topProducts')}
         empty={stats.topProductsByOccurrences.length === 0}
         emptyTitle={emptyTitle}
@@ -106,6 +112,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={240}
         title={t('statistics.widgets.topCarbs')}
         empty={stats.topProductsByCarbs.length === 0}
         emptyTitle={emptyTitle}
@@ -119,6 +126,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={280}
         title={t('statistics.widgets.starchBreakdown')}
         empty={stats.starchBreakdown.length === 0}
         emptyTitle={emptyTitle}
@@ -132,6 +140,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={320}
         title={t('statistics.widgets.mealDistribution')}
         empty={stats.averageCarbsByMealType.length === 0}
         emptyTitle={emptyTitle}
@@ -145,6 +154,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={360}
         title={t('statistics.widgets.cookedVsRaw')}
         empty={stats.cookedVsRaw.length === 0}
         emptyTitle={emptyTitle}
@@ -158,6 +168,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={400}
         title={t('statistics.widgets.favoriteMeals')}
         empty={stats.favoriteMeals.length === 0}
         emptyTitle={emptyTitle}
@@ -176,6 +187,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={440}
         title={t('statistics.widgets.mostConsumedTags')}
         empty={stats.mostConsumedTags.length === 0}
         emptyTitle={emptyTitle}
@@ -189,6 +201,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={480}
         title={t('statistics.widgets.heatmap')}
         empty={!stats.heatmapDays.some((day) => day.carbs > 0)}
         emptyTitle={emptyTitle}
@@ -197,17 +210,24 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={520}
         title={t('statistics.widgets.consistency')}
         empty={stats.consistency.dayCount < 2}
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}>
-        <Text className="text-accent text-3xl font-bold">{stats.consistency.score}%</Text>
+        <CountUpText
+          className="text-accent text-3xl font-bold"
+          value={stats.consistency.score}
+          decimals={0}
+          formatValue={(value) => `${Math.round(value)}%`}
+        />
         <Text className="text-muted text-sm italic">
           {t('statistics.consistency.description')}
         </Text>
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={560}
         title={t('statistics.widgets.bestDays')}
         empty={stats.bestDays.length === 0}
         emptyTitle={emptyTitle}
@@ -215,38 +235,49 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({ stats, period, o
         {stats.bestDays.map((entry) => (
           <ListRow key={entry.date}>
             <Text className="text-foreground text-base">{formatDateLabel(entry.date, locale)}</Text>
-            <Text className="text-accent text-sm">{formatDecimal(entry.carbs)} g</Text>
+            <CountUpText
+              className="text-accent text-sm"
+              value={entry.carbs}
+              formatValue={(value) => `${formatDecimal(value)} g`}
+            />
           </ListRow>
         ))}
       </StatisticsWidgetCard>
 
       <StatisticsWidgetCard
+        revealDelay={600}
         title={t('statistics.widgets.records')}
         empty={!stats.records.highestCarbMeal}
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}>
         {stats.records.highestCarbMeal ? (
           <>
-            <RecordLine
-              label={t('statistics.records.highestMealLabel')}
-              value={`${formatDecimal(stats.records.highestCarbMeal.carbs)} g`}
-            />
-            <RecordLine
-              label={t('statistics.records.highestDayLabel')}
-              value={`${formatDecimal(stats.records.highestCarbDay?.carbs ?? 0)} g`}
-            />
-            <RecordLine
-              label={t('statistics.records.mostProductLabel')}
-              value={stats.records.mostConsumedProduct?.name ?? '—'}
-            />
-            <RecordLine
-              label={t('statistics.records.mostCategoryLabel')}
-              value={
-                stats.records.mostConsumedCategory
+            <RecordLine label={t('statistics.records.highestMealLabel')}>
+              <CountUpText
+                className="font-bold"
+                value={stats.records.highestCarbMeal.carbs}
+                formatValue={(value) => `${formatDecimal(value)} g`}
+              />
+            </RecordLine>
+            <RecordLine label={t('statistics.records.highestDayLabel')}>
+              <CountUpText
+                className="font-bold"
+                value={stats.records.highestCarbDay?.carbs ?? 0}
+                formatValue={(value) => `${formatDecimal(value)} g`}
+              />
+            </RecordLine>
+            <RecordLine label={t('statistics.records.mostProductLabel')}>
+              <Text className="font-bold">
+                {stats.records.mostConsumedProduct?.name ?? '—'}
+              </Text>
+            </RecordLine>
+            <RecordLine label={t('statistics.records.mostCategoryLabel')}>
+              <Text className="font-bold">
+                {stats.records.mostConsumedCategory
                   ? t(`tags.${stats.records.mostConsumedCategory.tag}`)
-                  : '—'
-              }
-            />
+                  : '—'}
+              </Text>
+            </RecordLine>
           </>
         ) : null}
       </StatisticsWidgetCard>

@@ -2,6 +2,10 @@ import { type FC, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import {
+  ScrollRevealProvider,
+  useScrollRevealOnScroll,
+} from '@/components/animations/scrollRevealContext';
 import { HeatmapDayDetailSheet } from '@/features/statistics/components/HeatmapDayDetailSheet';
 import { StatisticsPeriodSelector } from '@/features/statistics/components/StatisticsPeriodSelector';
 import { StatisticsSummaryCards } from '@/features/statistics/components/StatisticsSummaryCards';
@@ -14,11 +18,12 @@ type StatisticsHomeScreenProps = {
   bottomInset: number;
 };
 
-export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInset, bottomInset }) => {
+const StatisticsHomeContent: FC<StatisticsHomeScreenProps> = ({ headerInset, bottomInset }) => {
   const { t } = useTranslation();
   const { period, setPeriod } = useStatisticsPeriod();
   const { meals, stats, loading } = useStatistics(period);
   const [selectedHeatmapDay, setSelectedHeatmapDay] = useState<{ date: string; carbs: number } | null>(null);
+  const onScrollReveal = useScrollRevealOnScroll();
 
   if (loading) {
     return (
@@ -40,7 +45,9 @@ export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInse
           paddingTop: headerInset,
           paddingBottom: bottomInset,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={onScrollReveal}>
         <View className="p-4">
           <StatisticsPeriodSelector value={period} onChange={setPeriod} />
 
@@ -71,3 +78,9 @@ export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = ({ headerInse
     </View>
   );
 };
+
+export const StatisticsHomeScreen: FC<StatisticsHomeScreenProps> = (props) => (
+  <ScrollRevealProvider>
+    <StatisticsHomeContent {...props} />
+  </ScrollRevealProvider>
+);
