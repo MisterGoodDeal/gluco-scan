@@ -1,5 +1,4 @@
 import { BlurTargetView } from 'expo-blur';
-import Constants from 'expo-constants';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useFocusEffect } from 'expo-router';
@@ -22,6 +21,7 @@ import { AppSelect } from '@/components/ui/AppSelect';
 import { AppPressable } from '@/components/ui/AppPressable';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useAppToast } from '@/components/ui/useAppToast';
+import { APP_VERSION } from '@/constants/appVersion';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
 import { getLanguageLabelKey, supportedLocales, type SupportedLocale } from '@/i18n';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
@@ -79,8 +79,6 @@ export const SettingsTabLayout: FC = () => {
   const startTutorial = useTutorialStore((s) => s.startTutorial);
   const isTutorialRunning = tutorialStatus === TutorialStatus.RUNNING;
   const isTutorialBusy = tutorialStatus === TutorialStatus.STARTING;
-  const appVersion = Constants.expoConfig?.version ?? '—';
-
   const languageOptions = useMemo(
     () =>
       supportedLocales.map((locale) => ({
@@ -297,7 +295,7 @@ export const SettingsTabLayout: FC = () => {
               </Accordion>
 
               <Text className="text-muted text-xs text-center mt-4">
-                Version {appVersion}
+                Version {APP_VERSION}
               </Text>
             </View>
           </TutorialAnchor>
