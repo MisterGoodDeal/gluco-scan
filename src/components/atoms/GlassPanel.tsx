@@ -1,7 +1,9 @@
 import { BlurView, type BlurViewProps } from 'expo-blur';
+import { useThemeColor } from 'heroui-native';
 import { type FC, type ReactNode, type RefObject } from 'react';
-import { View, type ViewProps } from 'react-native';
-import { useTheme } from 'styled-components/native';
+import { type View, type ViewProps } from 'react-native';
+
+import { useBlurSettings } from '@/hooks/useBlurSettings';
 
 type GlassPanelProps = {
   children: ReactNode;
@@ -22,27 +24,23 @@ export const GlassPanel: FC<GlassPanelProps> = ({
   blurTarget,
   style,
 }) => {
-  const theme = useTheme();
-  const resolvedIntensity = intensity ?? theme.blur.intensity;
-  const resolvedTint = tint ?? theme.blur.tint;
-  const resolvedPadding = padding ?? theme.spacing.md;
-  const resolvedRadius = borderRadius ?? theme.radius.md;
+  const blur = useBlurSettings();
+  const borderColor = useThemeColor('border');
 
   const containerStyle = {
     overflow: 'hidden' as const,
-    borderRadius: resolvedRadius,
+    borderRadius: borderRadius ?? 20,
     borderWidth: 1,
-    borderColor: theme.colors.glass.border,
-    padding: resolvedPadding,
-    ...theme.shadows.glass,
+    borderColor,
+    padding: padding ?? 16,
   };
 
   return (
     <BlurView
       blurTarget={blurTarget}
-      intensity={resolvedIntensity}
-      tint={resolvedTint}
-      blurMethod={theme.blur.androidMethod}
+      intensity={intensity ?? blur.intensity}
+      tint={tint ?? blur.tint}
+      blurMethod={blur.androidMethod}
       style={[containerStyle, style]}>
       {children}
     </BlurView>

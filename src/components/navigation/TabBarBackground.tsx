@@ -1,16 +1,17 @@
 import { BlurView } from 'expo-blur';
 import { type FC } from 'react';
 import { StyleSheet } from 'react-native';
-import { useTheme } from 'styled-components/native';
+
+import { useBlurSettings } from '@/hooks/useBlurSettings';
 
 export const TabBarBackground: FC = () => {
-  const theme = useTheme();
+  const blur = useBlurSettings();
 
   return (
     <BlurView
-      intensity={theme.blur.intensity}
-      tint={theme.blur.tint}
-      blurMethod={theme.blur.androidMethod}
+      intensity={blur.intensity}
+      tint={blur.tint}
+      blurMethod={blur.androidMethod}
       style={StyleSheet.absoluteFill}
     />
   );
