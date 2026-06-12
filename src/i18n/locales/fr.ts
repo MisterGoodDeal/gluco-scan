@@ -255,6 +255,11 @@ export type TranslationSchema = {
       button: string;
       confirm: string;
     };
+    collapse: {
+      minimizeA11y: string;
+      expandA11y: string;
+      fabA11y: string;
+    };
     settings: {
       title: string;
       relaunch: string;
@@ -263,9 +268,16 @@ export type TranslationSchema = {
     };
     steps: {
       products: { title: string; message: string };
+      productsAdd: { title: string; message: string };
       productForm: { title: string; message: string };
-      meals: { title: string; message: string };
+      mealsDayNav: { title: string; message: string };
+      mealsToday: { title: string; message: string };
+      mealsCalendar: { title: string; message: string };
+      mealsAdd: { title: string; message: string };
       mealCreate: { title: string; message: string; hint: string };
+      mealsSaved: { title: string; message: string };
+      mealsDetail: { title: string; message: string };
+      statistics: { title: string; message: string };
       settings: { title: string; message: string };
       finish: { title: string; message: string };
     };
@@ -592,6 +604,11 @@ export const fr: TranslationSchema = {
       button: "Quitter",
       confirm: "Quitter",
     },
+    collapse: {
+      minimizeA11y: "Réduire la carte du tutoriel",
+      expandA11y: "Afficher la carte du tutoriel",
+      fabA11y: "Afficher le tutoriel",
+    },
     settings: {
       title: "Tutoriel",
       relaunch: "Relancer le tutoriel",
@@ -601,24 +618,62 @@ export const fr: TranslationSchema = {
     steps: {
       products: {
         title: "Vos produits",
-        message: "Retrouvez ici tous vos aliments",
+        message:
+          "Retrouvez ici tous vos aliments et utilisez la recherche pour les filtrer",
+      },
+      productsAdd: {
+        title: "Ajouter un aliment",
+        message:
+          "Appuyez ici pour ajouter un aliment manuellement, par exemple un plat maison sans code-barres",
       },
       productForm: {
         title: "Fiche produit",
-        message: "Chaque produit peut avoir ses propres portions",
+        message:
+          "En cliquant sur un produit, vous pouvez le modifier ou le supprimer",
       },
-      meals: {
-        title: "Historique des repas",
-        message: "Consultez votre historique alimentaire",
+      mealsDayNav: {
+        title: "Naviguer entre les jours",
+        message:
+          "Les flèches changent de jour. Les points indiquent les jours proches : le trait coloré est le jour affiché, les points plus visibles correspondent aux jours avec des repas.",
+      },
+      mealsToday: {
+        title: "Revenir à aujourd'hui",
+        message:
+          "Après avoir parcouru d'autres dates, ce bouton vous ramène rapidement au jour actuel.",
+      },
+      mealsCalendar: {
+        title: "Calendrier",
+        message:
+          "Parcourez le calendrier pour sauter à une date. Le chiffre sous chaque jour correspond aux glucides consommés ce jour-là.",
+      },
+      mealsAdd: {
+        title: "Ajouter un repas",
+        message: "Appuyez ici pour créer un nouveau repas pour le jour sélectionné",
       },
       mealCreate: {
         title: "Créer un repas",
         message: "Créez un repas et ajoutez un produit pour continuer",
         hint: "Enregistrez un repas avec au moins un aliment",
       },
+      mealsSaved: {
+        title: "Repas enregistré",
+        message:
+          "Il apparaît dans la liste du jour avec ses aliments dépliés. Parcourez le résumé avant d'ouvrir le détail complet",
+      },
+      mealsDetail: {
+        title: "Détail du repas",
+        message:
+          "Retrouvez les aliments, le total de glucides et les mini statistiques. Vous pouvez modifier le repas depuis ici",
+      },
+      statistics: {
+        title: "Statistiques",
+        message:
+          "Explorez le tableau de bord à votre rythme. Quand vous avez terminé, appuyez sur Suivant",
+      },
       settings: {
         title: "Paramètres",
-        message: "Gérez vos unités globales et vos sauvegardes",
+        message:
+          "Personnalisez l'app ici : apparence et langue, unités (grammes ou onces), plages horaires des repas, conversions cuit/cru, unités personnalisées et export ou import de vos données. Parcourez les sections à votre rythme, puis appuyez sur Suivant",
       },
       finish: {
         title: "C'est parti",

@@ -236,6 +236,11 @@ export const en: TranslationSchema = {
       button: "Leave",
       confirm: "Leave",
     },
+    collapse: {
+      minimizeA11y: "Minimize tutorial card",
+      expandA11y: "Show tutorial card",
+      fabA11y: "Show tutorial",
+    },
     settings: {
       title: "Tutorial",
       relaunch: "Restart tutorial",
@@ -245,24 +250,60 @@ export const en: TranslationSchema = {
     steps: {
       products: {
         title: "Your products",
-        message: "Find all your foods here",
+        message: "Find all your foods here and use search to filter them",
+      },
+      productsAdd: {
+        title: "Add a food",
+        message:
+          "Tap here to add a food manually, for example a homemade dish without a barcode",
       },
       productForm: {
         title: "Product details",
-        message: "Each product can have its own portions",
+        message: "Click on a product to edit or delete it",
       },
-      meals: {
-        title: "Meal history",
-        message: "Browse your meal history",
+      mealsDayNav: {
+        title: "Browse days",
+        message:
+          "Use the arrows to change days. The dots show nearby days: the colored bar is the selected day, brighter dots mark days with meals.",
+      },
+      mealsToday: {
+        title: "Back to today",
+        message:
+          "After browsing other dates, this button quickly brings you back to today.",
+      },
+      mealsCalendar: {
+        title: "Calendar",
+        message:
+          "Browse the calendar to jump to a date. The number under each day is the carbs logged that day.",
+      },
+      mealsAdd: {
+        title: "Add a meal",
+        message: "Tap here to create a new meal for the selected day",
       },
       mealCreate: {
         title: "Create a meal",
         message: "Create a meal and add a product to continue",
         hint: "Save a meal with at least one item",
       },
+      mealsSaved: {
+        title: "Your meal is saved",
+        message:
+          "It appears in today's list with its foods expanded. Browse the summary before opening the full details",
+      },
+      mealsDetail: {
+        title: "Meal details",
+        message:
+          "Review the foods, total carbs, and mini statistics. You can edit the meal from here",
+      },
+      statistics: {
+        title: "Statistics",
+        message:
+          "Take your time to explore the dashboard. When you're done, tap Next",
+      },
       settings: {
         title: "Settings",
-        message: "Manage global units and backups",
+        message:
+          "Customize the app here: appearance and language, units (grams or ounces), meal time windows, cooked/raw conversions, custom units, and data export or import. Browse the sections at your own pace, then tap Next",
       },
       finish: {
         title: "All set",
