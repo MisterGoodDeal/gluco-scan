@@ -8,8 +8,15 @@ export enum TutorialStatus {
 
 export type TutorialStepId =
   | 'products'
+  | 'products-add'
   | 'product-form'
-  | 'meals'
+  | 'meals-day-nav'
+  | 'meals-today'
+  | 'meals-calendar'
+  | 'meals-add'
   | 'meal-create'
+  | 'meals-saved'
+  | 'meals-detail'
+  | 'statistics'
   | 'settings'
   | 'finish';

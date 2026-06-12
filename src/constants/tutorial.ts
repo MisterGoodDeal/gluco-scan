@@ -9,3 +9,13 @@ export const TUTORIAL_KEYS = {
 export const TUTORIAL_BACKUP_FILENAME = 'tutorial-backup.gs';
 
 export const TUTORIAL_FEATURED_PRODUCT_ID = 'tut-prod-pates';
+
+export const TUTORIAL_STEP_CARD_ANCHOR_ID = 'tutorial-step-card';
+
+export const TUTORIAL_PRODUCTS_ADD_ANCHOR_ID = 'tutorial-products-add';
+
+export const TUTORIAL_MEALS_DAY_NAV_ANCHOR_ID = 'tutorial-meals-day-nav';
+
+export const TUTORIAL_MEALS_ADD_ANCHOR_ID = 'tutorial-meals-add';
+
+export const TUTORIAL_MEALS_SAVED_MEAL_ANCHOR_ID = 'tutorial-meals-saved-meal';
