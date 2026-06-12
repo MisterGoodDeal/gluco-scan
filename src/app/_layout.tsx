@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import { HeroUINativeProvider } from 'heroui-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { TAB_BAR_CONTENT_HEIGHT } from '@/constants/tabBar';
 import { FontProvider } from '@/components/providers/FontProvider';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { DatabaseGate } from '@/components/organisms/DatabaseGate';
@@ -17,7 +18,13 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <FontProvider>
           <AppThemeProvider>
-          <HeroUINativeProvider config={{ toast: { defaultProps: { placement: 'top' } } }}>
+          <HeroUINativeProvider
+            config={{
+              toast: {
+                defaultProps: { placement: 'bottom' },
+                insets: { bottom: TAB_BAR_CONTENT_HEIGHT + 12 },
+              },
+            }}>
           <DatabaseGate>
             <TutorialHost>
               <WidgetBootstrap />
