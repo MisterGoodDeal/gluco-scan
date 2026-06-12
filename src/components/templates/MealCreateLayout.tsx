@@ -1,7 +1,7 @@
 import { BlurTargetView, BlurView } from 'expo-blur';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Card, Tabs, useThemeColor } from 'heroui-native';
-import { type FC, useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { ProgressStep, ProgressStepperBar, ProgressSteps } from '@/components/meal-progress-steps';
@@ -61,6 +61,7 @@ export const MealCreateLayout: FC = () => {
   const resetDraft = useMealStore((s) => s.resetDraft);
   const saveMeal = useMealStore((s) => s.saveMeal);
   const setMealCreateValidated = useTutorialStore((s) => s.setMealCreateValidated);
+  const setTutorialSavedMealId = useTutorialStore((s) => s.setTutorialSavedMealId);
   const tutorialStatus = useTutorialStore((s) => s.status);
   const tutorialNextStep = useTutorialStore((s) => s.nextStep);
   const getTutorialStepId = useTutorialStore((s) => s.getCurrentStepId);
@@ -71,6 +72,15 @@ export const MealCreateLayout: FC = () => {
     !isEditing &&
     tutorialStatus === TutorialStatus.RUNNING &&
     getTutorialStepId() === 'meal-create';
+
+  const handleTutorialCollapsedChange = useCallback((collapsed: boolean) => {
+    setTutorialCollapsed(collapsed);
+  }, []);
+
+  useEffect(() => {
+    setTutorialCollapsed(false);
+  }, [showTutorialBanner]);
+
   const navBottomInset = insets.bottom + 8;
   const blur = useBlurSettings();
   const chromeBlurIntensity = Math.round(blur.intensity * 0.5);
@@ -85,6 +95,7 @@ export const MealCreateLayout: FC = () => {
   const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const [timePickerOpen, setTimePickerOpen] = useState(false);
+  const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
   const locale = getCurrentLocale();
   const { handleScan, isLoading, error, warning, clearMessages } = useMealProductScan();
 
@@ -216,8 +227,9 @@ export const MealCreateLayout: FC = () => {
       toast.warning(t('meals.noItems'));
       return;
     }
+    let savedMealId: string | undefined;
     try {
-      await saveMeal();
+      savedMealId = await saveMeal();
       toast.mealSaved({
         isEditing,
         mealType: t(getMealTypeLabelKey(draftMeta.type)),
@@ -229,7 +241,12 @@ export const MealCreateLayout: FC = () => {
     }
     if (!isEditing) {
       setMealCreateValidated(true);
-      if (tutorialStatus === TutorialStatus.RUNNING && getTutorialStepId() === 'meal-create') {
+      if (
+        savedMealId &&
+        tutorialStatus === TutorialStatus.RUNNING &&
+        getTutorialStepId() === 'meal-create'
+      ) {
+        setTutorialSavedMealId(savedMealId);
         tutorialNextStep();
       }
     }
@@ -453,7 +470,14 @@ export const MealCreateLayout: FC = () => {
         </BlurScreenFooter>
       </BlurTargetView>
 
-      {showTutorialBanner ? <TutorialMealCreateBanner /> : null}
+      {showTutorialBanner ? (
+        <TutorialMealCreateBanner
+          collapsed={tutorialCollapsed}
+          onCollapsedChange={handleTutorialCollapsedChange}
+          cardBottom={footerHeight + 8}
+          fabBottom={insets.bottom + 16}
+        />
+      ) : null}
 
       <QuantityPickerModal
         visible={pickerProduct !== null}

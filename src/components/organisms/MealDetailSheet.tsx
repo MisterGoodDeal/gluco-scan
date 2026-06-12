@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProductImage } from '@/components/atoms/ProductImage';
 import { MealItemConversionLine } from '@/components/molecules/MealItemConversionLine';
 import { AppButton } from '@/components/ui/AppButton';
+import { MEAL_DETAIL_SNAP_RATIO } from '@/constants/mealDetailSheet';
 import type { Meal } from '@/types/meal';
 import { formatTimeLabel } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
@@ -21,9 +22,14 @@ import type { Product } from '@/types/product';
 type MealDetailSheetProps = {
   meal: Meal | null;
   onClose: () => void;
+  closeBlocked?: boolean;
 };
 
-export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => {
+export const MealDetailSheet: FC<MealDetailSheetProps> = ({
+  meal,
+  onClose,
+  closeBlocked = false,
+}) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const locale = getCurrentLocale();
@@ -50,11 +56,16 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({ meal, onClose }) => 
   }, [meal]);
 
   return (
-    <BottomSheet isOpen={meal !== null} onOpenChange={(open) => !open && onClose()}>
+    <BottomSheet
+      isOpen={meal !== null}
+      onOpenChange={(open) => {
+        if (!open && closeBlocked) return;
+        if (!open) onClose();
+      }}>
       <BottomSheet.Portal>
         <BottomSheet.Overlay />
         <BottomSheet.Content
-          snapPoints={['50%', '92%']}
+          snapPoints={[`${MEAL_DETAIL_SNAP_RATIO * 100}%`, '92%']}
           enableOverDrag={false}
           enableDynamicSizing={false}
           contentContainerClassName="h-full">

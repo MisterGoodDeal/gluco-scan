@@ -32,6 +32,7 @@ import type { ProductUnit } from '@/types/productUnit';
 import { useMassDisplay } from '@/hooks/useMassDisplay';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
+import { TutorialInlineBanner } from '@/components/organisms/TutorialInlineBanner';
 import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
 import {
   deleteLocalProductImage,
@@ -600,6 +601,23 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
               </View>
             </BottomSheetScrollView>
           </BottomSheet.Content>
+          {showTutorialBanner ? (
+            <View
+              pointerEvents="box-none"
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 10,
+              }}>
+              <TutorialInlineBanner
+                stepId="product-form"
+                includeTabBarInset={false}
+                sheetBottom
+              />
+            </View>
+          ) : null}
         </BottomSheet.Portal>
       </BottomSheet>
 

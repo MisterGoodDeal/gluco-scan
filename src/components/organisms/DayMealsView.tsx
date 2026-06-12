@@ -1,10 +1,12 @@
 import { Accordion, AccordionLayoutTransition, Card } from 'heroui-native';
-import { type FC, useMemo } from 'react';
+import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 
+import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { MealItemThumbnails } from '@/components/molecules/MealItemThumbnails';
+import { TUTORIAL_MEALS_SAVED_MEAL_ANCHOR_ID } from '@/constants/tutorial';
 import { AppButton } from '@/components/ui/AppButton';
 import { useTabBarBottomInset } from '@/hooks/useTabBarBottomInset';
 import { getCurrentLocale } from '@/i18n';
@@ -21,6 +23,8 @@ type DayMealsViewProps = {
   onMealPress: (meal: Meal) => void;
   onMealDelete: (mealId: string) => void;
   headerInset?: number;
+  expandedMealId?: string | null;
+  onExpandedMealLayout?: () => void;
 };
 
 export const DayMealsView: FC<DayMealsViewProps> = ({
@@ -31,11 +35,14 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   onMealPress,
   onMealDelete,
   headerInset = 0,
+  expandedMealId = null,
+  onExpandedMealLayout,
 }) => {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const locale = getCurrentLocale();
   const tabBarInset = useTabBarBottomInset();
+  const [openMealIds, setOpenMealIds] = useState<string[]>([]);
 
   const sortedMeals = useMemo(
     () =>
@@ -46,6 +53,14 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
   );
 
   const hasMeals = sortedMeals.length > 0;
+
+  useEffect(() => {
+    if (expandedMealId) {
+      setOpenMealIds([expandedMealId]);
+      return;
+    }
+    setOpenMealIds([]);
+  }, [expandedMealId]);
 
   return (
     <Animated.ScrollView
@@ -61,49 +76,69 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
       </Text>
 
       {hasMeals ? (
-        <Accordion selectionMode="multiple" variant="surface">
-          {sortedMeals.map((meal) => (
-            <Accordion.Item key={meal.id} value={meal.id}>
-              <Accordion.Trigger>
-                <View className="flex-1 gap-0.5">
-                  <Text className="text-foreground text-base font-medium">
-                    {t(getMealTypeLabelKey(meal.type))} ·{' '}
-                    {formatTimeLabel(meal.createdAt, locale)}
-                  </Text>
-                  <Text className="text-accent text-sm font-medium">
-                    {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
-                  </Text>
-                </View>
-                <Accordion.Indicator />
-              </Accordion.Trigger>
-              <Accordion.Content>
-                <View className="gap-3">
-                  <Text className="text-muted text-sm">
-                    {t('meals.itemCount', { count: meal.items.length })}
-                  </Text>
-                  <MealItemThumbnails items={meal.items} size={28} />
-                  <View className="flex-row gap-2">
-                    <AppButton
-                      size="sm"
-                      variant="tertiary"
-                      className="flex-1"
-                      onPress={() => onMealPress(meal)}
-                      accessibilityLabel={t('meals.viewDetailsA11y')}>
-                      {t('meals.viewDetails')}
-                    </AppButton>
-                    <AppButton
-                      size="sm"
-                      variant="danger-soft"
-                      className="flex-1"
-                      onPress={() => onMealDelete(meal.id)}
-                      accessibilityLabel={t('meals.deleteA11y')}>
-                      {t('common.delete')}
-                    </AppButton>
+        <Accordion
+          key={expandedMealId ?? 'default'}
+          selectionMode="multiple"
+          variant="surface"
+          value={openMealIds}
+          onValueChange={setOpenMealIds}>
+          {sortedMeals.map((meal) => {
+            const item = (
+              <Accordion.Item key={meal.id} value={meal.id}>
+                <Accordion.Trigger>
+                  <View className="flex-1 gap-0.5">
+                    <Text className="text-foreground text-base font-medium">
+                      {t(getMealTypeLabelKey(meal.type))} ·{' '}
+                      {formatTimeLabel(meal.createdAt, locale)}
+                    </Text>
+                    <Text className="text-accent text-sm font-medium">
+                      {t('meals.mealCarbs', { value: formatDecimal(meal.totalCarbs) })}
+                    </Text>
                   </View>
-                </View>
-              </Accordion.Content>
-            </Accordion.Item>
-          ))}
+                  <Accordion.Indicator />
+                </Accordion.Trigger>
+                <Accordion.Content>
+                  <View className="gap-3">
+                    <Text className="text-muted text-sm">
+                      {t('meals.itemCount', { count: meal.items.length })}
+                    </Text>
+                    <MealItemThumbnails items={meal.items} size={28} />
+                    <View className="flex-row gap-2">
+                      <AppButton
+                        size="sm"
+                        variant="tertiary"
+                        className="flex-1"
+                        onPress={() => onMealPress(meal)}
+                        accessibilityLabel={t('meals.viewDetailsA11y')}>
+                        {t('meals.viewDetails')}
+                      </AppButton>
+                      <AppButton
+                        size="sm"
+                        variant="danger-soft"
+                        className="flex-1"
+                        onPress={() => onMealDelete(meal.id)}
+                        accessibilityLabel={t('meals.deleteA11y')}>
+                        {t('common.delete')}
+                      </AppButton>
+                    </View>
+                  </View>
+                </Accordion.Content>
+              </Accordion.Item>
+            );
+
+            if (meal.id !== expandedMealId) {
+              return item;
+            }
+
+            return (
+              <TutorialAnchor
+                key={meal.id}
+                id={TUTORIAL_MEALS_SAVED_MEAL_ANCHOR_ID}
+                onAnchorLayout={onExpandedMealLayout}>
+                {item}
+              </TutorialAnchor>
+            );
+          })}
         </Accordion>
       ) : (
         <Card>

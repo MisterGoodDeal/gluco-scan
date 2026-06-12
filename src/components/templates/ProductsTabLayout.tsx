@@ -24,6 +24,7 @@ import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
 import { productMatchesQuery } from '@/utils/productSearch';
 import { productMatchesTagFilters } from '@/utils/productTagFilter';
+import { TUTORIAL_PRODUCTS_ADD_ANCHOR_ID } from '@/constants/tutorial';
 import { consumePendingAddProduct } from '@/features/widgets/deepLink/pendingAction';
 
 export const ProductsTabLayout: FC = () => {
@@ -51,28 +52,32 @@ export const ProductsTabLayout: FC = () => {
 
   const tutorialStatus = useTutorialStore((s) => s.status);
   const openProductId = useTutorialStore((s) => s.openProductId);
-  const tutorialStep = useTutorialStore((s) => s.currentStep);
+  const tutorialStepId = useTutorialStore((s) => s.getCurrentStepId());
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (tutorialStatus !== TutorialStatus.RUNNING) return;
-    if (tutorialStep !== 1 || !openProductId) return;
+    if (tutorialStepId !== 'product-form' || !openProductId) return;
     void productRepository.getById(openProductId).then((product) => {
       if (product) {
         setEditingProduct(product);
         setIsModalOpen(true);
       }
     });
-  }, [tutorialStatus, openProductId, tutorialStep]);
+  }, [tutorialStatus, openProductId, tutorialStepId]);
 
   useEffect(() => {
-    if (tutorialStatus === TutorialStatus.RUNNING && tutorialStep !== 1 && isModalOpen) {
+    if (
+      tutorialStatus === TutorialStatus.RUNNING &&
+      tutorialStepId !== 'product-form' &&
+      isModalOpen
+    ) {
       setIsModalOpen(false);
       setEditingProduct(null);
     }
-  }, [tutorialStatus, tutorialStep, isModalOpen]);
+  }, [tutorialStatus, tutorialStepId, isModalOpen]);
 
   const loadProducts = useCallback(async () => {
     await hydrate();
@@ -125,21 +130,21 @@ export const ProductsTabLayout: FC = () => {
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <View className="flex-row items-center justify-between">
             <Text className="text-foreground text-lg font-bold">{t('products.title')}</Text>
-            <TutorialAnchor id="tutorial-products-add">
-            <AppButton
-              size="sm"
-              variant="tertiary"
-              onPress={openAdd}
-              accessibilityLabel={t('common.add')}>
-              {t('products.addButton')}
-            </AppButton>
+            <TutorialAnchor
+              id={TUTORIAL_PRODUCTS_ADD_ANCHOR_ID}
+              style={{ alignSelf: 'flex-end' }}>
+              <AppButton
+                size="sm"
+                variant="tertiary"
+                onPress={openAdd}
+                accessibilityLabel={t('common.add')}>
+                {t('products.addButton')}
+              </AppButton>
             </TutorialAnchor>
           </View>
           <View className="mt-2 flex-row items-center gap-1 min-h-12 rounded-2xl border border-field-border bg-field px-2 overflow-hidden">
             <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
-            <TutorialAnchor id="tutorial-products-search" style={{ flex: 1, minWidth: 0 }}>
-              <SearchInput value={query} onChangeText={setQuery} flex variant="plain" />
-            </TutorialAnchor>
+            <SearchInput value={query} onChangeText={setQuery} flex variant="plain" />
             <View className="h-5 w-px bg-separator" />
             <ProductTagFilterBar
               value={tagFilters}

@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, View } from 'react-native';
 
 import { FaIcon } from '@/components/atoms/FaIcon';
-import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
@@ -237,8 +236,7 @@ export const SettingsTabLayout: FC = () => {
             </SectionItem>
           </Accordion>
 
-          <TutorialAnchor id="tutorial-settings-units">
-            <View className="mt-4">
+          <View className="mt-4">
               <Accordion selectionMode="multiple" variant="surface">
                 <SectionItem value="globalUnits" title={t('settings.globalUnits')}>
                   {globalUnits.map((unit, index) => (
@@ -272,11 +270,9 @@ export const SettingsTabLayout: FC = () => {
                   </AppButton>
                 </SectionItem>
               </Accordion>
-            </View>
-          </TutorialAnchor>
+          </View>
 
-          <TutorialAnchor id="tutorial-settings-data">
-            <View className="mt-4">
+          <View className="mt-4">
               <Accordion selectionMode="multiple" variant="surface">
                 <SectionItem value="export" title={t('settings.export')}>
                   <Text className="text-muted text-sm">{t('settings.exportDescription')}</Text>
@@ -301,11 +297,10 @@ export const SettingsTabLayout: FC = () => {
                 </SectionItem>
               </Accordion>
 
-              <Text className="text-muted text-xs text-center mt-4">
-                Version {APP_VERSION}
-              </Text>
-            </View>
-          </TutorialAnchor>
+            <Text className="text-muted text-xs text-center mt-4">
+              Version {APP_VERSION}
+            </Text>
+          </View>
         </ScrollView>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <Text className="text-foreground text-lg font-bold">{t('settings.title')}</Text>

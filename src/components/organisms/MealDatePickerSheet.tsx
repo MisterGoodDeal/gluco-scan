@@ -5,6 +5,7 @@ import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MealCalendarPicker } from '@/components/organisms/MealCalendarPicker';
+import { MEALS_DATE_PICKER_SNAP_RATIO } from '@/constants/mealsDatePicker';
 
 type MealDatePickerSheetProps = {
   isOpen: boolean;
@@ -21,13 +22,14 @@ export const MealDatePickerSheet: FC<MealDatePickerSheetProps> = ({
 }) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const snapPoint = `${MEALS_DATE_PICKER_SNAP_RATIO * 100}%`;
 
   return (
     <BottomSheet isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
       <BottomSheet.Portal>
         <BottomSheet.Overlay />
         <BottomSheet.Content
-          snapPoints={['58%']}
+          snapPoints={[snapPoint]}
           enableOverDrag={false}
           enableDynamicSizing={false}
           contentContainerClassName="h-full">
