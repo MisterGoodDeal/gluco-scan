@@ -2310,6 +2310,11 @@ clone@^1.0.2:
   resolved "https://registry.yarnpkg.com/clone/-/clone-1.0.4.tgz#da309cc263df15994c688ca902179ca3c7cd7c7e"
   integrity sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==
 
+clsx@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
+  integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
+
 color-convert@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"
@@ -2504,7 +2509,7 @@ culori@4.0.2:
   resolved "https://registry.yarnpkg.com/culori/-/culori-4.0.2.tgz#fbb28dbeb8d13d0eeab7520191f74ab822a8ca71"
   integrity sha512-1+BhOB8ahCn4O0cep0Sh2l9KCOfOdY+BXJnKMHFFzDEouSr/el18QwXEMRlOj9UY5nCeA8UN3a/82rUWRBeyBw==
 
-dayjs@^1.8.15:
+dayjs@^1.11.13, dayjs@^1.8.15:
   version "1.11.21"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.21.tgz#57f87562e62de76f3c704bd2b8d522fc33068eb2"
   integrity sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==
@@ -3495,6 +3500,11 @@ isexe@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
+
+jalali-plugin-dayjs@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/jalali-plugin-dayjs/-/jalali-plugin-dayjs-1.1.4.tgz#39a558d8ab02c7eeb5c375461001cc41e6ab2e1b"
+  integrity sha512-d62QGMTufGQ1TSov4a85gBU58PA8aL6wVQs9BnC3+d/VA+v4Sq0OqM3o6RoY+/VZjliYJroGIPwlSVf7uLnZ3w==
 
 jest-get-type@^29.6.3:
   version "29.6.3"
@@ -4742,6 +4752,17 @@ react-native-svg@^15.15.5:
     css-select "^5.1.0"
     css-tree "^1.1.3"
 
+react-native-ui-datepicker@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/react-native-ui-datepicker/-/react-native-ui-datepicker-3.3.0.tgz#9f5ab3b78cecac3c61dfa97d682f42cdf543fc73"
+  integrity sha512-TdiOADwpQQDEtD6RxzPFfu9iZlMrQkmIMlqYNXE9zigyTlG8kstnSLSCS/lJ+fS5/L4LGU/26xp0oVuYMzDzCg==
+  dependencies:
+    clsx "^2.1.1"
+    dayjs "^1.11.13"
+    jalali-plugin-dayjs "^1.1.4"
+    lodash "^4.17.21"
+    tailwind-merge "^3.0.1"
+
 react-native-web@^0.21.2:
   version "0.21.2"
   resolved "https://registry.yarnpkg.com/react-native-web/-/react-native-web-0.21.2.tgz#0f6983dfea600d9cc1c66fda87ff9ca585eaa647"
@@ -5333,7 +5354,7 @@ tagged-tag@^1.0.0:
   resolved "https://registry.yarnpkg.com/tagged-tag/-/tagged-tag-1.0.0.tgz#a0b5917c2864cba54841495abfa3f6b13edcf4d6"
   integrity sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==
 
-tailwind-merge@^3.6.0:
+tailwind-merge@^3.0.1, tailwind-merge@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/tailwind-merge/-/tailwind-merge-3.6.0.tgz#88d83242d1dd7bc847223f73dcf210dd1f2ee11c"
   integrity sha512-uxL7qAVQriqRQPAyK3pj66VqskWqoZ37PW94jwOTwNfq/z9oyu1V+eqrZqtR2+fCiXdYOZe/Modt8GtvqNzu+w==
