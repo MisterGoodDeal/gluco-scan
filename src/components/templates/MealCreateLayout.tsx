@@ -1,21 +1,24 @@
+import { BlurTargetView, BlurView } from 'expo-blur';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Card, useThemeColor } from 'heroui-native';
-import { type FC, useEffect, useMemo, useState } from 'react';
+import { Card, Tabs, useThemeColor } from 'heroui-native';
+import { type FC, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
-import { ProgressStep, ProgressSteps } from '@/components/meal-progress-steps';
+import { ProgressStep, ProgressStepperBar, ProgressSteps } from '@/components/meal-progress-steps';
 import { FONT_FAMILY } from '@/constants/typography';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FaIcon } from '@/components/atoms/FaIcon';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
+import { BlurScreenFooter } from '@/components/organisms/BlurScreenFooter';
 import { TutorialMealCreateBanner } from '@/components/organisms/TutorialMealCreateBanner';
+import { MealCalendarPicker } from '@/components/organisms/MealCalendarPicker';
+import { MealTimePickerSheet } from '@/components/organisms/MealTimePickerSheet';
 import { ProductSpotlightSearch } from '@/components/organisms/ProductSpotlightSearch';
 import { QuantityPickerModal } from '@/components/organisms/QuantityPickerModal';
 import { ScannerView } from '@/components/organisms/ScannerView';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppPressable } from '@/components/ui/AppPressable';
-import { AppSelect } from '@/components/ui/AppSelect';
 import { useAppToast } from '@/components/ui/useAppToast';
 import {
   persistOffProduct,
@@ -29,12 +32,14 @@ import { useMealStore, type MealDraftItem } from '@/store/meal.store';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import type { Product } from '@/types/product';
+import { combineDateAndTime, formatTimeLabel } from '@/utils/date';
 import { generateId } from '@/utils/id';
-import { addDays, formatDateLabel, toDateKey } from '@/utils/date';
 import { formatDecimal } from '@/utils/format';
 import { MealItemConversionLine } from '@/components/molecules/MealItemConversionLine';
 import { getMealTypeLabelKey } from '@/utils/mealType';
 import { MEAL_TYPES, MealType } from '@/types/mealType';
+import { useBlurSettings } from '@/hooks/useBlurSettings';
+import { triggerImpactLight } from '@/utils/haptics';
 import { hp, topScreenSpace } from '@/utils/screen';
 
 export const MealCreateLayout: FC = () => {
@@ -44,7 +49,6 @@ export const MealCreateLayout: FC = () => {
   const toast = useAppToast();
   const [mutedColor, dangerColor, accentColor, accentForeground, borderColor, foregroundColor] =
     useThemeColor(['muted', 'danger', 'accent', 'accent-foreground', 'border', 'foreground']);
-  const locale = getCurrentLocale();
   const step = useMealStore((s) => s.step);
   const setStep = useMealStore((s) => s.setStep);
   const draftMeta = useMealStore((s) => s.draftMeta);
@@ -67,24 +71,28 @@ export const MealCreateLayout: FC = () => {
     !isEditing &&
     tutorialStatus === TutorialStatus.RUNNING &&
     getTutorialStepId() === 'meal-create';
-  const navBottomInset = insets.bottom + 24;
+  const navBottomInset = insets.bottom + 8;
+  const blur = useBlurSettings();
+  const chromeBlurIntensity = Math.round(blur.intensity * 0.5);
+  const chromeContentGap = 24;
+  const mealCreateHeaderEstimate = topScreenSpace + 132;
+  const mealCreateFooterEstimate = 64;
+  const blurTargetRef = useRef<View>(null);
+  const [headerHeight, setHeaderHeight] = useState(mealCreateHeaderEstimate);
+  const [footerHeight, setFooterHeight] = useState(mealCreateFooterEstimate);
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
+  const [timePickerOpen, setTimePickerOpen] = useState(false);
+  const locale = getCurrentLocale();
   const { handleScan, isLoading, error, warning, clearMessages } = useMealProductScan();
 
   const scannerActive = step === 1 && pickerProduct === null && !searchVisible;
 
-  const dateOptions = useMemo(
-    () =>
-      Array.from({ length: 14 }, (_, index) => addDays(toDateKey(new Date()), index - 7)).map(
-        (dateKey) => ({
-          value: dateKey,
-          label: formatDateLabel(dateKey, locale),
-        }),
-      ),
-    [locale],
+  const stepLabels = useMemo(
+    () => [t('meals.stepInfo'), t('meals.stepFoods'), t('meals.stepSummary')],
+    [t],
   );
   const mealTypeOptions = useMemo(
     () =>
@@ -94,27 +102,9 @@ export const MealCreateLayout: FC = () => {
       })),
     [t],
   );
-  const hourOptions = useMemo(
-    () =>
-      Array.from({ length: 24 }, (_, hour) => ({
-        value: String(hour),
-        label: String(hour).padStart(2, '0'),
-      })),
-    [],
-  );
-  const minuteOptions = useMemo(
-    () =>
-      Array.from({ length: 60 }, (_, minute) => ({
-        value: String(minute),
-        label: String(minute).padStart(2, '0'),
-      })),
-    [],
-  );
-  const selectedMealType = mealTypeOptions.find((option) => option.value === draftMeta.type);
-  const selectedDate = dateOptions.find((option) => option.value === draftMeta.dateKey);
-  const selectedHour = hourOptions.find((option) => option.value === String(draftMeta.hours));
-  const selectedMinute = minuteOptions.find(
-    (option) => option.value === String(draftMeta.minutes),
+  const timeLabel = formatTimeLabel(
+    combineDateAndTime(draftMeta.dateKey, draftMeta.hours, draftMeta.minutes),
+    locale,
   );
 
   useEffect(() => {
@@ -178,16 +168,17 @@ export const MealCreateLayout: FC = () => {
     () => ({
       showsVerticalScrollIndicator: false as const,
       keyboardShouldPersistTaps: 'handled' as const,
-      contentContainerStyle: { paddingBottom: 16 },
+      contentContainerStyle: {
+        paddingTop: chromeContentGap,
+        paddingBottom: chromeContentGap + 8,
+        paddingHorizontal: 0,
+      },
     }),
-    [],
+    [chromeContentGap],
   );
 
-  const progressStepsTheme = useMemo(
+  const stepperVisualTheme = useMemo(
     () => ({
-      activeStep: step,
-      topOffset: 4,
-      marginBottom: 8,
       activeStepIconBorderColor: accentColor,
       activeStepIconColor: 'transparent',
       activeStepNumColor: accentColor,
@@ -204,7 +195,7 @@ export const MealCreateLayout: FC = () => {
       labelFontSize: 13,
       activeLabelFontSize: 13,
     }),
-    [accentColor, accentForeground, borderColor, foregroundColor, mutedColor, step],
+    [accentColor, accentForeground, borderColor, foregroundColor, mutedColor],
   );
 
   const onBarcodeScan = async (ean: string) => {
@@ -227,7 +218,11 @@ export const MealCreateLayout: FC = () => {
     }
     try {
       await saveMeal();
-      toast.success(t('meals.saveSuccess'));
+      toast.mealSaved({
+        isEditing,
+        mealType: t(getMealTypeLabelKey(draftMeta.type)),
+        carbs: draftTotal,
+      });
     } catch {
       toast.error(t('meals.saveError'));
       return;
@@ -269,23 +264,14 @@ export const MealCreateLayout: FC = () => {
   return (
     <View className="flex-1 bg-background">
       <BackgroundGradient />
-      <View
-        className="flex-row items-center justify-between px-4 pb-2"
-        style={{ paddingTop: topScreenSpace }}>
-        <AppPressable
-          onPress={() => {
-            resetDraft();
-            router.back();
+      <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            paddingTop: headerHeight,
+            paddingBottom: footerHeight,
           }}>
-          <Text className="text-accent text-base">{t('common.cancel')}</Text>
-        </AppPressable>
-        <Text className="text-foreground text-lg font-semibold">
-          {isEditing ? t('meals.editTitle') : t('meals.createTitle')}
-        </Text>
-        <View className="w-[60px]" />
-      </View>
-
-      <ProgressSteps {...progressStepsTheme}>
+          <ProgressSteps activeStep={step} {...stepperVisualTheme} hideStepper>
         <ProgressStep
           label={t('meals.stepInfo')}
           removeBtnRow
@@ -294,61 +280,44 @@ export const MealCreateLayout: FC = () => {
           <Card className="gap-4 p-4">
             <View className="gap-1.5">
               <Text className="text-foreground text-sm font-medium">{t('meals.mealType')}</Text>
-              <AppSelect
-                triggerVariant="surface"
-                value={selectedMealType}
-                onValueChange={(option) => {
-                  if (option) setDraftMeta({ type: option.value as MealType });
+              <Tabs
+                value={draftMeta.type}
+                onValueChange={(value) => {
+                  triggerImpactLight();
+                  setDraftMeta({ type: value as MealType });
                 }}
-                options={mealTypeOptions}
-                placeholder={t('meals.mealType')}
-                listLabel={t('meals.mealType')}
-              />
+                variant="primary">
+                <Tabs.List className="w-full self-stretch">
+                  <Tabs.ScrollView scrollAlign="center" contentContainerClassName="gap-1">
+                    <Tabs.Indicator />
+                    {mealTypeOptions.map((option) => (
+                      <Tabs.Trigger key={option.value} value={option.value}>
+                        <Tabs.Label>{option.label}</Tabs.Label>
+                      </Tabs.Trigger>
+                    ))}
+                  </Tabs.ScrollView>
+                </Tabs.List>
+              </Tabs>
             </View>
             <View className="gap-1.5">
               <Text className="text-foreground text-sm font-medium">{t('meals.date')}</Text>
-              <AppSelect
-                triggerVariant="surface"
-                value={selectedDate}
-                onValueChange={(option) => {
-                  if (option) setDraftMeta({ dateKey: option.value });
-                }}
-                options={dateOptions}
-                placeholder={t('meals.date')}
-                listLabel={t('meals.date')}
-                scrollable
+              <MealCalendarPicker
+                selectedDate={draftMeta.dateKey}
+                onSelectDate={(dateKey) => setDraftMeta({ dateKey })}
+                showDayCarbs={false}
+                containerHeight={280}
               />
             </View>
             <View className="gap-1.5">
               <Text className="text-foreground text-sm font-medium">{t('meals.time')}</Text>
-              <View className="flex-row gap-2">
-                <View className="flex-1">
-                  <AppSelect
-                    triggerVariant="surface"
-                    value={selectedHour}
-                    onValueChange={(option) => {
-                      if (option) setDraftMeta({ hours: Number(option.value) });
-                    }}
-                    options={hourOptions}
-                    placeholder="00"
-                    listLabel={t('meals.time')}
-                    scrollable
-                  />
-                </View>
-                <View className="flex-1">
-                  <AppSelect
-                    triggerVariant="surface"
-                    value={selectedMinute}
-                    onValueChange={(option) => {
-                      if (option) setDraftMeta({ minutes: Number(option.value) });
-                    }}
-                    options={minuteOptions}
-                    placeholder="00"
-                    listLabel={t('meals.time')}
-                    scrollable
-                  />
-                </View>
-              </View>
+              <AppPressable
+                className="min-h-12 flex-row items-center justify-between gap-3 px-3 rounded-2xl bg-surface border border-border"
+                onPress={() => setTimePickerOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('meals.time')}>
+                <Text className="text-foreground text-base tabular-nums">{timeLabel}</Text>
+                <FaIcon name="chevron-right" size={14} color={mutedColor} />
+              </AppPressable>
             </View>
           </Card>
         </ProgressStep>
@@ -413,28 +382,78 @@ export const MealCreateLayout: FC = () => {
             </AppButton>
           </View>
         </ProgressStep>
-      </ProgressSteps>
+          </ProgressSteps>
+        </View>
+
+        <View
+          className="absolute top-0 left-0 right-0 z-10"
+          onLayout={(event) => {
+            setHeaderHeight(event.nativeEvent.layout.height);
+          }}>
+          <BlurView
+            blurTarget={blurTargetRef}
+            intensity={chromeBlurIntensity}
+            tint={blur.tint}
+            blurMethod={blur.androidMethod}
+            style={{
+              borderBottomWidth: 1,
+              borderBottomColor: borderColor,
+              overflow: 'hidden',
+            }}>
+            <View className="px-4 pb-2" style={{ paddingTop: topScreenSpace }}>
+              <View className="flex-row items-center justify-between pb-1">
+                <AppPressable
+                  onPress={() => {
+                    resetDraft();
+                    router.back();
+                  }}>
+                  <Text className="text-accent text-base">{t('common.cancel')}</Text>
+                </AppPressable>
+                <Text className="text-foreground text-lg font-bold">
+                  {isEditing ? t('meals.editTitle') : t('meals.createTitle')}
+                </Text>
+                <View className="w-[60px]" />
+              </View>
+              <ProgressStepperBar
+                {...stepperVisualTheme}
+                activeStep={step}
+                labels={stepLabels}
+                marginBottom={0}
+              />
+            </View>
+          </BlurView>
+        </View>
+
+        <BlurScreenFooter
+          blurTarget={blurTargetRef}
+          intensity={chromeBlurIntensity}
+          onLayoutHeight={setFooterHeight}>
+          <View
+            className="flex-row items-center justify-between gap-3 px-4 py-2"
+            style={{ paddingBottom: navBottomInset }}>
+            {step > 0 ? (
+              <AppButton size="sm" variant="secondary" onPress={() => setStep(step - 1)}>
+                {t('common.previous')}
+              </AppButton>
+            ) : (
+              <View />
+            )}
+            {step < 2 ? (
+              <AppButton
+                size="sm"
+                variant="primary"
+                onPress={() => setStep(step + 1)}
+                isDisabled={!canGoNext}>
+                {t('common.next')}
+              </AppButton>
+            ) : (
+              <View />
+            )}
+          </View>
+        </BlurScreenFooter>
+      </BlurTargetView>
 
       {showTutorialBanner ? <TutorialMealCreateBanner /> : null}
-      <View
-        className="flex-row justify-between p-4"
-        style={{ paddingBottom: navBottomInset }}>
-        {step > 0 ? (
-          <AppButton variant="secondary" onPress={() => setStep(step - 1)}>
-            {t('common.previous')}
-          </AppButton>
-        ) : (
-          <View />
-        )}
-        {step < 2 && (
-          <AppButton
-            variant="primary"
-            onPress={() => setStep(step + 1)}
-            isDisabled={!canGoNext}>
-            {t('common.next')}
-          </AppButton>
-        )}
-      </View>
 
       <QuantityPickerModal
         visible={pickerProduct !== null}
@@ -473,6 +492,13 @@ export const MealCreateLayout: FC = () => {
           setPendingOffScan(null);
           setPickerProduct(product);
         }}
+      />
+      <MealTimePickerSheet
+        isOpen={timePickerOpen}
+        hours={draftMeta.hours}
+        minutes={draftMeta.minutes}
+        onClose={() => setTimePickerOpen(false)}
+        onTimeChange={(hours, minutes) => setDraftMeta({ hours, minutes })}
       />
     </View>
   );
