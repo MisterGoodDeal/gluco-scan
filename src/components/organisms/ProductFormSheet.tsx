@@ -1,57 +1,69 @@
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { BottomSheet, Card, FieldError, useThemeColor } from 'heroui-native';
-import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { BottomSheet, Card, FieldError, useThemeColor } from "heroui-native";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FC,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { ActivityIndicator, Alert, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { FaIcon } from '@/components/atoms/FaIcon';
-import { ButtonIcon } from '@/components/atoms/ButtonIcon';
-import { InputNumber } from '@/components/atoms/InputNumber';
-import { ProductImage } from '@/components/atoms/ProductImage';
-import { SearchInput } from '@/components/atoms/SearchInput';
-import { ProductEanListEditor } from '@/components/molecules/ProductEanListEditor';
-import { ProductUnitFormModal } from '@/components/organisms/ProductUnitFormModal';
-import { ProductTagPicker } from '@/components/molecules/ProductTagPicker';
-import { TagChipList } from '@/components/molecules/tag-chip/TagChipList';
-import { AppButton } from '@/components/ui/AppButton';
-import { AppPressable } from '@/components/ui/AppPressable';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { useAppToast } from '@/components/ui/useAppToast';
-import { productEanRepository } from '@/repositories/productEan.repository';
-import { productUnitRepository } from '@/repositories/productUnit.repository';
-import { getErrorMessage } from '@/services/errors';
+import { ButtonIcon } from "@/components/atoms/ButtonIcon";
+import { FaIcon } from "@/components/atoms/FaIcon";
+import { InputNumber } from "@/components/atoms/InputNumber";
+import { ProductImage } from "@/components/atoms/ProductImage";
+import { SearchInput } from "@/components/atoms/SearchInput";
+import { ProductEanListEditor } from "@/components/molecules/ProductEanListEditor";
+import { ProductTagPicker } from "@/components/molecules/ProductTagPicker";
+import { TagChipList } from "@/components/molecules/tag-chip/TagChipList";
+import { ProductUnitFormModal } from "@/components/organisms/ProductUnitFormModal";
+import {
+  getTutorialInlineStepIndex,
+  TutorialInlineBanner,
+} from "@/components/organisms/TutorialInlineBanner";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppPressable } from "@/components/ui/AppPressable";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useAppToast } from "@/components/ui/useAppToast";
+import { ProductStatisticsSection } from "@/features/statistics/components/ProductStatisticsSection";
+import { useMassDisplay } from "@/hooks/useMassDisplay";
+import { productEanRepository } from "@/repositories/productEan.repository";
+import { productUnitRepository } from "@/repositories/productUnit.repository";
+import { getErrorMessage } from "@/services/errors";
 import {
   fetchOffPartialByEAN,
   type PartialOffProduct,
-} from '@/services/openFoodFacts.service';
-import { useProductStore } from '@/store/product.store';
-import type { Product } from '@/types/product';
-import type { ProductTag } from '@/types/productTag';
-import type { ProductUnit } from '@/types/productUnit';
-import { useMassDisplay } from '@/hooks/useMassDisplay';
-import { useTutorialStore } from '@/store/tutorial.store';
-import { TutorialStatus } from '@/types/tutorial';
-import { TutorialInlineBanner } from '@/components/organisms/TutorialInlineBanner';
-import { getTutorialInlineStepIndex } from '@/components/organisms/TutorialInlineBanner';
+} from "@/services/openFoodFacts.service";
 import {
+  addProductPhoto,
   deleteLocalProductImage,
   deleteLocalProductImageById,
   isLocalProductImage,
   isRemoteProductImage,
-  addProductPhoto,
   requestProductCameraPermission,
   requestProductPhotoLibraryPermission,
   type ProductPhotoSource,
-} from '@/services/productImage.service';
-import { isValidEan, parseManualCarbs } from '@/utils/ean';
-import { convertRawToCooked } from '@/utils/cooking/convertRawToCooked';
-import { getCookingFactor } from '@/utils/cooking/getCookingFactor';
-import { hasCookingConversion } from '@/utils/cooking/hasCookingConversion';
-import { useCookingConversionStore } from '@/store/cookingConversion.store';
-import { generateId } from '@/utils/id';
-import { triggerNotificationError, triggerNotificationSuccess } from '@/utils/haptics';
-import { ProductStatisticsSection } from '@/features/statistics/components/ProductStatisticsSection';
+} from "@/services/productImage.service";
+import { useCookingConversionStore } from "@/store/cookingConversion.store";
+import { useProductStore } from "@/store/product.store";
+import { useTutorialStore } from "@/store/tutorial.store";
+import type { Product } from "@/types/product";
+import type { ProductTag } from "@/types/productTag";
+import type { ProductUnit } from "@/types/productUnit";
+import { TutorialStatus } from "@/types/tutorial";
+import { convertRawToCooked } from "@/utils/cooking/convertRawToCooked";
+import { getCookingFactor } from "@/utils/cooking/getCookingFactor";
+import { hasCookingConversion } from "@/utils/cooking/hasCookingConversion";
+import { isValidEan, parseManualCarbs } from "@/utils/ean";
+import {
+  triggerNotificationError,
+  triggerNotificationSuccess,
+} from "@/utils/haptics";
+import { generateId } from "@/utils/id";
 
 type ProductFormSheetProps = {
   visible: boolean;
@@ -67,36 +79,34 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const { t } = useTranslation();
   const toast = useAppToast();
   const { formatEquivalentMass } = useMassDisplay();
-  const [accentColor, mutedColor, dangerColor, accentForeground] = useThemeColor([
-    'accent',
-    'muted',
-    'danger',
-    'accent-foreground',
-  ]);
+  const [accentColor, mutedColor, dangerColor, accentForeground] =
+    useThemeColor(["accent", "muted", "danger", "accent-foreground"]);
   const insets = useSafeAreaInsets();
   const tutorialStatus = useTutorialStore((s) => s.status);
   const tutorialStep = useTutorialStore((s) => s.currentStep);
-  const productFormStepIndex = getTutorialInlineStepIndex('product-form');
+  const productFormStepIndex = getTutorialInlineStepIndex("product-form");
   const showTutorialBanner =
     visible &&
     tutorialStatus === TutorialStatus.RUNNING &&
     tutorialStep === productFormStepIndex;
 
   const isEditing = product != null;
-  const sheetTitle = isEditing ? t('products.editProduct') : t('products.addProduct');
+  const sheetTitle = isEditing
+    ? t("products.editProduct")
+    : t("products.addProduct");
 
   const create = useProductStore((s) => s.create);
   const update = useProductStore((s) => s.update);
   const remove = useProductStore((s) => s.remove);
 
   const [eans, setEans] = useState<string[]>([]);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [carbsText, setCarbsText] = useState('');
+  const [carbsText, setCarbsText] = useState("");
   const [units, setUnits] = useState<ProductUnit[]>([]);
   const [tags, setTags] = useState<ProductTag[]>([]);
   const [tagsTouched, setTagsTouched] = useState(false);
-  const [cookingFactorText, setCookingFactorText] = useState('');
+  const [cookingFactorText, setCookingFactorText] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const userConversions = useCookingConversionStore((s) => s.conversions);
 
@@ -126,16 +136,20 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       return;
     }
     setEans(product?.eans ?? []);
-    setName(product?.name ?? '');
+    setName(product?.name ?? "");
     setImageUrl(product?.imageUrl ?? null);
     setCarbsText(
-      product?.carbsPer100g != null ? String(product.carbsPer100g).replace('.', ',') : '',
+      product?.carbsPer100g != null
+        ? String(product.carbsPer100g).replace(".", ",")
+        : "",
     );
     setUnits(product?.customUnits ?? []);
     setTags(product?.tags ?? []);
     setTagsTouched(false);
     setCookingFactorText(
-      product?.customCookingFactor != null ? String(product.customCookingFactor).replace('.', ',') : '',
+      product?.customCookingFactor != null
+        ? String(product.customCookingFactor).replace(".", ",")
+        : "",
     );
     setSubmitted(false);
     setDeleteConfirmOpen(false);
@@ -152,48 +166,48 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     onClose();
   }, [onClose, product]);
 
-  const applyOffPartial = useCallback((partial: PartialOffProduct) => {
-    if (partial.name) setName(partial.name);
-    if (partial.carbsPer100g != null) {
-      setCarbsText(String(partial.carbsPer100g).replace('.', ','));
-    }
-    if (partial.imageUrl) {
-      setImageUrl((current) => {
-        if (current && isLocalProductImage(current)) {
-          deleteLocalProductImage(current);
-        }
-        return partial.imageUrl!;
-      });
-    }
-    if (!tagsTouched && partial.tags && partial.tags.length > 0) {
-      setTags(partial.tags);
-    }
-  }, [tagsTouched]);
-
-  const applyPickedPhoto = useCallback(
-    (path: string) => {
-      setImageUrl((current) => {
-        if (current && isLocalProductImage(current)) {
-          deleteLocalProductImage(current);
-        }
-        return path;
-      });
-      triggerNotificationSuccess();
+  const applyOffPartial = useCallback(
+    (partial: PartialOffProduct) => {
+      if (partial.name) setName(partial.name);
+      if (partial.carbsPer100g != null) {
+        setCarbsText(String(partial.carbsPer100g).replace(".", ","));
+      }
+      if (partial.imageUrl) {
+        setImageUrl((current) => {
+          if (current && isLocalProductImage(current)) {
+            deleteLocalProductImage(current);
+          }
+          return partial.imageUrl!;
+        });
+      }
+      if (!tagsTouched && partial.tags && partial.tags.length > 0) {
+        setTags(partial.tags);
+      }
     },
-    [],
+    [tagsTouched],
   );
+
+  const applyPickedPhoto = useCallback((path: string) => {
+    setImageUrl((current) => {
+      if (current && isLocalProductImage(current)) {
+        deleteLocalProductImage(current);
+      }
+      return path;
+    });
+    triggerNotificationSuccess();
+  }, []);
 
   const pickPhotoFromSource = useCallback(
     async (source: ProductPhotoSource) => {
       const granted =
-        source === 'camera'
+        source === "camera"
           ? await requestProductCameraPermission()
           : await requestProductPhotoLibraryPermission();
       if (!granted) {
         showError(
-          source === 'camera'
-            ? t('products.photoCameraPermissionDenied')
-            : t('products.photoPermissionDenied'),
+          source === "camera"
+            ? t("products.photoCameraPermissionDenied")
+            : t("products.photoPermissionDenied"),
         );
         return;
       }
@@ -205,16 +219,16 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   );
 
   const handlePickPhoto = useCallback(() => {
-    Alert.alert(t('products.photoSourceTitle'), undefined, [
+    Alert.alert(t("products.photoSourceTitle"), undefined, [
       {
-        text: t('products.photoFromCamera'),
-        onPress: () => void pickPhotoFromSource('camera'),
+        text: t("products.photoFromCamera"),
+        onPress: () => void pickPhotoFromSource("camera"),
       },
       {
-        text: t('products.photoFromGallery'),
-        onPress: () => void pickPhotoFromSource('library'),
+        text: t("products.photoFromGallery"),
+        onPress: () => void pickPhotoFromSource("library"),
       },
-      { text: t('common.cancel'), style: 'cancel' },
+      { text: t("common.cancel"), style: "cancel" },
     ]);
   }, [pickPhotoFromSource, t]);
 
@@ -237,11 +251,11 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
           partial.carbsPer100g != null ||
           Boolean(partial.imageUrl);
         if (!hasData) {
-          showError(t('products.refreshNoData'));
+          showError(t("products.refreshNoData"));
           return false;
         }
         applyOffPartial(partial);
-        toast.success(t('products.refreshSuccess'));
+        toast.success(t("products.refreshSuccess"));
         return true;
       } catch (err) {
         showError(getErrorMessage(err));
@@ -260,7 +274,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   const handleRefreshFromOff = async () => {
     const ean = eans.find((code) => isValidEan(code));
     if (!ean) {
-      showError(t('products.refreshNoEan'));
+      showError(t("products.refreshNoEan"));
       return;
     }
     await fetchFromOff(ean);
@@ -279,11 +293,26 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       customCookingFactor: parseManualCarbs(cookingFactorText),
       customUnits: units,
     }),
-    [carbsText, cookingFactorText, eans, getFormProductId, imageUrl, name, tags, units],
+    [
+      carbsText,
+      cookingFactorText,
+      eans,
+      getFormProductId,
+      imageUrl,
+      name,
+      tags,
+      units,
+    ],
   );
 
-  const showCookingSection = hasCookingConversion(previewProduct, userConversions);
-  const resolvedCookingFactor = getCookingFactor(previewProduct, userConversions);
+  const showCookingSection = hasCookingConversion(
+    previewProduct,
+    userConversions,
+  );
+  const resolvedCookingFactor = getCookingFactor(
+    previewProduct,
+    userConversions,
+  );
 
   const nameInvalid = submitted && name.trim().length === 0;
   const carbsInvalid = submitted && parseManualCarbs(carbsText) === null;
@@ -323,9 +352,12 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       triggerNotificationError();
       return;
     }
-    const conflict = await productEanRepository.findConflicts(eans, product?.id);
+    const conflict = await productEanRepository.findConflicts(
+      eans,
+      product?.id,
+    );
     if (conflict) {
-      showError(t('products.eanTaken', { ean: conflict }));
+      showError(t("products.eanTaken", { ean: conflict }));
       return;
     }
 
@@ -386,7 +418,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     try {
       await remove(product.id);
       triggerNotificationSuccess();
-      toast.success(t('products.deleteSuccess'));
+      toast.success(t("products.deleteSuccess"));
       onClose();
     } catch (err) {
       triggerNotificationError();
@@ -398,45 +430,62 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   return (
     <>
-      <BottomSheet isOpen={visible} onOpenChange={(open) => !open && handleDismiss()}>
+      <BottomSheet
+        isOpen={visible}
+        onOpenChange={(open) => !open && handleDismiss()}
+      >
         <BottomSheet.Portal>
           <BottomSheet.Overlay />
           <BottomSheet.Content
-            snapPoints={['90%']}
+            snapPoints={["90%"]}
             enableOverDrag={false}
             enableDynamicSizing={false}
             enablePanDownToClose={!showTutorialBanner}
             contentContainerClassName="h-full"
             keyboardBehavior="interactive"
             keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize">
+            android_keyboardInputMode="adjustResize"
+          >
             <BottomSheetScrollView
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{
                 paddingHorizontal: 24,
                 paddingBottom: insets.bottom + 24,
-              }}>
+              }}
+            >
               <View className="flex-row items-center justify-between py-4 border-b border-separator">
-                <Text className="text-foreground text-lg font-semibold">{sheetTitle}</Text>
+                <Text className="text-foreground text-lg font-semibold">
+                  {sheetTitle}
+                </Text>
                 <AppButton variant="tertiary" size="sm" onPress={handleDismiss}>
-                  {t('common.cancel')}
+                  {t("common.cancel")}
                 </AppButton>
               </View>
 
               <View className="gap-1 mt-4">
-                <Text className="text-muted text-sm">{t('modal.eanLabel')}</Text>
-                <ProductEanListEditor eans={eans} onChange={setEans} onScan={handleLookup} />
-                <FieldError isInvalid={eansInvalid}>{t('modal.invalidEan')}</FieldError>
+                <Text className="text-muted text-sm">
+                  {t("modal.eanLabel")}
+                </Text>
+                <ProductEanListEditor
+                  eans={eans}
+                  onChange={setEans}
+                  onScan={handleLookup}
+                />
+                <FieldError isInvalid={eansInvalid}>
+                  {t("modal.invalidEan")}
+                </FieldError>
               </View>
 
               <View className="gap-1 mt-4">
-                <Text className="text-muted text-sm">{t('modal.nameLabel')}</Text>
+                <Text className="text-muted text-sm">
+                  {t("modal.nameLabel")}
+                </Text>
                 <View className="flex-row items-center gap-2">
                   <SearchInput
                     value={name}
                     onChangeText={setName}
-                    placeholder={t('modal.namePlaceholder')}
+                    placeholder={t("modal.namePlaceholder")}
                     flex
                   />
                   <ButtonIcon
@@ -444,8 +493,11 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                       if (!canRefreshFromOff || isLookupLoading) return;
                       void handleRefreshFromOff();
                     }}
-                    accessibilityLabel={t('products.refreshFromOffA11y')}
-                    accessibilityState={{ disabled: !canRefreshFromOff || isLookupLoading }}>
+                    accessibilityLabel={t("products.refreshFromOffA11y")}
+                    accessibilityState={{
+                      disabled: !canRefreshFromOff || isLookupLoading,
+                    }}
+                  >
                     {isLookupLoading ? (
                       <ActivityIndicator color={accentColor} size="small" />
                     ) : (
@@ -457,17 +509,25 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                     )}
                   </ButtonIcon>
                 </View>
-                <FieldError isInvalid={nameInvalid}>{t('modal.nameRequired')}</FieldError>
+                <FieldError isInvalid={nameInvalid}>
+                  {t("modal.nameRequired")}
+                </FieldError>
               </View>
 
               <View className="gap-1 mt-4">
-                <Text className="text-muted text-sm">{t('modal.carbsLabel')}</Text>
+                <Text className="text-muted text-sm">
+                  {t("modal.carbsLabel")}
+                </Text>
                 <InputNumber value={carbsText} onChangeText={setCarbsText} />
-                <FieldError isInvalid={carbsInvalid}>{t('modal.invalidCarbs')}</FieldError>
+                <FieldError isInvalid={carbsInvalid}>
+                  {t("modal.invalidCarbs")}
+                </FieldError>
               </View>
 
               <View className="gap-1 mt-4">
-                <Text className="text-muted text-sm">{t('products.tagsSection')}</Text>
+                <Text className="text-muted text-sm">
+                  {t("products.tagsSection")}
+                </Text>
                 <ProductTagPicker
                   value={tags}
                   onChange={(nextTags) => {
@@ -479,16 +539,25 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
               {showCookingSection && resolvedCookingFactor != null ? (
                 <View className="gap-1 mt-4">
-                  <Text className="text-muted text-sm">{t('products.cookingConversion')}</Text>
+                  <Text className="text-muted text-sm">
+                    {t("products.cookingConversion")}
+                  </Text>
                   <TagChipList tags={tags} variant="expanded" />
-                  <Text className="text-muted text-sm mt-2">{t('products.cookingFactor')}</Text>
-                  <InputNumber value={cookingFactorText} onChangeText={setCookingFactorText} />
                   <Text className="text-muted text-sm mt-2">
-                    {t('products.cookingConversionPreview', {
-                      raw: '100',
-                      rawUnit: t('common.gramsUnit'),
-                      cooked: String(convertRawToCooked(100, resolvedCookingFactor)).replace('.', ','),
-                      cookedUnit: t('common.gramsUnit'),
+                    {t("products.cookingFactor")}
+                  </Text>
+                  <InputNumber
+                    value={cookingFactorText}
+                    onChangeText={setCookingFactorText}
+                  />
+                  <Text className="text-muted text-sm mt-2">
+                    {t("products.cookingConversionPreview", {
+                      raw: "100",
+                      rawUnit: t("common.gramsUnit"),
+                      cooked: String(
+                        convertRawToCooked(100, resolvedCookingFactor),
+                      ).replace(".", ","),
+                      cookedUnit: t("common.gramsUnit"),
                     })}
                   </Text>
                 </View>
@@ -496,7 +565,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
               <Card className="mt-4">
                 <Card.Header>
-                  <Card.Title>{t('products.photo')}</Card.Title>
+                  <Card.Title>{t("products.photo")}</Card.Title>
                 </Card.Header>
                 <Card.Body className="items-center gap-2 py-2">
                   {imageUrl ? (
@@ -504,8 +573,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                       <ProductImage uri={imageUrl} size={96} />
                       <Card.Description className="text-center">
                         {isRemoteProductImage(imageUrl)
-                          ? t('products.photoFromOff')
-                          : t('products.photoCustom')}
+                          ? t("products.photoFromOff")
+                          : t("products.photoCustom")}
                       </Card.Description>
                     </>
                   ) : (
@@ -518,17 +587,23 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                     className="flex-1"
                     onPress={handlePickPhoto}
                     accessibilityLabel={
-                      imageUrl ? t('products.changePhoto') : t('products.addPhoto')
-                    }>
-                    {imageUrl ? t('products.changePhoto') : t('products.addPhoto')}
+                      imageUrl
+                        ? t("products.changePhoto")
+                        : t("products.addPhoto")
+                    }
+                  >
+                    {imageUrl
+                      ? t("products.changePhoto")
+                      : t("products.addPhoto")}
                   </AppButton>
                   {imageUrl ? (
                     <AppButton
                       variant="danger-soft"
                       className="flex-1"
                       onPress={handleRemovePhoto}
-                      accessibilityLabel={t('products.removePhotoA11y')}>
-                      {t('products.removePhoto')}
+                      accessibilityLabel={t("products.removePhotoA11y")}
+                    >
+                      {t("products.removePhoto")}
                     </AppButton>
                   ) : null}
                 </Card.Footer>
@@ -537,31 +612,45 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
               <View className="mt-4">
                 <View className="flex-row items-center justify-between mb-2">
                   <Text className="text-foreground text-base font-medium">
-                    {t('products.customUnits')}
+                    {t("products.customUnits")}
                   </Text>
                   <AppButton
                     size="sm"
                     variant="tertiary"
                     onPress={openAddUnit}
-                    accessibilityLabel={t('products.addUnit')}>
-                    {t('products.addUnit')}
+                    accessibilityLabel={t("products.addUnit")}
+                  >
+                    {t("products.addUnit")}
                   </AppButton>
                 </View>
                 {units.length === 0 ? (
-                  <Text className="text-muted text-sm">{t('products.noCustomUnits')}</Text>
+                  <Text className="text-muted text-sm">
+                    {t("products.noCustomUnits")}
+                  </Text>
                 ) : (
                   units.map((unit, index) => (
                     <View
                       key={unit.id}
                       className={`flex-row items-center justify-between py-2 ${
-                        index === units.length - 1 ? '' : 'border-b border-separator'
-                      }`}>
-                      <AppPressable className="flex-1 pr-2" onPress={() => openEditUnit(unit)}>
+                        index === units.length - 1
+                          ? ""
+                          : "border-b border-separator"
+                      }`}
+                    >
+                      <AppPressable
+                        className="flex-1 pr-2"
+                        onPress={() => openEditUnit(unit)}
+                      >
                         <Text className="text-foreground text-sm">
-                          1 {unit.abbreviation} = {formatEquivalentMass(unit.equivalentInGrams)} ({unit.name})
+                          1 {unit.abbreviation} ={" "}
+                          {formatEquivalentMass(unit.equivalentInGrams)} (
+                          {unit.name})
                         </Text>
                       </AppPressable>
-                      <AppPressable onPress={() => removeUnit(unit.id)} hitSlop={8}>
+                      <AppPressable
+                        onPress={() => removeUnit(unit.id)}
+                        hitSlop={8}
+                      >
                         <FaIcon name="xmark" size={16} color={dangerColor} />
                       </AppPressable>
                     </View>
@@ -569,33 +658,30 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                 )}
               </View>
 
-              {product?.id ? <ProductStatisticsSection productId={product.id} /> : null}
+              {product?.id ? (
+                <ProductStatisticsSection productId={product.id} />
+              ) : null}
 
               <View className="flex-row items-center justify-end gap-2 mt-6 mb-8">
                 {isEditing ? (
                   <AppButton
-                    isIconOnly
                     variant="danger-soft"
                     onPress={() => setDeleteConfirmOpen(true)}
                     isDisabled={isSaving || isDeleting}
-                    accessibilityLabel={t('products.deleteA11y')}>
-                    <FaIcon name="trash-can" size={18} color={dangerColor} />
+                    accessibilityLabel={t("products.deleteA11y")}
+                  >
+                    {t("common.delete")}
                   </AppButton>
                 ) : null}
                 <AppButton
-                  variant="tertiary"
-                  onPress={handleDismiss}
-                  isDisabled={isSaving || isDeleting}>
-                  {t('common.cancel')}
-                </AppButton>
-                <AppButton
                   variant="primary"
                   onPress={() => void handleSave()}
-                  isDisabled={isSaving || isDeleting}>
+                  isDisabled={isSaving || isDeleting}
+                >
                   {isSaving ? (
                     <ActivityIndicator color={accentForeground} size="small" />
                   ) : (
-                    t('common.save')
+                    t("common.save")
                   )}
                 </AppButton>
               </View>
@@ -605,12 +691,13 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
             <View
               pointerEvents="box-none"
               style={{
-                position: 'absolute',
+                position: "absolute",
                 bottom: 0,
                 left: 0,
                 right: 0,
                 zIndex: 10,
-              }}>
+              }}
+            >
               <TutorialInlineBanner
                 stepId="product-form"
                 includeTabBarInset={false}
@@ -634,9 +721,9 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       <ConfirmDialog
         isOpen={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
-        title={t('products.deleteConfirmTitle')}
-        description={t('products.deleteConfirmMessage')}
-        confirmLabel={t('common.delete')}
+        title={t("products.deleteConfirmTitle")}
+        description={t("products.deleteConfirmMessage")}
+        confirmLabel={t("common.delete")}
         destructive
         onConfirm={() => void handleDeleteConfirmed()}
       />
