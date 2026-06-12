@@ -1,0 +1,1 @@
+export const MEALS_DATE_PICKER_SNAP_RATIO = 0.58;
