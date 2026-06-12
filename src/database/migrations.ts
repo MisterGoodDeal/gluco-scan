@@ -5,7 +5,9 @@ import { MIGRATION_002_SQL } from '@/database/migrations/002_product_eans';
 import { MIGRATION_003_SQL } from '@/database/migrations/003_app_preferences';
 import { MIGRATION_004_SQL } from '@/database/migrations/004_product_image';
 import { MIGRATION_005_SQL } from '@/database/migrations/005_tags_and_cooking';
+import { MIGRATION_006_SQL } from '@/database/migrations/006_meal_type_schedule';
 import { backfillLegacyMealItems } from '@/database/backfillLegacyMealItems';
+import { defaultMealTypeSchedule, serializeMealTypeSchedule } from '@/types/mealTypeSchedule';
 
 const migrations: { version: number; sql: string; seed?: string; after?: (db: SQLiteDatabase) => Promise<void> }[] = [
   { version: 1, sql: MIGRATION_001_SQL, seed: SEED_GLOBAL_UNITS_SQL },
@@ -16,6 +18,16 @@ const migrations: { version: number; sql: string; seed?: string; after?: (db: SQ
     version: 5,
     sql: MIGRATION_005_SQL,
     after: backfillLegacyMealItems,
+  },
+  {
+    version: 6,
+    sql: MIGRATION_006_SQL,
+    after: async (db) => {
+      await db.runAsync(
+        `UPDATE app_preferences SET meal_type_schedule = ? WHERE meal_type_schedule IS NULL`,
+        serializeMealTypeSchedule(defaultMealTypeSchedule),
+      );
+    },
   },
 ];
 

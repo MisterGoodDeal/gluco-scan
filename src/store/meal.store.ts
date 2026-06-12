@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 import { mealRepository } from '@/repositories/meal.repository';
 import { productRepository } from '@/repositories/product.repository';
+import { usePreferencesStore } from '@/store/preferences.store';
 import type { Meal } from '@/types/meal';
 import type { MealItem, MealItemQuantityType } from '@/types/mealItem';
 import type { ProductTag } from '@/types/productTag';
@@ -50,12 +51,15 @@ type MealStore = {
   saveMeal: () => Promise<void>;
 };
 
+const inferTypeForDraft = (hours: number, minutes: number) =>
+  inferMealTypeFromTime(hours, minutes, usePreferencesStore.getState().mealTypeSchedule);
+
 const defaultMeta = (): MealDraftMeta => {
   const now = new Date();
   const hours = now.getHours();
   const minutes = now.getMinutes();
   return {
-    type: inferMealTypeFromTime(hours, minutes),
+    type: inferTypeForDraft(hours, minutes),
     dateKey: toDateKey(now),
     hours,
     minutes,
@@ -95,7 +99,7 @@ export const useMealStore = create<MealStore>((set, get) => ({
     set((state) => {
       const draftMeta = { ...state.draftMeta, ...meta };
       if ('hours' in meta || 'minutes' in meta) {
-        draftMeta.type = inferMealTypeFromTime(draftMeta.hours, draftMeta.minutes);
+        draftMeta.type = inferTypeForDraft(draftMeta.hours, draftMeta.minutes);
       }
       return { draftMeta };
     }),

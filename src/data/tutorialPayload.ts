@@ -1,3 +1,4 @@
+import { defaultAppPreferences } from '@/types/appPreferences';
 import type { ExportPayload } from '@/types/exportPayload';
 import { MealType } from '@/types/mealType';
 import { addDays, combineDateAndTime, toDateKey } from '@/utils/date';
@@ -15,9 +16,9 @@ export const TUTORIAL_PAYLOAD: ExportPayload = {
     { tag: 'bread', cookedFactor: 1 },
   ],
   preferences: {
+    ...defaultAppPreferences,
     theme: 'light',
     locale: 'fr',
-    unitSystem: 'metric',
   },
   globalUnits: [
     { id: 'global-teaspoon', abbreviation: 'càc', name: 'Cuillère à café', equivalentInGrams: 5 },

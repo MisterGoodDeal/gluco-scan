@@ -4,6 +4,7 @@ import i18n from '@/i18n';
 import { appPreferencesRepository } from '@/repositories/appPreferences.repository';
 import type { AppPreferences } from '@/types/appPreferences';
 import { defaultAppPreferences } from '@/types/appPreferences';
+import type { MealTypeSchedule } from '@/types/mealTypeSchedule';
 import type { SupportedLocale } from '@/i18n/types';
 import type { ThemePreference } from '@/types/theme';
 import type { UnitSystem } from '@/types/unitSystem';
@@ -14,6 +15,7 @@ type PreferencesStore = AppPreferences & {
   setTheme: (theme: ThemePreference) => Promise<void>;
   setLocale: (locale: SupportedLocale) => Promise<void>;
   setUnitSystem: (unitSystem: UnitSystem) => Promise<void>;
+  setMealTypeSchedule: (mealTypeSchedule: MealTypeSchedule) => Promise<void>;
   applyImported: (preferences: AppPreferences) => Promise<void>;
 };
 
@@ -45,6 +47,11 @@ export const usePreferencesStore = create<PreferencesStore>((set, get) => ({
   setUnitSystem: async (unitSystem) => {
     const prefs = await appPreferencesRepository.update({ unitSystem });
     set({ unitSystem: prefs.unitSystem });
+  },
+
+  setMealTypeSchedule: async (mealTypeSchedule) => {
+    const prefs = await appPreferencesRepository.update({ mealTypeSchedule });
+    set({ mealTypeSchedule: prefs.mealTypeSchedule });
   },
 
   applyImported: async (preferences) => {

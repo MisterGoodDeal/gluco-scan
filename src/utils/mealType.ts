@@ -1,18 +1,36 @@
 import { MealType } from '@/types/mealType';
+import {
+  CONFIGURABLE_MEAL_TYPES,
+  defaultMealTypeSchedule,
+  type MealTypeSchedule,
+  type MealTypeTimeRange,
+} from '@/types/mealTypeSchedule';
 
 const toMinutes = (hours: number, minutes: number) => hours * 60 + minutes;
 
-/** Plages horaires pour la sélection automatique du type de repas. */
-export const inferMealTypeFromTime = (hours: number, minutes: number): MealType => {
-  const t = toMinutes(hours, minutes);
+const isInRange = (timeInMinutes: number, range: MealTypeTimeRange): boolean => {
+  const start = toMinutes(range.startHours, range.startMinutes);
+  const end = toMinutes(range.endHours, range.endMinutes);
+  return timeInMinutes >= start && timeInMinutes <= end;
+};
 
-  if (t >= toMinutes(6, 0) && t <= toMinutes(10, 0)) return MealType.BREAKFAST;
-  if (t >= toMinutes(11, 30) && t <= toMinutes(14, 0)) return MealType.LUNCH;
-  if (t >= toMinutes(15, 30) && t <= toMinutes(17, 30)) return MealType.SNACK;
-  if (t >= toMinutes(19, 0) && t <= toMinutes(22, 0)) return MealType.DINNER;
+/** Plages horaires pour la sélection automatique du type de repas. */
+export const inferMealTypeFromTime = (
+  hours: number,
+  minutes: number,
+  schedule: MealTypeSchedule = defaultMealTypeSchedule,
+): MealType => {
+  const timeInMinutes = toMinutes(hours, minutes);
+
+  for (const mealType of CONFIGURABLE_MEAL_TYPES) {
+    if (isInRange(timeInMinutes, schedule[mealType])) return mealType;
+  }
 
   return MealType.COLLATION;
 };
+
+export const formatTimeOfDay = (hours: number, minutes: number): string =>
+  `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
 export type MealTypeLabelKey =
   | 'meals.breakfast'
