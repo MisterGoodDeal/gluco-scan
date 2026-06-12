@@ -24,7 +24,7 @@ export const StatisticsTabLayout: FC = () => {
         <StatisticsHomeScreen headerInset={headerHeight} bottomInset={bottomInset} />
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <View className="flex-row items-center justify-between">
-            <Text className="text-foreground text-lg font-semibold">{t('statistics.title')}</Text>
+            <Text className="text-foreground text-lg font-bold">{t('statistics.title')}</Text>
           </View>
         </BlurScreenHeader>
       </BlurTargetView>

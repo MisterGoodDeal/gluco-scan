@@ -56,7 +56,7 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
         paddingTop: 16 + headerInset,
         paddingBottom: tabBarInset,
       }}>
-      <Text className="text-foreground text-lg font-semibold capitalize mb-4">
+      <Text className="text-foreground text-lg font-bold capitalize mb-4">
         {formatDateLabel(dateKey, locale)}
       </Text>
 
