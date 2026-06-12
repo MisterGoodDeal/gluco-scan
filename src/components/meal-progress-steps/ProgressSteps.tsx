@@ -4,14 +4,19 @@ import type { ProgressStepsProps } from 'react-native-progress-steps/dist/types'
 
 import StepIcon from './StepIcon';
 
+type AppProgressStepsProps = ProgressStepsProps & {
+  hideStepper?: boolean;
+};
+
 const ProgressSteps = ({
   children,
   isComplete = false,
   activeStep: initialActiveStep = 0,
   topOffset = 60,
   marginBottom = 30,
+  hideStepper = false,
   ...props
-}: ProgressStepsProps) => {
+}: AppProgressStepsProps) => {
   const [stepCount, setStepCount] = React.useState(0);
   const [activeStep, setActiveStep] = React.useState(initialActiveStep);
 
@@ -51,9 +56,11 @@ const ProgressSteps = ({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.stepsContainer, { paddingTop: topOffset, marginBottom }]}>
-        {renderStepIcons()}
-      </View>
+      {!hideStepper ? (
+        <View style={[styles.stepsContainer, { paddingTop: topOffset, marginBottom }]}>
+          {renderStepIcons()}
+        </View>
+      ) : null}
       <View style={styles.contentContainer}>
         {React.cloneElement(children[activeStep], {
           setActiveStep: handleSetActiveStep,
@@ -80,5 +87,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+type ProgressStepperBarProps = Omit<AppProgressStepsProps, 'children' | 'hideStepper'> & {
+  activeStep: number;
+  labels: string[];
+};
+
+export const ProgressStepperBar = ({
+  labels,
+  activeStep,
+  isComplete = false,
+  marginBottom = 12,
+  topOffset: _topOffset,
+  ...props
+}: ProgressStepperBarProps) => (
+  <View style={[styles.stepsContainer, { marginBottom }]}>
+    {labels.map((label, index) => {
+      const isCompletedStep = isComplete ? true : index < activeStep;
+      const isActiveStep = isComplete ? false : index === activeStep;
+
+      return (
+        <View key={label} style={styles.stepContainer}>
+          <StepIcon
+            {...props}
+            stepNum={index + 1}
+            label={label}
+            isFirstStep={index === 0}
+            isLastStep={index === labels.length - 1}
+            isCompletedStep={isCompletedStep}
+            isActiveStep={isActiveStep}
+          />
+        </View>
+      );
+    })}
+  </View>
+);
 
 export default ProgressSteps;
