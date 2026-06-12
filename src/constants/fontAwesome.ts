@@ -4,6 +4,7 @@ const icon = (codepoint: number): string => String.fromCodePoint(codepoint);
 
 export const FA_ICONS = {
   'apple-whole': icon(0xf5d1),
+  'arrow-rotate-left': icon(0xf0e2),
   'arrows-rotate': icon(0xf021),
   barcode: icon(0xf02a),
   'basket-shopping': icon(0xf291),
@@ -20,6 +21,8 @@ export const FA_ICONS = {
   carrot: icon(0xf787),
   'chart-line': icon(0xf201),
   check: icon(0xf00c),
+  'chevron-left': icon(0xf053),
+  'chevron-right': icon(0xf054),
   cheese: icon(0xf7ef),
   'cheese-swiss': icon(0xf7f0),
   'cloud-meatball': icon(0xf73b),

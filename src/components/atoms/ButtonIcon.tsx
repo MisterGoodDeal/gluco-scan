@@ -9,6 +9,7 @@ type ButtonIconProps = {
   accessibilityLabel: string;
   accessibilityState?: AccessibilityState;
   variant?: AppButtonProps['variant'];
+  size?: AppButtonProps['size'];
 };
 
 export const ButtonIcon: FC<ButtonIconProps> = ({
@@ -17,10 +18,12 @@ export const ButtonIcon: FC<ButtonIconProps> = ({
   accessibilityLabel,
   accessibilityState,
   variant = 'tertiary',
+  size,
 }) => (
   <AppButton
     isIconOnly
     variant={variant}
+    size={size}
     onPress={onPress}
     accessibilityLabel={accessibilityLabel}
     accessibilityState={accessibilityState}>
