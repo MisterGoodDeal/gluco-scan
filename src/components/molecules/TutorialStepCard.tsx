@@ -1,7 +1,9 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
+import { FaIcon } from '@/components/atoms/FaIcon';
+import { ButtonIcon } from '@/components/atoms/ButtonIcon';
 import { AppButton } from '@/components/ui/AppButton';
 import { TUTORIAL_STEPS } from '@/config/tutorialSteps';
 import { useTutorialStore } from '@/store/tutorial.store';
@@ -12,6 +14,8 @@ type TutorialStepCardProps = {
   onPrevious: () => void;
   onNext: () => void;
   style?: ViewStyle;
+  collapsible?: boolean;
+  onMinimize?: () => void;
 };
 
 export const TutorialStepCard: FC<TutorialStepCardProps> = ({
@@ -20,6 +24,8 @@ export const TutorialStepCard: FC<TutorialStepCardProps> = ({
   onPrevious,
   onNext,
   style,
+  collapsible = false,
+  onMinimize,
 }) => {
   const { t } = useTranslation();
   const mealCreateValidated = useTutorialStore((s) => s.mealCreateValidated);
@@ -34,8 +40,18 @@ export const TutorialStepCard: FC<TutorialStepCardProps> = ({
   return (
     <View
       className="rounded-3xl bg-overlay border border-border p-4 gap-2"
-      style={style}>
-      <Text className="text-foreground text-lg font-semibold">{t(step.titleKey)}</Text>
+      style={[styles.card, style]}>
+      <View className="flex-row items-start justify-between gap-2">
+        <Text className="text-foreground text-lg font-semibold flex-1">{t(step.titleKey)}</Text>
+        {collapsible ? (
+          <ButtonIcon
+            onPress={() => onMinimize?.()}
+            accessibilityLabel={t('tutorial.collapse.minimizeA11y')}
+            size="sm">
+            <FaIcon name="chevron-down" size={14} />
+          </ButtonIcon>
+        ) : null}
+      </View>
       <Text className="text-muted text-base">{t(step.messageKey)}</Text>
       {step.requiresAction && step.id === 'meal-create' && !mealCreateValidated ? (
         <Text className="text-accent text-sm">{t('tutorial.steps.mealCreate.hint')}</Text>
@@ -58,3 +74,21 @@ export const TutorialStepCard: FC<TutorialStepCardProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    overflow: 'visible',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.28,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 12,
+      },
+      default: {},
+    }),
+  },
+});

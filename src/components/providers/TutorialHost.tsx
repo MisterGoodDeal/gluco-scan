@@ -1,7 +1,7 @@
 import { type FC, type ReactNode, useEffect } from 'react';
 import { AppState } from 'react-native';
 
-import { TutorialOverlay } from '@/components/organisms/TutorialOverlay';
+import { TutorialOverlayLayer } from '@/components/providers/TutorialOverlayLayer';
 import { TutorialWelcomeModal } from '@/components/organisms/TutorialWelcomeModal';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { tutorialMmkv } from '@/utils/tutorialMmkv';
@@ -28,10 +28,9 @@ export const TutorialHost: FC<TutorialHostProps> = ({ children }) => {
   }, [cancelTutorial]);
 
   return (
-    <>
+    <TutorialOverlayLayer>
       {children}
       <TutorialWelcomeModal />
-      <TutorialOverlay />
-    </>
+    </TutorialOverlayLayer>
   );
 };
