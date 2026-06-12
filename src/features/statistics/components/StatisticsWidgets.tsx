@@ -16,6 +16,7 @@ import { getCurrentLocale } from "@/i18n";
 import { formatDateLabel } from "@/utils/date";
 import { formatDecimal } from "@/utils/format";
 import { getMealTypeLabelKey } from "@/utils/mealType";
+import { twMerge } from "tailwind-merge";
 
 type StatisticsWidgetsProps = {
   stats: ComputedStatistics;
@@ -23,8 +24,18 @@ type StatisticsWidgetsProps = {
   onHeatmapDayPress?: (date: string, carbs: number) => void;
 };
 
-const ListRow: FC<ViewProps> = ({ children, ...rest }) => (
-  <View className="py-2 border-b border-separator" {...rest}>
+const ListRow: FC<ViewProps & { isLastChild?: boolean }> = ({
+  children,
+  isLastChild = false,
+  ...rest
+}) => (
+  <View
+    className={twMerge(
+      "py-2 border-b border-separator",
+      isLastChild ? "border-b-0" : "",
+    )}
+    {...rest}
+  >
     {children}
   </View>
 );
@@ -199,8 +210,11 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}
       >
-        {stats.favoriteMeals.map((entry) => (
-          <ListRow key={entry.fingerprint}>
+        {stats.favoriteMeals.map((entry, index: number) => (
+          <ListRow
+            key={entry.fingerprint}
+            isLastChild={index === stats.favoriteMeals.length - 1}
+          >
             <Text className="text-foreground text-base">{entry.name}</Text>
             <Text className="text-muted text-sm">
               {t("statistics.favoriteMeals.line", {
