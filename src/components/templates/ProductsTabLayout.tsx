@@ -124,7 +124,7 @@ export const ProductsTabLayout: FC = () => {
         </TutorialAnchor>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <View className="flex-row items-center justify-between">
-            <Text className="text-foreground text-lg font-semibold">{t('products.title')}</Text>
+            <Text className="text-foreground text-lg font-bold">{t('products.title')}</Text>
             <TutorialAnchor id="tutorial-products-add">
             <AppButton
               size="sm"
@@ -135,12 +135,21 @@ export const ProductsTabLayout: FC = () => {
             </AppButton>
             </TutorialAnchor>
           </View>
-          <View className="flex-row items-center gap-2 mt-2">
+          <View className="mt-2 flex-row items-center gap-1 min-h-12 rounded-2xl border border-field-border bg-field px-2 overflow-hidden">
+            <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
             <TutorialAnchor id="tutorial-products-search" style={{ flex: 1, minWidth: 0 }}>
-              <SearchInput value={query} onChangeText={setQuery} flex />
+              <SearchInput value={query} onChangeText={setQuery} flex variant="plain" />
             </TutorialAnchor>
-            <ProductTagFilterBar value={tagFilters} onChange={setTagFilters} />
+            <View className="h-5 w-px bg-separator" />
+            <ProductTagFilterBar
+              value={tagFilters}
+              onChange={setTagFilters}
+              embedded
+            />
+            <View className="h-5 w-px bg-separator" />
             <ButtonIcon
+              variant="ghost"
+              size="sm"
               onPress={toggleCompactList}
               accessibilityLabel={
                 compactList ? t('products.compactListOnA11y') : t('products.compactListOffA11y')
@@ -148,7 +157,7 @@ export const ProductsTabLayout: FC = () => {
               accessibilityState={{ selected: compactList }}>
               <FaIcon
                 name={compactList ? 'grip-lines' : 'list'}
-                size={20}
+                size={18}
                 color={compactList ? accentColor : mutedColor}
               />
             </ButtonIcon>

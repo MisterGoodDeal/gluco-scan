@@ -18,9 +18,14 @@ import { sortProductTags } from '@/utils/tags/sortProductTags';
 type ProductTagFilterBarProps = {
   value: ProductTag[];
   onChange: (tags: ProductTag[]) => void;
+  embedded?: boolean;
 };
 
-export const ProductTagFilterBar: FC<ProductTagFilterBarProps> = ({ value, onChange }) => {
+export const ProductTagFilterBar: FC<ProductTagFilterBarProps> = ({
+  value,
+  onChange,
+  embedded = false,
+}) => {
   const { t } = useTranslation();
   const [accentColor, mutedColor] = useThemeColor(['accent', 'muted']);
 
@@ -63,13 +68,14 @@ export const ProductTagFilterBar: FC<ProductTagFilterBarProps> = ({ value, onCha
       trigger={
         <AppButton
           isIconOnly
-          variant="tertiary"
+          size={embedded ? 'sm' : undefined}
+          variant={embedded ? 'ghost' : 'tertiary'}
           haptic={false}
           accessibilityLabel={filterA11y}
           accessibilityState={{ selected: value.length > 0 }}>
           <FaIcon
             name="tag"
-            size={20}
+            size={embedded ? 18 : 20}
             color={value.length > 0 ? accentColor : mutedColor}
           />
         </AppButton>
