@@ -1,5 +1,19 @@
 import { type LayoutRectangle, type View } from 'react-native';
 
+import {
+  toSpotlightHole,
+  type TutorialSpotlightHole,
+  type TutorialSpotlightRingVariant,
+} from '@/utils/tutorialSpotlightPath';
+
+export type TutorialSpotlightTarget = {
+  anchorId: string;
+  cornerRadius: number;
+  padding?: number;
+  showRing?: boolean;
+  ringVariant?: TutorialSpotlightRingVariant;
+};
+
 const anchors = new Map<string, View>();
 
 export const registerTutorialAnchor = (id: string, ref: View | null): void => {
@@ -61,4 +75,70 @@ export const measureTutorialAnchorsWithRetry = async (
     if (rect) return rect;
   }
   return null;
+};
+
+const measureTutorialAnchorsInOrder = async (
+  ids: string[],
+): Promise<(LayoutRectangle | null)[]> =>
+  Promise.all(ids.map((id) => measureTutorialAnchor(id)));
+
+export const measureTutorialAnchorsListWithRetry = async (
+  ids: string[],
+  attempts = 6,
+): Promise<(LayoutRectangle | null)[]> => {
+  if (ids.length === 0) return [];
+
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 120 * (attempt + 1)));
+    const rects = await measureTutorialAnchorsInOrder(ids);
+    if (rects.every((rect) => rect != null)) return rects;
+  }
+
+  return measureTutorialAnchorsInOrder(ids);
+};
+
+export const measureTutorialSpotlightTargets = async (
+  targets: TutorialSpotlightTarget[],
+  attempts = 8,
+  initialDelayMs = 0,
+  onProgress?: (holes: TutorialSpotlightHole[]) => void,
+): Promise<TutorialSpotlightHole[]> => {
+  if (targets.length === 0) return [];
+
+  if (initialDelayMs > 0) {
+    await new Promise((resolve) => setTimeout(resolve, initialDelayMs));
+  }
+
+  let bestHoles: TutorialSpotlightHole[] = [];
+
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 140 * (attempt + 1)));
+    }
+
+    const holes: TutorialSpotlightHole[] = [];
+    for (const target of targets) {
+      const rect = await measureTutorialAnchor(target.anchorId);
+      if (rect == null) continue;
+      holes.push(
+        toSpotlightHole(
+          rect,
+          target.cornerRadius,
+          target.padding,
+          target.showRing !== false,
+          target.ringVariant ?? 'default',
+        ),
+      );
+    }
+
+    if (holes.length > bestHoles.length) {
+      bestHoles = holes;
+      onProgress?.(bestHoles);
+    }
+    if (holes.length === targets.length) {
+      return holes;
+    }
+  }
+
+  return bestHoles;
 };
