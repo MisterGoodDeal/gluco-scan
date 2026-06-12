@@ -48,7 +48,7 @@ type MealStore = {
   updateDraftItem: (id: string, item: MealDraftItem) => void;
   beginEditMeal: (mealId: string) => Promise<boolean>;
   resetDraft: () => void;
-  saveMeal: () => Promise<void>;
+  saveMeal: () => Promise<string>;
 };
 
 const inferTypeForDraft = (hours: number, minutes: number) =>
@@ -186,13 +186,18 @@ export const useMealStore = create<MealStore>((set, get) => ({
       ),
     };
 
+    let mealId: string;
     if (editingMealId) {
       await mealRepository.updateWithItems(editingMealId, payload);
+      mealId = editingMealId;
     } else {
-      await mealRepository.createWithItems(payload);
+      const meal = await mealRepository.createWithItems(payload);
+      mealId = meal.id;
     }
 
+    const dateKey = draftMeta.dateKey;
     get().resetDraft();
-    await get().hydrateDay(draftMeta.dateKey);
+    await get().hydrateDay(dateKey);
+    return mealId;
   },
 }));
