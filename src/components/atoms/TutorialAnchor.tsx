@@ -7,9 +7,15 @@ type TutorialAnchorProps = {
   id: string;
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
+  onAnchorLayout?: () => void;
 };
 
-export const TutorialAnchor: FC<TutorialAnchorProps> = ({ id, children, style }) => {
+export const TutorialAnchor: FC<TutorialAnchorProps> = ({
+  id,
+  children,
+  style,
+  onAnchorLayout,
+}) => {
   const ref = useRef<View>(null);
 
   useEffect(() => () => registerTutorialAnchor(id, null), [id]);
@@ -19,7 +25,10 @@ export const TutorialAnchor: FC<TutorialAnchorProps> = ({ id, children, style })
       ref={ref}
       collapsable={false}
       style={style}
-      onLayout={() => registerTutorialAnchor(id, ref.current)}>
+      onLayout={() => {
+        registerTutorialAnchor(id, ref.current);
+        onAnchorLayout?.();
+      }}>
       {children}
     </View>
   );
