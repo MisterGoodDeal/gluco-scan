@@ -13,6 +13,7 @@ import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { ThemePreferencePicker } from '@/components/molecules/ThemePreferencePicker';
 import { UnitSystemPicker } from '@/components/molecules/UnitSystemPicker';
 import { CookingConversionSettings } from '@/components/molecules/CookingConversionSettings';
+import { MealTypeScheduleSettings } from '@/components/molecules/MealTypeScheduleSettings';
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { GlobalUnitFormModal } from '@/components/organisms/GlobalUnitFormModal';
@@ -73,6 +74,7 @@ export const SettingsTabLayout: FC = () => {
   const [unitIdToDelete, setUnitIdToDelete] = useState<string | null>(null);
   const currentLocale = usePreferencesStore((s) => s.locale);
   const setLocale = usePreferencesStore((s) => s.setLocale);
+  const hydratePreferences = usePreferencesStore((s) => s.hydrate);
   const { formatEquivalentMass } = useMassDisplay();
   const tabBarInset = useTabBarBottomInset();
   const tutorialStatus = useTutorialStore((s) => s.status);
@@ -93,7 +95,8 @@ export const SettingsTabLayout: FC = () => {
     useCallback(() => {
       void hydrate();
       void hydrateCookingConversions();
-    }, [hydrate, hydrateCookingConversions]),
+      void hydratePreferences();
+    }, [hydrate, hydrateCookingConversions, hydratePreferences]),
   );
 
   const openAddUnit = () => {
@@ -200,6 +203,10 @@ export const SettingsTabLayout: FC = () => {
               <UnitSystemPicker />
             </SectionItem>
 
+            <SectionItem value="mealSchedule" title={t('settings.mealTypeSchedule')}>
+              <MealTypeScheduleSettings />
+            </SectionItem>
+
             <SectionItem value="cooking" title={t('settings.cookingConversions')}>
               <CookingConversionSettings />
             </SectionItem>
@@ -301,7 +308,7 @@ export const SettingsTabLayout: FC = () => {
           </TutorialAnchor>
         </ScrollView>
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
-          <Text className="text-foreground text-lg font-semibold">{t('settings.title')}</Text>
+          <Text className="text-foreground text-lg font-bold">{t('settings.title')}</Text>
         </BlurScreenHeader>
       </BlurTargetView>
       <GlobalUnitFormModal
