@@ -52,12 +52,16 @@ export const MealsDayPager: FC<MealsDayPagerProps> = ({
 
   const initialIndex = hasAnyMeals ? Math.floor(windowDays / 2) : 0;
   const listRef = useRef<FlatList<string>>(null);
+  const onDateChangeRef = useRef(onDateChange);
+  onDateChangeRef.current = onDateChange;
+  const hasAnyMealsRef = useRef(hasAnyMeals);
+  hasAnyMealsRef.current = hasAnyMeals;
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (!hasAnyMeals) return;
+      if (!hasAnyMealsRef.current) return;
       const first = viewableItems[0]?.item as string | undefined;
-      if (first) onDateChange(first);
+      if (first) onDateChangeRef.current(first);
     },
   ).current;
 
