@@ -39,6 +39,15 @@ export const combineDateAndTime = (dateKey: string, hours: number, minutes: numb
   return date.toISOString();
 };
 
+export const getMonthDateBounds = (
+  year: number,
+  monthIndex: number,
+): { start: string; end: string } => {
+  const start = new Date(year, monthIndex, 1);
+  const end = new Date(year, monthIndex + 1, 0);
+  return { start: toDateKey(start), end: toDateKey(end) };
+};
+
 export const getNowParts = (): { dateKey: string; hours: number; minutes: number } => {
   const now = new Date();
   return {

@@ -142,6 +142,23 @@ export const mealRepository = {
     return row?.total ?? 0;
   },
 
+  async getDayTotalsBetween(startDate: string, endDate: string): Promise<Record<string, number>> {
+    const db = getDatabase();
+    const rows = await db.getAllAsync<{ date: string; total: number }>(
+      `SELECT date, COALESCE(SUM(total_carbs), 0) AS total
+       FROM meals
+       WHERE date >= ? AND date <= ?
+       GROUP BY date`,
+      startDate,
+      endDate,
+    );
+    const totals: Record<string, number> = {};
+    for (const row of rows) {
+      totals[row.date] = row.total;
+    }
+    return totals;
+  },
+
   async createWithItems(input: CreateMealInput): Promise<Meal> {
     const db = getDatabase();
     const [globalUnits, userConversions] = await Promise.all([
