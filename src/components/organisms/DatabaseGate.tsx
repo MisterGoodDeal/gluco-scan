@@ -1,6 +1,6 @@
-import { useThemeColor } from 'heroui-native';
+import { Spinner, useThemeColor } from 'heroui-native';
 import { type FC, type ReactNode } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useDatabase } from '@/hooks/useDatabase';
@@ -25,7 +25,7 @@ export const DatabaseGate: FC<DatabaseGateProps> = ({ children }) => {
   if (!ready) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color={accentColor} size="large" />
+        <Spinner size="lg" color={accentColor} />
         <Text className="text-muted text-sm mt-4">{t('common.loading')}</Text>
       </View>
     );
