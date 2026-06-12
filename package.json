@@ -62,6 +62,7 @@
   "devDependencies": {
     "@react-native-community/cli": "latest",
     "@types/react": "~19.2.2",
+    "prettier": "^3.8.4",
     "react-native-cli-bump-version": "^1.5.1",
     "typescript": "~6.0.3"
   },
@@ -95,7 +96,9 @@
     "pods:install": "if [ -d \"ios\" ]; then cd ios && pod install && cd ..; fi",
     "pods:update": "if [ -d \"ios\" ]; then cd ios && pod update && cd ..; fi",
     "pods:clean": "if [ -d \"ios\" ]; then cd ios && rm -rf Pods && rm -rf Podfile.lock && pod deintegrate && pod install && cd ..; fi",
-    "postinstall": "yarn pods:install"
+    "postinstall": "yarn pods:install",
+    "prettier:check": "prettier . --check",
+    "prettier:write": "prettier . --write"
   },
   "private": true,
   "expo": {
