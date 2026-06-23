@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { useThemeColor } from 'heroui-native';
+import { Card, useThemeColor } from 'heroui-native';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -26,7 +26,7 @@ import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
 import { textLineClamp } from '@/utils/text';
 import { productMatchesQuery } from '@/utils/productSearch';
-import { topScreenSpace } from '@/utils/screen';
+import { hp, topScreenSpace } from '@/utils/screen';
 
 type ProductSpotlightSearchProps = {
   visible: boolean;
@@ -75,17 +75,18 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <BlurView
-        intensity={80}
+        intensity={blur.intensity}
         tint={blur.tint}
         blurMethod={blur.androidMethod}
         style={StyleSheet.absoluteFill}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={topScreenSpace}>
-          <View className="flex-1" style={{ paddingTop: topScreenSpace }}>
-            <View className="p-4">
-              <View className="flex-row items-center gap-2 px-4 min-h-12 rounded-xl border border-border bg-surface/80 overflow-hidden">
+        <View className="flex-1 bg-background/75">
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={topScreenSpace}>
+            <View className="flex-1" style={{ paddingTop: topScreenSpace }}>
+              <View className="px-4 pb-2">
+                <View className="flex-row items-center gap-2 px-4 min-h-12 rounded-2xl border border-border bg-overlay overflow-hidden">
                 <FaIcon name="magnifying-glass" size={20} color={mutedColor} />
                 <View className="flex-1">
                   <SearchInput
@@ -128,58 +129,65 @@ export const ProductSpotlightSearch: FC<ProductSpotlightSearchProps> = ({
                 automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
                 contentContainerStyle={{
                   paddingHorizontal: 16,
+                  paddingTop: 8,
                   paddingBottom: insets.bottom + 16,
                 }}
+                ItemSeparatorComponent={() => (
+                  <View style={{ height: compactList ? 4 : hp('1.5%') }} />
+                )}
                 ListEmptyComponent={
                   <View className="p-8 items-center">
-                    <Text className="text-muted text-base text-center">
-                      {query.trim()
-                        ? t('meals.searchNoResults')
-                        : t('meals.searchEmptyHint')}
-                    </Text>
+                    <Card className="p-4">
+                      <Text className="text-muted text-base text-center">
+                        {query.trim()
+                          ? t('meals.searchNoResults')
+                          : t('meals.searchEmptyHint')}
+                      </Text>
+                    </Card>
                   </View>
                 }
-                renderItem={({ item, index }) => {
+                renderItem={({ item }) => {
                   const carbsLabel = t('common.carbsPer100g', {
                     value: formatDecimal(item.carbsPer100g),
                   });
 
                   return (
-                    <AppPressable
-                      className={`${compactList ? 'p-2' : 'p-4'} ${
-                        index === results.length - 1 ? '' : 'border-b border-separator'
-                      }`}
-                      onPress={() => handleSelect(item)}>
-                      {compactList ? (
-                        <View className="flex-row items-center gap-1 min-w-0">
-                          <Text className="text-foreground text-base shrink" {...textLineClamp(1)}>
-                            {item.name}
-                          </Text>
-                          <Text className="text-muted text-sm" numberOfLines={1}>
-                            {carbsLabel}
-                          </Text>
-                        </View>
-                      ) : (
-                        <View className="flex-row items-center gap-2">
-                          {item.imageUrl ? <ProductImage uri={item.imageUrl} /> : null}
-                          <View className="flex-1 min-w-0">
-                            <Text className="text-foreground text-base" {...textLineClamp(2)}>
+                    <AppPressable onPress={() => handleSelect(item)}>
+                      <Card className={compactList ? 'px-3 py-2' : 'p-4'}>
+                        {compactList ? (
+                          <View className="flex-row items-center gap-1 min-w-0">
+                            <Text
+                              className="text-foreground text-base shrink"
+                              {...textLineClamp(1)}>
                               {item.name}
                             </Text>
-                            <Text className="text-muted text-sm">
+                            <Text className="text-muted text-sm" numberOfLines={1}>
                               {carbsLabel}
-                              {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}
                             </Text>
                           </View>
-                        </View>
-                      )}
+                        ) : (
+                          <View className="flex-row items-center gap-2">
+                            {item.imageUrl ? <ProductImage uri={item.imageUrl} /> : null}
+                            <View className="flex-1 min-w-0">
+                              <Text className="text-foreground text-base" {...textLineClamp(2)}>
+                                {item.name}
+                              </Text>
+                              <Text className="text-muted text-sm">
+                                {carbsLabel}
+                                {item.eans.length > 0 ? ` · ${item.eans.join(', ')}` : ''}
+                              </Text>
+                            </View>
+                          </View>
+                        )}
+                      </Card>
                     </AppPressable>
                   );
                 }}
               />
             )}
-          </View>
-        </KeyboardAvoidingView>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
       </BlurView>
     </Modal>
   );
