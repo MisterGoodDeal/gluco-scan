@@ -123,7 +123,14 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   const [unitModalVisible, setUnitModalVisible] = useState(false);
   const [editingUnit, setEditingUnit] = useState<ProductUnit | null>(null);
+  const [isSheetSuppressed, setIsSheetSuppressed] = useState(false);
+  const isSheetSuppressedRef = useRef(false);
   const draftProductIdRef = useRef<string | null>(null);
+
+  const setSheetSuppressed = useCallback((suppressed: boolean) => {
+    isSheetSuppressedRef.current = suppressed;
+    setIsSheetSuppressed(suppressed);
+  }, []);
 
   const getFormProductId = useCallback(
     () => product?.id ?? (draftProductIdRef.current ??= generateId()),
@@ -133,6 +140,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   useEffect(() => {
     if (!visible) {
       draftProductIdRef.current = null;
+      isSheetSuppressedRef.current = false;
+      setIsSheetSuppressed(false);
       return;
     }
     setEans(product?.eans ?? []);
@@ -199,38 +208,50 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
 
   const pickPhotoFromSource = useCallback(
     async (source: ProductPhotoSource) => {
-      const granted =
-        source === "camera"
-          ? await requestProductCameraPermission()
-          : await requestProductPhotoLibraryPermission();
-      if (!granted) {
-        showError(
+      try {
+        const granted =
           source === "camera"
-            ? t("products.photoCameraPermissionDenied")
-            : t("products.photoPermissionDenied"),
-        );
-        return;
+            ? await requestProductCameraPermission()
+            : await requestProductPhotoLibraryPermission();
+        if (!granted) {
+          showError(
+            source === "camera"
+              ? t("products.photoCameraPermissionDenied")
+              : t("products.photoPermissionDenied"),
+          );
+          return;
+        }
+        const path = await addProductPhoto(getFormProductId(), source);
+        if (!path) return;
+        applyPickedPhoto(path);
+      } finally {
+        setSheetSuppressed(false);
       }
-      const path = await addProductPhoto(getFormProductId(), source);
-      if (!path) return;
-      applyPickedPhoto(path);
     },
-    [applyPickedPhoto, getFormProductId, showError, t],
+    [applyPickedPhoto, getFormProductId, setSheetSuppressed, showError, t],
   );
 
   const handlePickPhoto = useCallback(() => {
-    Alert.alert(t("products.photoSourceTitle"), undefined, [
-      {
-        text: t("products.photoFromCamera"),
-        onPress: () => void pickPhotoFromSource("camera"),
-      },
-      {
-        text: t("products.photoFromGallery"),
-        onPress: () => void pickPhotoFromSource("library"),
-      },
-      { text: t("common.cancel"), style: "cancel" },
-    ]);
-  }, [pickPhotoFromSource, t]);
+    void (async () => {
+      setSheetSuppressed(true);
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      Alert.alert(t("products.photoSourceTitle"), undefined, [
+        {
+          text: t("products.photoFromCamera"),
+          onPress: () => void pickPhotoFromSource("camera"),
+        },
+        {
+          text: t("products.photoFromGallery"),
+          onPress: () => void pickPhotoFromSource("library"),
+        },
+        {
+          text: t("common.cancel"),
+          style: "cancel",
+          onPress: () => setSheetSuppressed(false),
+        },
+      ]);
+    })();
+  }, [pickPhotoFromSource, setSheetSuppressed, t]);
 
   const handleRemovePhoto = useCallback(() => {
     setImageUrl((current) => {
@@ -431,8 +452,12 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   return (
     <>
       <BottomSheet
-        isOpen={visible}
-        onOpenChange={(open) => !open && handleDismiss()}
+        isOpen={visible && !isSheetSuppressed}
+        onOpenChange={(open) => {
+          if (!open && !isSheetSuppressedRef.current) {
+            handleDismiss();
+          }
+        }}
       >
         <BottomSheet.Portal>
           <BottomSheet.Overlay />
