@@ -1,10 +1,15 @@
 import { useThemeColor } from "heroui-native";
-import { type FC, useMemo } from "react";
-import { Text, View } from "react-native";
+import { type FC, useMemo, useState } from "react";
+import {
+  ScrollView,
+  Text,
+  View,
+  type LayoutChangeEvent,
+} from "react-native";
 
 import {
-  aggregateBarChartPoints,
   getChartMaxValue,
+  MAX_VISIBLE_BAR_CHART_BARS,
 } from "@/features/statistics/components/charts/chartUtils";
 import { formatDecimal } from "@/utils/format";
 
@@ -16,85 +21,126 @@ export type VerticalBarChartPoint = {
 type VerticalBarChartProps = {
   data: VerticalBarChartPoint[];
   height?: number;
-  maxBars?: number;
   compact?: boolean;
   hideLabels?: boolean;
+  newestFirst?: boolean;
+  barMaxWidth?: number;
 };
 
 const MIN_IN_BAR_VALUE_HEIGHT = 22;
+const BAR_GAP = 4;
 
 export const VerticalBarChart: FC<VerticalBarChartProps> = ({
   data,
   height = 160,
-  maxBars,
   compact = false,
   hideLabels = false,
+  newestFirst = false,
+  barMaxWidth = 32,
 }) => {
   const accentForeground = useThemeColor("accent-foreground");
+  const [containerWidth, setContainerWidth] = useState(0);
 
-  const chartData = useMemo(() => {
-    if (maxBars == null) return data;
-    return aggregateBarChartPoints(data, maxBars);
-  }, [data, maxBars]);
+  const chartData = useMemo(
+    () => (newestFirst ? [...data].reverse() : data),
+    [data, newestFirst],
+  );
 
   const maxValue = getChartMaxValue(chartData.map((point) => point.value));
   const trackHeight = height - 24;
   const compactText = compact ? true : chartData.length > 10;
+  const needsScroll = chartData.length > MAX_VISIBLE_BAR_CHART_BARS;
+
+  const barWidth = useMemo(() => {
+    if (containerWidth <= 0) return undefined;
+    const gaps = (MAX_VISIBLE_BAR_CHART_BARS - 1) * BAR_GAP;
+    return (containerWidth - gaps) / MAX_VISIBLE_BAR_CHART_BARS;
+  }, [containerWidth]);
+
+  const contentWidth = useMemo(() => {
+    if (!needsScroll || barWidth == null) return undefined;
+    return chartData.length * barWidth + (chartData.length - 1) * BAR_GAP;
+  }, [barWidth, chartData.length, needsScroll]);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width);
+  };
+
+  const bars = chartData.map((point, index) => {
+    const fillHeight =
+      maxValue > 0 ? (point.value / maxValue) * trackHeight : 0;
+    const barHeight = Math.max(fillHeight, point.value > 0 ? 4 : 0);
+    const showValueInBar =
+      barHeight >= MIN_IN_BAR_VALUE_HEIGHT && point.value > 0;
+
+    return (
+      <View
+        key={`${point.label}-${index}`}
+        className="items-center"
+        style={needsScroll && barWidth != null ? { width: barWidth } : { flex: 1, minWidth: 0 }}
+      >
+        <View
+          className="w-full self-center justify-end rounded-lg bg-default overflow-hidden"
+          style={{ height: trackHeight, maxWidth: barMaxWidth }}
+        >
+          <View
+            className="w-full rounded-lg bg-accent justify-center items-center"
+            style={{ height: barHeight }}
+          >
+            {showValueInBar ? (
+              <Text
+                style={{
+                  color: accentForeground,
+                  fontWeight: "700",
+                  fontSize: 9,
+                  textAlign: "center",
+                }}
+                numberOfLines={1}
+              >
+                {formatDecimal(point.value)}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+
+        <View className="mt-1 w-full items-center">
+          <Text
+            className="text-muted"
+            numberOfLines={2}
+            style={{
+              fontSize: compactText ? 8 : 10,
+              textAlign: "center",
+              width: "100%",
+            }}
+          >
+            {!hideLabels ? point.label : null}
+          </Text>
+        </View>
+      </View>
+    );
+  });
 
   return (
-    <View className="w-full flex-row items-end gap-1" style={{ height }}>
-      {chartData.map((point, index) => {
-        const fillHeight =
-          maxValue > 0 ? (point.value / maxValue) * trackHeight : 0;
-        const barHeight = Math.max(fillHeight, point.value > 0 ? 4 : 0);
-        const showValueInBar =
-          barHeight >= MIN_IN_BAR_VALUE_HEIGHT && point.value > 0;
-
-        return (
+    <View className="w-full" style={{ height }} onLayout={handleLayout}>
+      {needsScroll ? (
+        <ScrollView
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ width: contentWidth, height }}
+        >
           <View
-            key={`${point.label}-${index}`}
-            className="flex-1 min-w-0 items-center"
+            className="flex-row items-end"
+            style={{ height, gap: BAR_GAP }}
           >
-            <View
-              className="w-full max-w-8 self-center justify-end rounded-lg bg-default overflow-hidden"
-              style={{ height: trackHeight }}
-            >
-              <View
-                className="w-full rounded-lg bg-accent justify-center items-center"
-                style={{ height: barHeight }}
-              >
-                {showValueInBar ? (
-                  <Text
-                    style={{
-                      color: accentForeground,
-                      fontWeight: "700",
-                      fontSize: 9,
-                      textAlign: "center",
-                    }}
-                    numberOfLines={1}
-                  >
-                    {formatDecimal(point.value)}
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-
-            <View className="mt-1 w-full items-center">
-              <Text
-                className="text-muted"
-                numberOfLines={2}
-                style={{
-                  fontSize: compactText ? 8 : 10,
-                  textAlign: "center",
-                  width: "100%",
-                }}
-              >
-                {!hideLabels ? point.label : null}
-              </Text>
-            </View>
+            {bars}
           </View>
-        );
-      })}
+        </ScrollView>
+      ) : (
+        <View className="flex-row items-end gap-1" style={{ height }}>
+          {bars}
+        </View>
+      )}
     </View>
   );
 };

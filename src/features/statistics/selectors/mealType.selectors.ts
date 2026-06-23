@@ -50,9 +50,27 @@ export const selectCarbsByMealType = (
 export const selectAverageCarbsByMealType = (
   allMeals: EnrichedMealRecord[],
   period: StatisticsPeriod,
-): MealTypeAverage[] =>
-  selectCarbsByMealType(allMeals, period).map((slice) => ({
-    type: slice.type,
-    averageCarbs: slice.mealCount > 0 ? slice.carbs / slice.mealCount : 0,
-    mealCount: slice.mealCount,
-  }));
+): MealTypeAverage[] => {
+  const meals = filterMealsByPeriod(allMeals, period);
+  const totals = new Map<MealType, { carbs: number; count: number }>();
+
+  for (const type of MEAL_TYPES) {
+    totals.set(type, { carbs: 0, count: 0 });
+  }
+
+  for (const meal of meals) {
+    const entry = totals.get(meal.type) ?? { carbs: 0, count: 0 };
+    entry.carbs += meal.totalCarbs;
+    entry.count += 1;
+    totals.set(meal.type, entry);
+  }
+
+  return MEAL_TYPES.map((type) => {
+    const entry = totals.get(type) ?? { carbs: 0, count: 0 };
+    return {
+      type,
+      averageCarbs: entry.count > 0 ? entry.carbs / entry.count : 0,
+      mealCount: entry.count,
+    };
+  });
+};

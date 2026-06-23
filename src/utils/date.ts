@@ -16,6 +16,22 @@ export const addDays = (dateKey: string, days: number): string => {
   return toDateKey(date);
 };
 
+export const getRelativeDayOffset = (
+  dateKey: string,
+  referenceDateKey: string,
+): number => {
+  const date = parseDateKey(dateKey);
+  const reference = parseDateKey(referenceDateKey);
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const utcDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const utcReference = Date.UTC(
+    reference.getFullYear(),
+    reference.getMonth(),
+    reference.getDate(),
+  );
+  return Math.round((utcReference - utcDate) / msPerDay);
+};
+
 export const formatDateLabel = (dateKey: string, locale: string): string => {
   const date = parseDateKey(dateKey);
   return date.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', {

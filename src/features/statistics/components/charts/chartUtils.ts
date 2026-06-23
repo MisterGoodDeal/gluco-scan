@@ -1,5 +1,3 @@
-import type { StatisticsPeriod } from '@/features/statistics/types/statisticsPeriod';
-
 export const CHART_COLORS = [
   '#5B8CFF',
   '#34C759',
@@ -13,42 +11,7 @@ export const CHART_COLORS = [
 export const getChartColor = (index: number, override?: string): string =>
   override ?? CHART_COLORS[index % CHART_COLORS.length];
 
-export const MAX_BAR_CHART_BARS = 10;
-
-export type BarChartPoint = {
-  label: string;
-  value: number;
-};
-
-export const aggregateBarChartPoints = (
-  points: BarChartPoint[],
-  maxBars = MAX_BAR_CHART_BARS,
-): BarChartPoint[] => {
-  if (maxBars <= 0 || points.length <= maxBars) return points;
-
-  const bucketSize = Math.ceil(points.length / maxBars);
-  const buckets: BarChartPoint[] = [];
-
-  for (let index = 0; index < points.length; index += bucketSize) {
-    const chunk = points.slice(index, index + bucketSize);
-    const value = chunk.reduce((sum, point) => sum + point.value, 0) / chunk.length;
-    const firstLabel = chunk[0]?.label ?? '';
-    const lastLabel = chunk[chunk.length - 1]?.label ?? firstLabel;
-    const label =
-      chunk.length === 1 || firstLabel === lastLabel ? firstLabel : `${firstLabel}–${lastLabel}`;
-
-    buckets.push({ label, value });
-  }
-
-  return buckets.slice(0, maxBars);
-};
-
-export const getDailyBarChartMaxBars = (period: StatisticsPeriod): number | undefined => {
-  if (period === '30d' || period === '90d' || period === '1y') {
-    return MAX_BAR_CHART_BARS;
-  }
-  return undefined;
-};
+export const MAX_VISIBLE_BAR_CHART_BARS = 7;
 
 export const getMaxValue = (values: number[]): number => Math.max(...values, 0);
 

@@ -4,14 +4,15 @@ import { Text, View, type ViewProps } from "react-native";
 
 import { CountUpText } from "@/components/animations/CountUpText";
 import { ContributionHeatmap } from "@/components/organisms/ContributionHeatmap";
-import { getDailyBarChartMaxBars } from "@/features/statistics/components/charts/chartUtils";
 import { HorizontalBarChart } from "@/features/statistics/components/charts/HorizontalBarChart";
 import { LineChart } from "@/features/statistics/components/charts/LineChart";
 import { PieChart } from "@/features/statistics/components/charts/PieChart";
 import { VerticalBarChart } from "@/features/statistics/components/charts/VerticalBarChart";
 import { StatisticsWidgetCard } from "@/features/statistics/components/StatisticsWidgetCard";
 import type { ComputedStatistics } from "@/features/statistics/services/statisticsCompute.service";
+import { getPeriodBounds } from "@/features/statistics/utils/periodFilter";
 import type { StatisticsPeriod } from "@/features/statistics/types/statisticsPeriod";
+import { getRelativeDayOffset } from "@/utils/date";
 import { getCurrentLocale } from "@/i18n";
 import { formatDateLabel } from "@/utils/date";
 import { formatDecimal } from "@/utils/format";
@@ -61,8 +62,15 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({
 }) => {
   const { t } = useTranslation();
   const locale = getCurrentLocale();
+  const referenceDate = getPeriodBounds(period).endDate;
   const emptyTitle = t(emptyCopy.title);
   const emptyDescription = t(emptyCopy.description);
+
+  const formatRelativeDayLabel = (date: string): string => {
+    const offset = getRelativeDayOffset(date, referenceDate);
+    if (offset === 0) return t("statistics.chart.relativeDayToday");
+    return t("statistics.chart.relativeDayPast", { offset });
+  };
 
   return (
     <>
@@ -74,12 +82,11 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({
         emptyDescription={emptyDescription}
       >
         <VerticalBarChart
-          maxBars={getDailyBarChartMaxBars(period)}
+          newestFirst
           data={stats.dailyCarbs.map((point) => ({
-            label: point.label,
+            label: formatRelativeDayLabel(point.date),
             value: point.carbs,
           }))}
-          hideLabels
         />
       </StatisticsWidgetCard>
 
@@ -176,11 +183,12 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({
       <StatisticsWidgetCard
         revealDelay={320}
         title={t("statistics.widgets.mealDistribution")}
-        empty={stats.averageCarbsByMealType.length === 0}
+        empty={stats.averageCarbsByMealType.every((entry) => entry.mealCount === 0)}
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}
       >
         <VerticalBarChart
+          barMaxWidth={48}
           data={stats.averageCarbsByMealType.map((entry) => ({
             label: t(getMealTypeLabelKey(entry.type)),
             value: entry.averageCarbs,
