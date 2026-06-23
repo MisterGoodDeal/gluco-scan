@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useThemeColor } from 'heroui-native';
 import { type FC } from 'react';
 
-import { resolveProductImageUri } from '@/services/productImage.service';
+import { resolveProductImage } from '@/services/productImage.service';
 
 const DEFAULT_SIZE = 52;
 const THUMB_MAX_SIZE = 40;
@@ -15,14 +15,14 @@ type ProductImageProps = {
 
 export const ProductImage: FC<ProductImageProps> = ({ uri, size = DEFAULT_SIZE }) => {
   const [surfaceColor, borderColor] = useThemeColor(['surface-secondary', 'border']);
-  const resolvedUri = resolveProductImageUri(uri);
+  const resolved = resolveProductImage(uri);
   const borderRadius = size <= THUMB_MAX_SIZE ? PRODUCT_IMAGE_THUMB_RADIUS : 12;
 
-  if (!resolvedUri) return null;
+  if (!resolved) return null;
 
   return (
     <Image
-      source={{ uri: resolvedUri }}
+      source={{ uri: resolved.uri, cacheKey: resolved.cacheKey }}
       style={{
         width: size,
         height: size,

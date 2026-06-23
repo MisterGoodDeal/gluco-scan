@@ -18,12 +18,29 @@ export const isRemoteProductImage = (stored: string | null | undefined): boolean
 export const isLocalProductImage = (stored: string | null | undefined): boolean =>
   stored != null && !isRemoteProductImage(stored);
 
-export const resolveProductImageUri = (stored: string | null | undefined): string | null => {
-  if (!stored) return null;
-  if (isRemoteProductImage(stored)) return stored;
-  const file = getProductImageFileFromStored(stored);
-  return file.exists ? file.uri : null;
+export type ResolvedProductImage = {
+  uri: string;
+  cacheKey: string;
 };
+
+export const resolveProductImage = (
+  stored: string | null | undefined,
+): ResolvedProductImage | null => {
+  if (!stored) return null;
+  if (isRemoteProductImage(stored)) {
+    return { uri: stored, cacheKey: stored };
+  }
+  const file = getProductImageFileFromStored(stored);
+  if (!file.exists) return null;
+  const mtime = file.lastModified ?? 0;
+  return {
+    uri: file.uri,
+    cacheKey: `${stored}:${mtime}`,
+  };
+};
+
+export const resolveProductImageUri = (stored: string | null | undefined): string | null =>
+  resolveProductImage(stored)?.uri ?? null;
 
 const ensureProductImagesDirectory = (): void => {
   const dir = new Directory(Paths.document, PRODUCT_IMAGES_DIR);
@@ -74,7 +91,7 @@ export const saveCompressedProductImage = async (
   if (dest.exists) dest.delete();
 
   const temp = new File(manipulated.uri);
-  dest.write(await temp.bytes());
+  await temp.copy(dest);
 
   return getProductImageStoredPath(productId);
 };
