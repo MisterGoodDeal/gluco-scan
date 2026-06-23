@@ -10,11 +10,9 @@ import { PieChart } from "@/features/statistics/components/charts/PieChart";
 import { VerticalBarChart } from "@/features/statistics/components/charts/VerticalBarChart";
 import { StatisticsWidgetCard } from "@/features/statistics/components/StatisticsWidgetCard";
 import type { ComputedStatistics } from "@/features/statistics/services/statisticsCompute.service";
-import { getPeriodBounds } from "@/features/statistics/utils/periodFilter";
 import type { StatisticsPeriod } from "@/features/statistics/types/statisticsPeriod";
-import { getRelativeDayOffset } from "@/utils/date";
 import { getCurrentLocale } from "@/i18n";
-import { formatDateLabel } from "@/utils/date";
+import { formatChartDayLabel, formatDateLabel } from "@/utils/date";
 import { formatDecimal } from "@/utils/format";
 import { getMealTypeLabelKey } from "@/utils/mealType";
 import { twMerge } from "tailwind-merge";
@@ -62,15 +60,8 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({
 }) => {
   const { t } = useTranslation();
   const locale = getCurrentLocale();
-  const referenceDate = getPeriodBounds(period).endDate;
   const emptyTitle = t(emptyCopy.title);
   const emptyDescription = t(emptyCopy.description);
-
-  const formatRelativeDayLabel = (date: string): string => {
-    const offset = getRelativeDayOffset(date, referenceDate);
-    if (offset === 0) return t("statistics.chart.relativeDayToday");
-    return t("statistics.chart.relativeDayPast", { offset });
-  };
 
   return (
     <>
@@ -84,7 +75,7 @@ export const StatisticsWidgets: FC<StatisticsWidgetsProps> = ({
         <VerticalBarChart
           newestFirst
           data={stats.dailyCarbs.map((point) => ({
-            label: formatRelativeDayLabel(point.date),
+            label: formatChartDayLabel(point.date, locale),
             value: point.carbs,
           }))}
         />

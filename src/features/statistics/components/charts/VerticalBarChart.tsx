@@ -7,10 +7,12 @@ import {
   type LayoutChangeEvent,
 } from "react-native";
 
+import { ChartScrollTrack } from "@/features/statistics/components/charts/ChartScrollTrack";
 import {
   getChartMaxValue,
   MAX_VISIBLE_BAR_CHART_BARS,
 } from "@/features/statistics/components/charts/chartUtils";
+import { useChartScrollTrack } from "@/features/statistics/components/charts/useChartScrollTrack";
 import { formatDecimal } from "@/utils/format";
 
 export type VerticalBarChartPoint = {
@@ -50,6 +52,12 @@ export const VerticalBarChart: FC<VerticalBarChartProps> = ({
   const trackHeight = height - 24;
   const compactText = compact ? true : chartData.length > 10;
   const needsScroll = chartData.length > MAX_VISIBLE_BAR_CHART_BARS;
+  const scrollTrack = useChartScrollTrack(
+    "horizontal",
+    needsScroll,
+    chartData.length,
+    MAX_VISIBLE_BAR_CHART_BARS,
+  );
 
   const barWidth = useMemo(() => {
     if (containerWidth <= 0) return undefined;
@@ -121,26 +129,33 @@ export const VerticalBarChart: FC<VerticalBarChartProps> = ({
   });
 
   return (
-    <View className="w-full" style={{ height }} onLayout={handleLayout}>
-      {needsScroll ? (
-        <ScrollView
-          horizontal
-          nestedScrollEnabled
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ width: contentWidth, height }}
-        >
-          <View
-            className="flex-row items-end"
-            style={{ height, gap: BAR_GAP }}
+    <View className="w-full">
+      <View style={{ height }} onLayout={handleLayout}>
+        {needsScroll ? (
+          <ScrollView
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onScroll={scrollTrack?.onScroll}
+            contentContainerStyle={{ width: contentWidth, height }}
           >
+            <View
+              className="flex-row items-end"
+              style={{ height, gap: BAR_GAP }}
+            >
+              {bars}
+            </View>
+          </ScrollView>
+        ) : (
+          <View className="flex-row items-end gap-1" style={{ height }}>
             {bars}
           </View>
-        </ScrollView>
-      ) : (
-        <View className="flex-row items-end gap-1" style={{ height }}>
-          {bars}
-        </View>
-      )}
+        )}
+      </View>
+      {scrollTrack ? (
+        <ChartScrollTrack orientation="horizontal" metrics={scrollTrack.metrics} />
+      ) : null}
     </View>
   );
 };

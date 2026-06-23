@@ -16,25 +16,20 @@ export const addDays = (dateKey: string, days: number): string => {
   return toDateKey(date);
 };
 
-export const getRelativeDayOffset = (
-  dateKey: string,
-  referenceDateKey: string,
-): number => {
+const getLocaleTag = (locale: string): string =>
+  locale === 'fr' ? 'fr-FR' : 'en-US';
+
+export const formatChartDayLabel = (dateKey: string, locale: string): string => {
   const date = parseDateKey(dateKey);
-  const reference = parseDateKey(referenceDateKey);
-  const msPerDay = 1000 * 60 * 60 * 24;
-  const utcDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-  const utcReference = Date.UTC(
-    reference.getFullYear(),
-    reference.getMonth(),
-    reference.getDate(),
-  );
-  return Math.round((utcReference - utcDate) / msPerDay);
+  const weekday = date.toLocaleDateString(getLocaleTag(locale), { weekday: 'long' });
+  const dayLetter = weekday.charAt(0).toUpperCase();
+  const dayOfMonth = String(date.getDate()).padStart(2, '0');
+  return `${dayLetter} - ${dayOfMonth}`;
 };
 
 export const formatDateLabel = (dateKey: string, locale: string): string => {
   const date = parseDateKey(dateKey);
-  return date.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', {
+  return date.toLocaleDateString(getLocaleTag(locale), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -43,7 +38,7 @@ export const formatDateLabel = (dateKey: string, locale: string): string => {
 
 export const formatTimeLabel = (iso: string, locale: string): string => {
   const date = new Date(iso);
-  return date.toLocaleTimeString(locale === 'fr' ? 'fr-FR' : 'en-US', {
+  return date.toLocaleTimeString(getLocaleTag(locale), {
     hour: '2-digit',
     minute: '2-digit',
   });

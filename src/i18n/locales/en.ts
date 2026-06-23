@@ -375,10 +375,6 @@ export const en: TranslationSchema = {
       bestDays: "Best days",
       records: "Records",
     },
-    chart: {
-      relativeDayToday: "D",
-      relativeDayPast: "D-{{offset}}",
-    },
     cookedRaw: {
       raw: "Raw",
       cooked: "Cooked",

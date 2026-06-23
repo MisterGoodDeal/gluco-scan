@@ -320,10 +320,6 @@ export type TranslationSchema = {
       bestDays: string;
       records: string;
     };
-    chart: {
-      relativeDayToday: string;
-      relativeDayPast: string;
-    };
     cookedRaw: {
       raw: string;
       cooked: string;
@@ -748,10 +744,6 @@ export const fr: TranslationSchema = {
       consistency: "Score de régularité",
       bestDays: "Meilleurs jours",
       records: "Records",
-    },
-    chart: {
-      relativeDayToday: "J",
-      relativeDayPast: "J-{{offset}}",
     },
     cookedRaw: {
       raw: "Cru",

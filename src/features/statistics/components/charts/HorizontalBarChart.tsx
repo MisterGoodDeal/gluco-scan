@@ -1,10 +1,12 @@
 import { type FC } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
+import { ChartScrollTrack } from '@/features/statistics/components/charts/ChartScrollTrack';
 import {
   getMaxValue,
   MAX_VISIBLE_BAR_CHART_BARS,
 } from '@/features/statistics/components/charts/chartUtils';
+import { useChartScrollTrack } from '@/features/statistics/components/charts/useChartScrollTrack';
 import { formatDecimal } from '@/utils/format';
 
 export type HorizontalBarChartPoint = {
@@ -22,6 +24,12 @@ export const HorizontalBarChart: FC<HorizontalBarChartProps> = ({ data }) => {
   const maxValue = getMaxValue(data.map((point) => point.value));
   const needsScroll = data.length > MAX_VISIBLE_BAR_CHART_BARS;
   const maxHeight = MAX_VISIBLE_BAR_CHART_BARS * BAR_ROW_HEIGHT;
+  const scrollTrack = useChartScrollTrack(
+    'vertical',
+    needsScroll,
+    data.length,
+    MAX_VISIBLE_BAR_CHART_BARS,
+  );
 
   const bars = data.map((point) => (
     <View key={`${point.label}-${point.value}`} className="gap-1 mb-2">
@@ -42,13 +50,24 @@ export const HorizontalBarChart: FC<HorizontalBarChartProps> = ({ data }) => {
 
   if (needsScroll) {
     return (
-      <ScrollView
-        nestedScrollEnabled
-        showsVerticalScrollIndicator={false}
-        style={{ maxHeight }}
-      >
-        {bars}
-      </ScrollView>
+      <View className="flex-row items-stretch gap-2">
+        <ScrollView
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={scrollTrack?.onScroll}
+          style={{ flex: 1, maxHeight }}
+        >
+          {bars}
+        </ScrollView>
+        {scrollTrack ? (
+          <ChartScrollTrack
+            orientation="vertical"
+            metrics={scrollTrack.metrics}
+            trackSize={maxHeight}
+          />
+        ) : null}
+      </View>
     );
   }
 
