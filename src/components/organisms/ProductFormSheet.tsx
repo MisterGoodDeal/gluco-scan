@@ -12,7 +12,6 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ButtonIcon } from "@/components/atoms/ButtonIcon";
 import { FaIcon } from "@/components/atoms/FaIcon";
 import { InputNumber } from "@/components/atoms/InputNumber";
 import { ProductImage } from "@/components/atoms/ProductImage";
@@ -513,26 +512,6 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                     placeholder={t("modal.namePlaceholder")}
                     flex
                   />
-                  <ButtonIcon
-                    onPress={() => {
-                      if (!canRefreshFromOff || isLookupLoading) return;
-                      void handleRefreshFromOff();
-                    }}
-                    accessibilityLabel={t("products.refreshFromOffA11y")}
-                    accessibilityState={{
-                      disabled: !canRefreshFromOff || isLookupLoading,
-                    }}
-                  >
-                    {isLookupLoading ? (
-                      <ActivityIndicator color={accentColor} size="small" />
-                    ) : (
-                      <FaIcon
-                        name="arrows-rotate"
-                        size={18}
-                        color={canRefreshFromOff ? accentColor : mutedColor}
-                      />
-                    )}
-                  </ButtonIcon>
                 </View>
                 <FieldError isInvalid={nameInvalid}>
                   {t("modal.nameRequired")}
