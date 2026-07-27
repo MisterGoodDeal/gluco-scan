@@ -57,8 +57,6 @@ type UnitOption = {
 
 const getUnitTabValue = (opt: UnitOption): string => `${opt.unitType}-${opt.id}`;
 
-const UNIT_TABS_SCROLL_THRESHOLD = 4;
-
 export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
   visible,
   product,
@@ -228,28 +226,15 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
                 }}
                 variant="primary">
                 <Tabs.List className="w-full self-stretch">
-                  {unitOptions.length > UNIT_TABS_SCROLL_THRESHOLD ? (
-                    <Tabs.ScrollView scrollAlign="center" contentContainerClassName="gap-1">
-                      <Tabs.Indicator />
-                      {unitOptions.map((opt) => (
-                        <Tabs.Trigger key={getUnitTabValue(opt)} value={getUnitTabValue(opt)}>
-                          <Tabs.Label>{opt.abbreviation}</Tabs.Label>
-                        </Tabs.Trigger>
-                      ))}
-                    </Tabs.ScrollView>
-                  ) : (
-                    <>
-                      <Tabs.Indicator />
-                      {unitOptions.map((opt) => (
-                        <Tabs.Trigger
-                          key={getUnitTabValue(opt)}
-                          value={getUnitTabValue(opt)}
-                          className="flex-1">
-                          <Tabs.Label className="text-center">{opt.abbreviation}</Tabs.Label>
-                        </Tabs.Trigger>
-                      ))}
-                    </>
-                  )}
+                  <Tabs.Indicator />
+                  {unitOptions.map((opt) => (
+                    <Tabs.Trigger
+                      key={getUnitTabValue(opt)}
+                      value={getUnitTabValue(opt)}
+                      className="flex-1">
+                      <Tabs.Label className="text-center">{opt.abbreviation}</Tabs.Label>
+                    </Tabs.Trigger>
+                  ))}
                 </Tabs.List>
 
                 {unitOptions.map((opt) => {
