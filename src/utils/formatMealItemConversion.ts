@@ -21,6 +21,7 @@ export type FormatMealItemConversionParams = {
   formatMassValue: (grams: number) => string;
   massUnit: string;
   userConversions?: CookingConversion[];
+  isManualCarbs?: boolean;
   t: (key: 'meals.quantityCooked' | 'meals.quantityRaw' | 'meals.rawEquivalent' | 'meals.cookedEquivalent' | 'common.carbs', options?: Record<string, unknown>) => string;
 };
 
@@ -30,6 +31,7 @@ export const formatMealItemConversion = ({
   formatMassValue,
   massUnit,
   userConversions = [],
+  isManualCarbs = false,
   t,
 }: FormatMealItemConversionParams) => {
   const carbsLine = t('common.carbs', {
@@ -38,6 +40,15 @@ export const formatMealItemConversion = ({
         ? item.carbs.toFixed(1).replace('.', ',')
         : '0',
   });
+
+  if (isManualCarbs) {
+    return {
+      primaryLine: null,
+      equivalentLine: null,
+      carbsLine,
+      productTags: [] as ProductTag[],
+    };
+  }
 
   if (item.unitType === 'custom') {
     const quantityPart = formatMealItemQuantity(

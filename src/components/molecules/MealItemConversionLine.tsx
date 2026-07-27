@@ -2,6 +2,7 @@ import { type FC } from 'react';
 import { Text, View } from 'react-native';
 
 import { TagIcon } from '@/components/atoms/TagIcon';
+import { isManualCarbsProductId } from '@/constants/manualCarbs';
 import type { MealItem } from '@/types/mealItem';
 import type { Product } from '@/types/product';
 import { formatMealItemConversion, type FormatMealItemConversionParams } from '@/utils/formatMealItemConversion';
@@ -27,12 +28,15 @@ export const MealItemConversionLine: FC<MealItemConversionLineProps> = ({
   const { t } = useTranslation();
   const { formatMassValue, massUnit } = useMassDisplay();
   const userConversions = useCookingConversionStore((s) => s.conversions);
+  const isManualCarbs = isManualCarbsProductId(item.productId);
+  const displayName = isManualCarbs ? t('meals.manualCarbsLabel') : item.productName;
   const { primaryLine, equivalentLine, carbsLine, productTags } = formatMealItemConversion({
     item,
     product,
     formatMassValue,
     massUnit,
     userConversions,
+    isManualCarbs,
     t: t as FormatMealItemConversionParams['t'],
   });
 
@@ -48,11 +52,11 @@ export const MealItemConversionLine: FC<MealItemConversionLineProps> = ({
             </View>
           ) : null}
           <Text className="text-foreground text-base flex-1 min-w-0" {...textLineClamp(2)}>
-            {item.productName}
+            {displayName}
           </Text>
         </View>
       ) : null}
-      <Text className="text-muted text-sm">{primaryLine}</Text>
+      {primaryLine ? <Text className="text-muted text-sm">{primaryLine}</Text> : null}
       {equivalentLine ? <Text className="text-muted text-sm">{equivalentLine}</Text> : null}
       <Text className="text-accent text-sm">{carbsLine}</Text>
     </View>
