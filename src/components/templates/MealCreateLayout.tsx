@@ -6,12 +6,14 @@ import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { ProgressStep, ProgressStepperBar, ProgressSteps } from '@/components/meal-progress-steps';
 import { FONT_FAMILY } from '@/constants/typography';
+import { isManualCarbsProductId, MANUAL_CARBS_PRODUCT_ID } from '@/constants/manualCarbs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FaIcon } from '@/components/atoms/FaIcon';
 import { BackgroundGradient } from '@/components/atoms/BackgroundGradient';
 import { BlurScreenFooter } from '@/components/organisms/BlurScreenFooter';
 import { TutorialMealCreateBanner } from '@/components/organisms/TutorialMealCreateBanner';
+import { ManualCarbsModal } from '@/components/organisms/ManualCarbsModal';
 import { MealCalendarPicker } from '@/components/organisms/MealCalendarPicker';
 import { MealTimePickerSheet } from '@/components/organisms/MealTimePickerSheet';
 import { ProductSpotlightSearch } from '@/components/organisms/ProductSpotlightSearch';
@@ -94,12 +96,14 @@ export const MealCreateLayout: FC = () => {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [pendingOffScan, setPendingOffScan] = useState<MealScanResult | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
+  const [manualCarbsVisible, setManualCarbsVisible] = useState(false);
+  const [editingManualCarbs, setEditingManualCarbs] = useState<number | null>(null);
   const [timePickerOpen, setTimePickerOpen] = useState(false);
   const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
   const locale = getCurrentLocale();
   const { handleScan, isLoading, error, warning, clearMessages } = useMealProductScan();
 
-  const scannerActive = step === 1 && pickerProduct === null && !searchVisible;
+  const scannerActive = step === 1 && pickerProduct === null && !searchVisible && !manualCarbsVisible;
 
   const stepLabels = useMemo(
     () => [t('meals.stepInfo'), t('meals.stepFoods'), t('meals.stepSummary')],
@@ -215,11 +219,46 @@ export const MealCreateLayout: FC = () => {
   };
 
   const openEditItem = async (item: MealDraftItem) => {
+    if (isManualCarbsProductId(item.productId)) {
+      setEditingItemId(item.id);
+      setEditingManualCarbs(item.carbs);
+      setManualCarbsVisible(true);
+      return;
+    }
     const product = await productRepository.getById(item.productId);
     if (!product) return;
     setEditingItemId(item.id);
     setPendingOffScan(null);
     setPickerProduct(product);
+  };
+
+  const closeManualCarbsModal = () => {
+    setManualCarbsVisible(false);
+    setEditingManualCarbs(null);
+    setEditingItemId(null);
+  };
+
+  const handleManualCarbsConfirm = (carbs: number) => {
+    const item: MealDraftItem = {
+      id: editingItemId ?? generateId(),
+      productId: MANUAL_CARBS_PRODUCT_ID,
+      quantity: carbs,
+      unitType: 'grams',
+      quantityType: 'raw',
+      rawEquivalentQuantity: carbs,
+      productName: t('meals.manualCarbsLabel'),
+      carbsPer100g: 100,
+      carbs,
+      unitLabel: 'g',
+      productTags: [],
+    };
+
+    if (editingItemId) {
+      updateDraftItem(editingItemId, item);
+    } else {
+      addDraftItem(item);
+    }
+    closeManualCarbsModal();
   };
 
   const handleSave = async () => {
@@ -344,7 +383,7 @@ export const MealCreateLayout: FC = () => {
           removeBtnRow
           scrollable
           scrollViewProps={progressStepScrollProps}>
-          <View className="rounded-3xl overflow-hidden" style={{ height: hp('30%') }}>
+          <View className="rounded-3xl overflow-hidden" style={{ height: hp('22%') }}>
             <ScannerView
               fill
               onScan={onBarcodeScan}
@@ -366,6 +405,18 @@ export const MealCreateLayout: FC = () => {
             <Text className="flex-1 text-muted text-base">
               {t('meals.searchSpotlightPlaceholder')}
             </Text>
+          </AppPressable>
+
+          <AppPressable
+            className="mt-3 flex-row items-center gap-2 rounded-2xl border border-border bg-surface p-4"
+            onPress={() => {
+              setEditingItemId(null);
+              setEditingManualCarbs(null);
+              setManualCarbsVisible(true);
+            }}
+            accessibilityLabel={t('meals.addManualCarbs')}>
+            <FaIcon name="plus" size={18} color={mutedColor} />
+            <Text className="flex-1 text-muted text-base">{t('meals.addManualCarbs')}</Text>
           </AppPressable>
 
           <View className="mt-4 gap-2">
@@ -508,6 +559,12 @@ export const MealCreateLayout: FC = () => {
           }
           closeProductPicker();
         }}
+      />
+      <ManualCarbsModal
+        visible={manualCarbsVisible}
+        initialCarbs={editingManualCarbs}
+        onClose={closeManualCarbsModal}
+        onConfirm={handleManualCarbsConfirm}
       />
       <ProductSpotlightSearch
         visible={searchVisible}
