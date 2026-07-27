@@ -13,10 +13,13 @@ import { SearchInput } from '@/components/atoms/SearchInput';
 import { TabBarHeightReporter } from '@/components/navigation/TabBarHeightReporter';
 import { BlurScreenHeader } from '@/components/organisms/BlurScreenHeader';
 import { ProductFormSheet } from '@/components/organisms/ProductFormSheet';
+import { ProductOffSearchSheet } from '@/components/organisms/ProductOffSearchSheet';
 import { ProductList } from '@/components/organisms/ProductList';
 import { ProductTagFilterBar } from '@/components/molecules/ProductTagFilterBar';
 import { AppButton } from '@/components/ui/AppButton';
+import { useAppToast } from '@/components/ui/useAppToast';
 import { useBlurHeaderInset } from '@/hooks/useBlurHeaderInset';
+import { persistOffProduct } from '@/hooks/useMealProductScan';
 import { useProductStore } from '@/store/product.store';
 import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
@@ -26,9 +29,17 @@ import { productMatchesQuery } from '@/utils/productSearch';
 import { productMatchesTagFilters } from '@/utils/productTagFilter';
 import { TUTORIAL_PRODUCTS_ADD_ANCHOR_ID } from '@/constants/tutorial';
 import { consumePendingAddProduct } from '@/features/widgets/deepLink/pendingAction';
+import { getErrorMessage } from '@/services/errors';
+import {
+  fetchProductByEAN,
+  type OffSearchHit,
+  type PartialOffProduct,
+} from '@/services/openFoodFacts.service';
+import { isValidEan, normalizeEan } from '@/utils/ean';
 
 export const ProductsTabLayout: FC = () => {
   const { t } = useTranslation();
+  const toast = useAppToast();
   const [accentColor, mutedColor] = useThemeColor(['accent', 'muted']);
   const blurTargetRef = useRef<View>(null);
   const { headerHeight, onHeaderLayout } = useBlurHeaderInset(1);
@@ -55,7 +66,10 @@ export const ProductsTabLayout: FC = () => {
   const tutorialStepId = useTutorialStore((s) => s.getCurrentStepId());
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [offDraft, setOffDraft] = useState<PartialOffProduct | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOffSearchOpen, setIsOffSearchOpen] = useState(false);
+  const [isOffSearchSelecting, setIsOffSearchSelecting] = useState(false);
   const [listRevision, setListRevision] = useState(0);
 
   useEffect(() => {
@@ -64,6 +78,7 @@ export const ProductsTabLayout: FC = () => {
     void productRepository.getById(openProductId).then((product) => {
       if (product) {
         setEditingProduct(product);
+        setOffDraft(null);
         setIsModalOpen(true);
       }
     });
@@ -77,6 +92,7 @@ export const ProductsTabLayout: FC = () => {
     ) {
       setIsModalOpen(false);
       setEditingProduct(null);
+      setOffDraft(null);
     }
   }, [tutorialStatus, tutorialStepId, isModalOpen]);
 
@@ -93,6 +109,7 @@ export const ProductsTabLayout: FC = () => {
       void loadProducts();
       if (consumePendingAddProduct()) {
         setEditingProduct(null);
+        setOffDraft(null);
         setIsModalOpen(true);
       }
     }, [loadProducts]),
@@ -100,18 +117,99 @@ export const ProductsTabLayout: FC = () => {
 
   const openAdd = () => {
     setEditingProduct(null);
+    setOffDraft(null);
     setIsModalOpen(true);
   };
 
   const openEdit = useCallback((product: Product) => {
     setEditingProduct(product);
+    setOffDraft(null);
     setIsModalOpen(true);
   }, []);
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
+    setOffDraft(null);
   };
+
+  const openOffSearch = () => {
+    setIsOffSearchOpen(true);
+  };
+
+  const closeOffSearch = () => {
+    setIsOffSearchOpen(false);
+  };
+
+  const handleOffSearchSelect = useCallback(
+    async (hit: OffSearchHit) => {
+      setIsOffSearchSelecting(true);
+      try {
+        const code = normalizeEan(hit.code);
+        const eanValid = isValidEan(code);
+
+        if (eanValid) {
+          const existing = await productRepository.getByEan(code);
+          if (existing) {
+            setIsOffSearchOpen(false);
+            setOffDraft(null);
+            setEditingProduct(existing);
+            setIsModalOpen(true);
+            return;
+          }
+        }
+
+        if (hit.carbsPer100g == null) {
+          setIsOffSearchOpen(false);
+          setEditingProduct(null);
+          setOffDraft({
+            ean: eanValid ? code : hit.code,
+            name: hit.name,
+            imageUrl: hit.imageUrl,
+            tags: hit.tags,
+          });
+          setIsModalOpen(true);
+          return;
+        }
+
+        let product: Product;
+        if (eanValid) {
+          try {
+            const fromOff = await fetchProductByEAN(code);
+            product = await persistOffProduct({ ...fromOff, ean: code });
+          } catch {
+            product = await persistOffProduct({
+              ean: code,
+              name: hit.name,
+              carbsPer100g: hit.carbsPer100g,
+              imageUrl: hit.imageUrl,
+              tags: hit.tags,
+            });
+          }
+        } else {
+          product = await productRepository.create({
+            name: hit.name,
+            carbsPer100g: hit.carbsPer100g,
+            imageUrl: hit.imageUrl ?? null,
+            tags: hit.tags,
+            eans: [],
+          });
+        }
+
+        await hydrate();
+        setIsOffSearchOpen(false);
+        setOffDraft(null);
+        setEditingProduct(product);
+        setIsModalOpen(true);
+        setListRevision((revision) => revision + 1);
+      } catch (err) {
+        toast.error(getErrorMessage(err));
+      } finally {
+        setIsOffSearchSelecting(false);
+      }
+    },
+    [hydrate, toast],
+  );
 
   return (
     <View className="flex-1 bg-background">
@@ -132,17 +230,31 @@ export const ProductsTabLayout: FC = () => {
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <View className="flex-row items-center justify-between">
             <Text className="text-foreground text-lg font-bold">{t('products.title')}</Text>
-            <TutorialAnchor
-              id={TUTORIAL_PRODUCTS_ADD_ANCHOR_ID}
-              style={{ alignSelf: 'flex-end' }}>
+            <View className="flex-row items-center gap-1">
               <AppButton
                 size="sm"
                 variant="tertiary"
-                onPress={openAdd}
-                accessibilityLabel={t('common.add')}>
-                {t('products.addButton')}
+                onPress={openOffSearch}
+                accessibilityLabel={t('products.searchOffButton')}>
+                <View className="flex-row items-center gap-1">
+                  <FaIcon name="magnifying-glass" size={14} color={mutedColor} />
+                  <Text className="text-foreground text-sm">
+                    {t('products.searchOffButton')}
+                  </Text>
+                </View>
               </AppButton>
-            </TutorialAnchor>
+              <TutorialAnchor
+                id={TUTORIAL_PRODUCTS_ADD_ANCHOR_ID}
+                style={{ alignSelf: 'flex-end' }}>
+                <AppButton
+                  size="sm"
+                  variant="tertiary"
+                  onPress={openAdd}
+                  accessibilityLabel={t('common.add')}>
+                  {t('products.addButton')}
+                </AppButton>
+              </TutorialAnchor>
+            </View>
           </View>
           <View className="mt-2 flex-row items-center gap-1 min-h-12 rounded-2xl border border-field-border bg-field px-2 overflow-hidden">
             <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
@@ -171,9 +283,16 @@ export const ProductsTabLayout: FC = () => {
           </View>
         </BlurScreenHeader>
       </BlurTargetView>
+      <ProductOffSearchSheet
+        visible={isOffSearchOpen}
+        onClose={closeOffSearch}
+        onSelect={(hit) => void handleOffSearchSelect(hit)}
+        isSelecting={isOffSearchSelecting}
+      />
       <ProductFormSheet
         visible={isModalOpen}
         product={editingProduct}
+        initialOffDraft={offDraft}
         onClose={closeModal}
         onSaved={() => setListRevision((revision) => revision + 1)}
       />
