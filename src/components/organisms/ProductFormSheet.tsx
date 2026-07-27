@@ -57,7 +57,7 @@ import { TutorialStatus } from "@/types/tutorial";
 import { convertRawToCooked } from "@/utils/cooking/convertRawToCooked";
 import { getCookingFactor } from "@/utils/cooking/getCookingFactor";
 import { hasCookingConversion } from "@/utils/cooking/hasCookingConversion";
-import { isValidEan, parseManualCarbs } from "@/utils/ean";
+import { isValidEan, normalizeEan, parseManualCarbs } from "@/utils/ean";
 import {
   triggerNotificationError,
   triggerNotificationSuccess,
@@ -67,6 +67,7 @@ import { generateId } from "@/utils/id";
 type ProductFormSheetProps = {
   visible: boolean;
   product: Product | null;
+  initialOffDraft?: PartialOffProduct | null;
   onClose: () => void;
   onSaved?: () => void;
 };
@@ -74,6 +75,7 @@ type ProductFormSheetProps = {
 export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   visible,
   product,
+  initialOffDraft = null,
   onClose,
   onSaved,
 }) => {
@@ -145,16 +147,23 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
       setIsSheetSuppressed(false);
       return;
     }
-    setEans(product?.eans ?? []);
-    setName(product?.name ?? "");
-    setImageUrl(product?.imageUrl ?? null);
+    setEans(
+      product?.eans ??
+        (initialOffDraft?.ean && isValidEan(normalizeEan(initialOffDraft.ean))
+          ? [normalizeEan(initialOffDraft.ean)]
+          : []),
+    );
+    setName(product?.name ?? initialOffDraft?.name ?? "");
+    setImageUrl(product?.imageUrl ?? initialOffDraft?.imageUrl ?? null);
     setCarbsText(
       product?.carbsPer100g != null
         ? String(product.carbsPer100g).replace(".", ",")
-        : "",
+        : initialOffDraft?.carbsPer100g != null
+          ? String(initialOffDraft.carbsPer100g).replace(".", ",")
+          : "",
     );
     setUnits(product?.customUnits ?? []);
-    setTags(product?.tags ?? []);
+    setTags(product?.tags ?? initialOffDraft?.tags ?? []);
     setTagsTouched(false);
     setCookingFactorText(
       product?.customCookingFactor != null
@@ -166,7 +175,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     setIsDeleting(false);
     setUnitModalVisible(false);
     setEditingUnit(null);
-  }, [visible, product]);
+  }, [visible, product, initialOffDraft]);
 
   const handleDismiss = useCallback((saved = false) => {
     if (!product && !saved) {
