@@ -2,6 +2,7 @@ import type { TranslationSchema } from "@/i18n/locales/fr";
 
 export const en: TranslationSchema = {
   tabs: {
+    compositions: "Menus",
     products: "Products",
     meals: "Meals",
     statistics: "Statistics",
@@ -103,6 +104,34 @@ export const en: TranslationSchema = {
     searchOffMissingCarbs: "Carbs not listed",
     searchOffAdding: "Adding…",
   },
+  compositions: {
+    title: "My menus",
+    addButton: "+ Add",
+    createTitle: "New menu",
+    editTitle: "Edit menu",
+    createSubtitle: "Build a reusable group of foods",
+    editSubtitle: "Update the foods and carbs in this menu",
+    name: "Name",
+    namePlaceholder: "Ex. Usual breakfast",
+    nameRequired: "Menu name is required",
+    searchPlaceholder: "Search menus…",
+    searchProduct: "Search my products",
+    totalCarbs: "Total: {{value}} g carbs",
+    itemCount: "{{count}} items",
+    emptyList: "No menus yet.\nCreate one to reuse your typical meals",
+    noItems: "Add at least one food item to the menu",
+    itemsHint: "Add foods or manual carbs",
+    noItemsYet: "No foods in this menu yet",
+    editItemHint: "Tap a food item to edit its quantity",
+    editA11y: "Edit menu {{name}}",
+    deleteA11y: "Delete menu {{name}}",
+    createMeal: "Create a meal from this menu",
+    deleteConfirmTitle: "Delete this menu?",
+    deleteConfirmMessage: "This action cannot be undone",
+    addedTitle: "Menu saved",
+    updatedTitle: "Menu updated",
+    saveError: "Could not save the menu",
+  },
   tags: {
     starch: "Starch",
     pasta: "Pasta",
@@ -151,6 +180,7 @@ export const en: TranslationSchema = {
     searchSpotlightPlaceholder: "Search for a food…",
     searchNoResults: "No products found",
     searchEmptyHint: "No products saved yet",
+    searchMinCharsHint: "Enter at least 3 characters to search",
     productNotFoundOff:
       "Product not found on Open Food Facts. Add it manually in the Products tab, then search for it below",
     mealTotal: "Meal total",
@@ -197,6 +227,7 @@ export const en: TranslationSchema = {
     manualCarbsTitle: "Carbs",
     manualCarbsDescription: "Enter a number of grams of carbs",
     manualCarbsInvalid: "Invalid carbs amount",
+    fromComposition: "From menu: {{name}}",
   },
   settings: {
     title: "Settings",
@@ -273,6 +304,11 @@ export const en: TranslationSchema = {
       productForm: {
         title: "Product details",
         message: "Click on a product to edit or delete it",
+      },
+      menus: {
+        title: "Your menus",
+        message:
+          "Menus group several foods to prefill a meal in one tap. The tutorial loads an example here.",
       },
       mealsDayNav: {
         title: "Browse days",

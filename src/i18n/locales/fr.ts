@@ -1,5 +1,6 @@
 export type TranslationSchema = {
   tabs: {
+    compositions: string;
     products: string;
     meals: string;
     statistics: string;
@@ -100,6 +101,34 @@ export type TranslationSchema = {
     searchOffMissingCarbs: string;
     searchOffAdding: string;
   };
+  compositions: {
+    title: string;
+    addButton: string;
+    createTitle: string;
+    editTitle: string;
+    createSubtitle: string;
+    editSubtitle: string;
+    name: string;
+    namePlaceholder: string;
+    nameRequired: string;
+    searchPlaceholder: string;
+    searchProduct: string;
+    totalCarbs: string;
+    itemCount: string;
+    emptyList: string;
+    noItems: string;
+    itemsHint: string;
+    noItemsYet: string;
+    editItemHint: string;
+    editA11y: string;
+    deleteA11y: string;
+    createMeal: string;
+    deleteConfirmTitle: string;
+    deleteConfirmMessage: string;
+    addedTitle: string;
+    updatedTitle: string;
+    saveError: string;
+  };
   tags: {
     starch: string;
     pasta: string;
@@ -148,6 +177,7 @@ export type TranslationSchema = {
     searchSpotlightPlaceholder: string;
     searchNoResults: string;
     searchEmptyHint: string;
+    searchMinCharsHint: string;
     productNotFoundOff: string;
     mealTotal: string;
     saveMeal: string;
@@ -193,6 +223,7 @@ export type TranslationSchema = {
     manualCarbsTitle: string;
     manualCarbsDescription: string;
     manualCarbsInvalid: string;
+    fromComposition: string;
   };
   settings: {
     title: string;
@@ -283,6 +314,7 @@ export type TranslationSchema = {
       products: { title: string; message: string };
       productsAdd: { title: string; message: string };
       productForm: { title: string; message: string };
+      menus: { title: string; message: string };
       mealsDayNav: { title: string; message: string };
       mealsToday: { title: string; message: string };
       mealsCalendar: { title: string; message: string };
@@ -378,6 +410,7 @@ export type TranslationSchema = {
 
 export const fr: TranslationSchema = {
   tabs: {
+    compositions: "Menus",
     products: "Produits",
     meals: "Repas",
     statistics: "Statistiques",
@@ -482,6 +515,34 @@ export const fr: TranslationSchema = {
     searchOffMissingCarbs: "Glucides non renseignés",
     searchOffAdding: "Ajout en cours…",
   },
+  compositions: {
+    title: "Mes menus",
+    addButton: "+ Ajouter",
+    createTitle: "Nouveau menu",
+    editTitle: "Modifier le menu",
+    createSubtitle: "Composez un groupe d'aliments réutilisable",
+    editSubtitle: "Modifiez les aliments et glucides de ce menu",
+    name: "Nom",
+    namePlaceholder: "Ex. Petit déjeuner habituel",
+    nameRequired: "Le nom du menu est requis",
+    searchPlaceholder: "Rechercher un menu…",
+    searchProduct: "Rechercher dans mes produits",
+    totalCarbs: "Total : {{value}} g glucides",
+    itemCount: "{{count}} aliments",
+    emptyList: "Aucun menu.\nCréez-en un pour réutiliser vos repas types",
+    noItems: "Ajoutez au moins un aliment au menu",
+    itemsHint: "Ajoutez des aliments ou des glucides manuels",
+    noItemsYet: "Aucun aliment dans ce menu",
+    editItemHint: "Appuyez sur un aliment pour modifier sa quantité",
+    editA11y: "Modifier le menu {{name}}",
+    deleteA11y: "Supprimer le menu {{name}}",
+    createMeal: "Créer un repas avec ce menu",
+    deleteConfirmTitle: "Supprimer ce menu ?",
+    deleteConfirmMessage: "Cette action est irréversible",
+    addedTitle: "Menu enregistré",
+    updatedTitle: "Menu mis à jour",
+    saveError: "Impossible d'enregistrer le menu",
+  },
   tags: {
     starch: "Féculent",
     pasta: "Pâtes",
@@ -530,6 +591,7 @@ export const fr: TranslationSchema = {
     searchSpotlightPlaceholder: "Rechercher un aliment…",
     searchNoResults: "Aucun produit trouvé",
     searchEmptyHint: "Aucun produit enregistré",
+    searchMinCharsHint: "Saisissez au moins 3 caractères pour rechercher",
     productNotFoundOff:
       "Produit introuvable sur Open Food Facts. Ajoutez-le manuellement dans l'onglet Produits, puis recherchez-le ci-dessous.",
     mealTotal: "Total du repas",
@@ -577,6 +639,7 @@ export const fr: TranslationSchema = {
     manualCarbsTitle: "Glucides",
     manualCarbsDescription: "Saisissez un nombre de grammes de glucides",
     manualCarbsInvalid: "Nombre de glucides invalide",
+    fromComposition: "Depuis le menu : {{name}}",
   },
   settings: {
     title: "Paramètres",
@@ -656,6 +719,11 @@ export const fr: TranslationSchema = {
         title: "Fiche produit",
         message:
           "En cliquant sur un produit, vous pouvez le modifier ou le supprimer",
+      },
+      menus: {
+        title: "Vos menus",
+        message:
+          "Les menus regroupent plusieurs aliments pour préremplir un repas en un geste. Le tutoriel en charge un exemple ici.",
       },
       mealsDayNav: {
         title: "Naviguer entre les jours",
