@@ -68,12 +68,14 @@ type ProductFormSheetProps = {
   visible: boolean;
   product: Product | null;
   onClose: () => void;
+  onSaved?: () => void;
 };
 
 export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   visible,
   product,
   onClose,
+  onSaved,
 }) => {
   const { t } = useTranslation();
   const toast = useAppToast();
@@ -166,8 +168,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     setEditingUnit(null);
   }, [visible, product]);
 
-  const handleDismiss = useCallback(() => {
-    if (!product) {
+  const handleDismiss = useCallback((saved = false) => {
+    if (!product && !saved) {
       const draftId = draftProductIdRef.current;
       if (draftId) deleteLocalProductImageById(draftId);
     }
@@ -424,7 +426,8 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
         }
       }
       triggerNotificationSuccess();
-      handleDismiss();
+      onSaved?.();
+      handleDismiss(true);
     } catch (err) {
       showError(getErrorMessage(err));
     } finally {
@@ -482,7 +485,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
                 <Text className="text-foreground text-lg font-semibold">
                   {sheetTitle}
                 </Text>
-                <AppButton variant="tertiary" size="sm" onPress={handleDismiss}>
+                <AppButton variant="tertiary" size="sm" onPress={() => handleDismiss()}>
                   {t("common.cancel")}
                 </AppButton>
               </View>
