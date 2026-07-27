@@ -1,10 +1,12 @@
 import type { Product } from '@/types/product';
+import { normalizeForSearch } from '@/utils/text';
 
 export const productMatchesQuery = (product: Product, query: string): boolean => {
-  const trimmed = query.trim().toLowerCase();
+  const trimmed = query.trim();
   if (!trimmed) return true;
+  const normalizedQuery = normalizeForSearch(trimmed);
   return (
-    product.name.toLowerCase().includes(trimmed) ||
+    normalizeForSearch(product.name).includes(normalizedQuery) ||
     product.eans.some((ean) => ean.includes(trimmed))
   );
 };
