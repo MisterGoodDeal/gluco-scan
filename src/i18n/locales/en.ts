@@ -192,6 +192,11 @@ export const en: TranslationSchema = {
     updatedDescription: "{{mealType}} was updated with {{carbs}} g of carbs",
     saveSuccess: "Meal saved",
     saveError: "Could not save the meal",
+    addManualCarbs: "Add carbs",
+    manualCarbsLabel: "Carbs",
+    manualCarbsTitle: "Carbs",
+    manualCarbsDescription: "Enter a number of grams of carbs",
+    manualCarbsInvalid: "Invalid carbs amount",
   },
   settings: {
     title: "Settings",

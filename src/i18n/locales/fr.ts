@@ -188,6 +188,11 @@ export type TranslationSchema = {
     updatedDescription: string;
     saveSuccess: string;
     saveError: string;
+    addManualCarbs: string;
+    manualCarbsLabel: string;
+    manualCarbsTitle: string;
+    manualCarbsDescription: string;
+    manualCarbsInvalid: string;
   };
   settings: {
     title: string;
@@ -567,6 +572,11 @@ export const fr: TranslationSchema = {
       "{{mealType}} a été modifié avec {{carbs}} g de glucides",
     saveSuccess: "Repas enregistré",
     saveError: "Impossible d'enregistrer le repas",
+    addManualCarbs: "Ajouter des glucides",
+    manualCarbsLabel: "Glucides",
+    manualCarbsTitle: "Glucides",
+    manualCarbsDescription: "Saisissez un nombre de grammes de glucides",
+    manualCarbsInvalid: "Nombre de glucides invalide",
   },
   settings: {
     title: "Paramètres",
