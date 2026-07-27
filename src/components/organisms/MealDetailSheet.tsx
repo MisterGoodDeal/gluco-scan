@@ -100,6 +100,13 @@ export const MealDetailSheet: FC<MealDetailSheetProps> = ({
               <Text className="text-muted text-sm mt-2 mb-2">
                 {t('meals.itemCount', { count: meal.items.length })}
               </Text>
+              {meal.sourceCompositionName ? (
+                <View className="mb-3 self-start rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
+                  <Text className="text-accent text-xs font-medium">
+                    {t('meals.fromComposition', { name: meal.sourceCompositionName })}
+                  </Text>
+                </View>
+              ) : null}
               {meal.items.map((item, index) => (
                 <View
                   key={item.id}

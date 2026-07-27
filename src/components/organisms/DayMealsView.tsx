@@ -99,6 +99,13 @@ export const DayMealsView: FC<DayMealsViewProps> = ({
                 </Accordion.Trigger>
                 <Accordion.Content>
                   <View className="gap-3">
+                    {meal.sourceCompositionName ? (
+                      <View className="self-start rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
+                        <Text className="text-accent text-xs font-medium">
+                          {t('meals.fromComposition', { name: meal.sourceCompositionName })}
+                        </Text>
+                      </View>
+                    ) : null}
                     <Text className="text-muted text-sm">
                       {t('meals.itemCount', { count: meal.items.length })}
                     </Text>

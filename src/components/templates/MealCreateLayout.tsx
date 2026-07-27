@@ -56,9 +56,16 @@ export const MealCreateLayout: FC = () => {
   const draftMeta = useMealStore((s) => s.draftMeta);
   const setDraftMeta = useMealStore((s) => s.setDraftMeta);
   const draftItems = useMealStore((s) => s.draftItems);
+  const draftSourceCompositionName = useMealStore((s) => s.draftSourceCompositionName);
   const removeDraftItem = useMealStore((s) => s.removeDraftItem);
   const addDraftItem = useMealStore((s) => s.addDraftItem);
+  const addDraftItems = useMealStore((s) => s.addDraftItems);
   const updateDraftItem = useMealStore((s) => s.updateDraftItem);
+  const beginFromComposition = useMealStore((s) => s.beginFromComposition);
+  const consumePreservedDraftOnCreateOpen = useMealStore(
+    (s) => s.consumePreservedDraftOnCreateOpen,
+  );
+  const clearDraftSourceComposition = useMealStore((s) => s.clearDraftSourceComposition);
   const beginEditMeal = useMealStore((s) => s.beginEditMeal);
   const resetDraft = useMealStore((s) => s.resetDraft);
   const saveMeal = useMealStore((s) => s.saveMeal);
@@ -168,9 +175,11 @@ export const MealCreateLayout: FC = () => {
       });
       return () => resetDraft();
     }
-    resetDraft();
+    if (!consumePreservedDraftOnCreateOpen()) {
+      resetDraft();
+    }
     return () => resetDraft();
-  }, [mealId, beginEditMeal, resetDraft]);
+  }, [mealId, beginEditMeal, resetDraft, consumePreservedDraftOnCreateOpen]);
 
   useEffect(() => {
     void hydrateSettings();
@@ -420,6 +429,13 @@ export const MealCreateLayout: FC = () => {
           </AppPressable>
 
           <View className="mt-4 gap-2">
+            {draftSourceCompositionName ? (
+              <View className="rounded-2xl border border-accent/30 bg-accent/10 px-3 py-2">
+                <Text className="text-accent text-sm font-medium">
+                  {t('meals.fromComposition', { name: draftSourceCompositionName })}
+                </Text>
+              </View>
+            ) : null}
             {draftItems.length > 0 ? (
               <Text className="text-muted text-sm">{t('meals.editItemHint')}</Text>
             ) : null}
@@ -569,9 +585,40 @@ export const MealCreateLayout: FC = () => {
       <ProductSpotlightSearch
         visible={searchVisible}
         onClose={() => setSearchVisible(false)}
+        includeCompositions
         onSelect={(product) => {
           setPendingOffScan(null);
           setPickerProduct(product);
+        }}
+        onSelectComposition={(composition) => {
+          if (draftItems.length === 0) {
+            beginFromComposition(composition, { replaceExisting: true, keepStep: true });
+            return;
+          }
+
+          clearDraftSourceComposition();
+          addDraftItems(
+            composition.items.map((item) => ({
+              id: generateId(),
+              productId: item.productId,
+              quantity: item.quantity,
+              unitType: item.unitType,
+              unitId: item.unitId,
+              quantityType: item.quantityType,
+              rawEquivalentQuantity: item.rawEquivalentQuantity,
+              productName: item.productName,
+              imageUrl: item.imageUrl ?? null,
+              carbsPer100g:
+                item.productId === MANUAL_CARBS_PRODUCT_ID
+                  ? 100
+                  : item.rawEquivalentQuantity > 0
+                    ? (item.carbs / item.rawEquivalentQuantity) * 100
+                    : 0,
+              carbs: item.carbs,
+              unitLabel: item.unitLabel,
+              productTags: [],
+            })),
+          );
         }}
       />
       <MealTimePickerSheet
