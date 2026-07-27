@@ -1,3 +1,4 @@
+import { MANUAL_CARBS_PRODUCT_ID } from '@/constants/manualCarbs';
 import { getDatabase } from '@/database/client';
 import { productEanRepository } from '@/repositories/productEan.repository';
 import { productUnitRepository } from '@/repositories/productUnit.repository';
@@ -62,8 +63,10 @@ export const productRepository = {
       `SELECT p.id, p.name, p.carbs_per_100g, p.image_url, p.tags, p.custom_cooking_factor, p.created_at, COUNT(mi.id) as usage_count
        FROM products p
        LEFT JOIN meal_items mi ON mi.product_id = p.id
+       WHERE p.id != ?
        GROUP BY p.id
        ORDER BY p.name`,
+      MANUAL_CARBS_PRODUCT_ID,
     );
     const eansByProduct = await productEanRepository.getByProductIds(rows.map((r) => r.id));
     const products: Product[] = [];
@@ -157,6 +160,7 @@ export const productRepository = {
   },
 
   async delete(id: string): Promise<void> {
+    if (id === MANUAL_CARBS_PRODUCT_ID) return;
     const existing = await this.getById(id);
     if (existing?.imageUrl) {
       deleteLocalProductImage(existing.imageUrl);
