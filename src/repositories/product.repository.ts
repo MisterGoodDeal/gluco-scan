@@ -78,8 +78,30 @@ export const productRepository = {
   },
 
   async search(query: string): Promise<Product[]> {
-    const all = await this.getAll();
-    return all.filter((p) => productMatchesQuery(p, query));
+    const trimmed = query.trim();
+    if (trimmed.length < 3) return [];
+
+    const db = getDatabase();
+    const likeQuery = `%${trimmed.toLowerCase()}%`;
+    const rows = await db.getAllAsync<ProductRow>(
+      `SELECT p.id, p.name, p.carbs_per_100g, p.image_url, p.tags, p.custom_cooking_factor, p.created_at, COUNT(mi.id) as usage_count
+       FROM products p
+       LEFT JOIN meal_items mi ON mi.product_id = p.id
+       LEFT JOIN product_eans pe ON pe.product_id = p.id
+       WHERE p.id != ? AND (lower(p.name) LIKE ? OR pe.ean LIKE ?)
+       GROUP BY p.id
+       ORDER BY p.name`,
+      MANUAL_CARBS_PRODUCT_ID,
+      likeQuery,
+      `%${trimmed}%`,
+    );
+    const eansByProduct = await productEanRepository.getByProductIds(rows.map((r) => r.id));
+    const products: Product[] = [];
+    for (const row of rows) {
+      const units = await productUnitRepository.getByProductId(row.id);
+      products.push(mapRow(row, units, eansByProduct.get(row.id) ?? []));
+    }
+    return products;
   },
 
   async getById(id: string): Promise<Product | null> {
