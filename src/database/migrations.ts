@@ -6,6 +6,7 @@ import { MIGRATION_003_SQL } from '@/database/migrations/003_app_preferences';
 import { MIGRATION_004_SQL } from '@/database/migrations/004_product_image';
 import { MIGRATION_005_SQL } from '@/database/migrations/005_tags_and_cooking';
 import { MIGRATION_006_SQL } from '@/database/migrations/006_meal_type_schedule';
+import { MIGRATION_007_SQL } from '@/database/migrations/007_manual_carbs_product';
 import { backfillLegacyMealItems } from '@/database/backfillLegacyMealItems';
 import { defaultMealTypeSchedule, serializeMealTypeSchedule } from '@/types/mealTypeSchedule';
 
@@ -29,6 +30,7 @@ const migrations: { version: number; sql: string; seed?: string; after?: (db: SQ
       );
     },
   },
+  { version: 7, sql: MIGRATION_007_SQL },
 ];
 
 export const runMigrations = async (db: SQLiteDatabase): Promise<void> => {
