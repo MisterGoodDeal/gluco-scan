@@ -14,6 +14,7 @@ const STEP_ORDER: TutorialStepId[] = [
   'products',
   'products-add',
   'product-form',
+  'menus',
   'meals-day-nav',
   'meals-today',
   'meals-calendar',

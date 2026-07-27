@@ -14,6 +14,8 @@ export const TUTORIAL_STEP_CARD_ANCHOR_ID = 'tutorial-step-card';
 
 export const TUTORIAL_PRODUCTS_ADD_ANCHOR_ID = 'tutorial-products-add';
 
+export const TUTORIAL_MENUS_LIST_ANCHOR_ID = 'tutorial-menus-list';
+
 export const TUTORIAL_MEALS_DAY_NAV_ANCHOR_ID = 'tutorial-meals-day-nav';
 
 export const TUTORIAL_MEALS_ADD_ANCHOR_ID = 'tutorial-meals-add';

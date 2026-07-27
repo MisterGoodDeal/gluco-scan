@@ -10,6 +10,7 @@ export type TutorialStepId =
   | 'products'
   | 'products-add'
   | 'product-form'
+  | 'menus'
   | 'meals-day-nav'
   | 'meals-today'
   | 'meals-calendar'

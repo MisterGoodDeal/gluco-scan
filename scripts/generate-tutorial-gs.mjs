@@ -25,7 +25,7 @@ const combine = (dateKey, h, min) => {
 
 const base = toDateKey(new Date());
 const data = {
-  version: 5,
+  version: 6,
   exportedAt: new Date().toISOString(),
   metadata: { tutorial: true },
   cookingConversions: [
@@ -99,13 +99,51 @@ const data = {
       ],
     },
   ],
+  compositions: [
+    {
+      id: 'tut-menu-breakfast',
+      name: 'Petit déjeuner rapide',
+      createdAt: combine(addDays(base, -3), 7, 45),
+      totalCarbs: 57.7,
+      items: [
+        {
+          id: 'tut-menu-item-1',
+          productId: 'tut-prod-banane',
+          quantity: 1,
+          unitType: 'custom',
+          unitId: 'tut-unit-banane',
+          quantityType: 'raw',
+          rawEquivalentQuantity: 120,
+          productName: 'Banane',
+          imageUrl: null,
+          carbs: 27.6,
+          unitLabel: 'pc',
+        },
+        {
+          id: 'tut-menu-item-2',
+          productId: 'tut-prod-pain',
+          quantity: 2,
+          unitType: 'custom',
+          unitId: 'tut-unit-tranche',
+          quantityType: 'raw',
+          rawEquivalentQuantity: 70,
+          productName: 'Pain complet',
+          imageUrl: null,
+          carbs: 30.1,
+          unitLabel: 'tr.',
+        },
+      ],
+    },
+  ],
   meals: [
     {
       id: 'tut-meal-1',
       type: 'breakfast',
       date: addDays(base, -3),
       createdAt: combine(addDays(base, -3), 8, 15),
-      totalCarbs: 27.6,
+      sourceCompositionId: 'tut-menu-breakfast',
+      sourceCompositionName: 'Petit déjeuner rapide',
+      totalCarbs: 57.7,
       items: [
         {
           id: 'tut-item-1',

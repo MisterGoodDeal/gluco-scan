@@ -30,6 +30,8 @@ export const navigateToTutorialStep = (stepIndex: number): void => {
 
   if (config.tab === 'products') {
     router.replace('/products');
+  } else if (config.tab === 'compositions') {
+    router.replace('/compositions');
   } else if (config.tab === 'meals') {
     router.replace('/meals');
   } else if (config.tab === 'statistics') {

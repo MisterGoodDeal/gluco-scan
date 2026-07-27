@@ -2,13 +2,14 @@ import type { TutorialStepId } from '@/types/tutorial';
 
 export type TutorialStepConfig = {
   id: TutorialStepId;
-  tab?: 'products' | 'meals' | 'statistics' | 'settings';
+  tab?: 'products' | 'compositions' | 'meals' | 'statistics' | 'settings';
   route?: string;
   anchorIds: string[];
   titleKey:
     | 'tutorial.steps.products.title'
     | 'tutorial.steps.productsAdd.title'
     | 'tutorial.steps.productForm.title'
+    | 'tutorial.steps.menus.title'
     | 'tutorial.steps.mealsDayNav.title'
     | 'tutorial.steps.mealsToday.title'
     | 'tutorial.steps.mealsCalendar.title'
@@ -23,6 +24,7 @@ export type TutorialStepConfig = {
     | 'tutorial.steps.products.message'
     | 'tutorial.steps.productsAdd.message'
     | 'tutorial.steps.productForm.message'
+    | 'tutorial.steps.menus.message'
     | 'tutorial.steps.mealsDayNav.message'
     | 'tutorial.steps.mealsToday.message'
     | 'tutorial.steps.mealsCalendar.message'
@@ -82,6 +84,18 @@ export const TUTORIAL_STEPS: TutorialStepConfig[] = [
     messageKey: 'tutorial.steps.productForm.message',
     cardPlacement: 'bottom',
     cardCollapsible: true,
+  },
+  {
+    id: 'menus',
+    tab: 'compositions',
+    anchorIds: [],
+    titleKey: 'tutorial.steps.menus.title',
+    messageKey: 'tutorial.steps.menus.message',
+    cardPlacement: 'bottom',
+    spotlightTargets: [
+      { anchorId: 'tutorial-menus-list', cornerRadius: 20, padding: 6 },
+      { anchorId: 'tutorial-step-card', cornerRadius: 24, padding: 2, ringVariant: 'accent' },
+    ],
   },
   {
     id: 'meals-day-nav',

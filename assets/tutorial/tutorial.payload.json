@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "exportedAt": "2026-06-05T19:12:44.332Z",
+  "version": 6,
+  "exportedAt": "2026-07-27T10:17:28.688Z",
   "metadata": {
     "tutorial": true
   },
@@ -142,13 +142,51 @@
       ]
     }
   ],
+  "compositions": [
+    {
+      "id": "tut-menu-breakfast",
+      "name": "Petit déjeuner rapide",
+      "createdAt": "2026-07-24T05:45:00.000Z",
+      "totalCarbs": 57.7,
+      "items": [
+        {
+          "id": "tut-menu-item-1",
+          "productId": "tut-prod-banane",
+          "quantity": 1,
+          "unitType": "custom",
+          "unitId": "tut-unit-banane",
+          "quantityType": "raw",
+          "rawEquivalentQuantity": 120,
+          "productName": "Banane",
+          "imageUrl": null,
+          "carbs": 27.6,
+          "unitLabel": "pc"
+        },
+        {
+          "id": "tut-menu-item-2",
+          "productId": "tut-prod-pain",
+          "quantity": 2,
+          "unitType": "custom",
+          "unitId": "tut-unit-tranche",
+          "quantityType": "raw",
+          "rawEquivalentQuantity": 70,
+          "productName": "Pain complet",
+          "imageUrl": null,
+          "carbs": 30.1,
+          "unitLabel": "tr."
+        }
+      ]
+    }
+  ],
   "meals": [
     {
       "id": "tut-meal-1",
       "type": "breakfast",
-      "date": "2026-06-02",
-      "createdAt": "2026-06-02T06:15:00.000Z",
-      "totalCarbs": 27.6,
+      "date": "2026-07-24",
+      "createdAt": "2026-07-24T06:15:00.000Z",
+      "sourceCompositionId": "tut-menu-breakfast",
+      "sourceCompositionName": "Petit déjeuner rapide",
+      "totalCarbs": 57.7,
       "items": [
         {
           "id": "tut-item-1",
@@ -169,8 +207,8 @@
     {
       "id": "tut-meal-2",
       "type": "lunch",
-      "date": "2026-06-03",
-      "createdAt": "2026-06-03T10:30:00.000Z",
+      "date": "2026-07-25",
+      "createdAt": "2026-07-25T10:30:00.000Z",
       "totalCarbs": 56.8,
       "items": [
         {
@@ -185,8 +223,8 @@
     {
       "id": "tut-meal-3",
       "type": "snack",
-      "date": "2026-06-04",
-      "createdAt": "2026-06-04T14:00:00.000Z",
+      "date": "2026-07-26",
+      "createdAt": "2026-07-26T14:00:00.000Z",
       "totalCarbs": 35,
       "items": [
         {
@@ -201,8 +239,8 @@
     {
       "id": "tut-meal-4",
       "type": "dinner",
-      "date": "2026-06-05",
-      "createdAt": "2026-06-05T17:45:00.000Z",
+      "date": "2026-07-27",
+      "createdAt": "2026-07-27T17:45:00.000Z",
       "totalCarbs": 156,
       "items": [
         {

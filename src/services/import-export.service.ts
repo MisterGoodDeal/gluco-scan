@@ -2,7 +2,9 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { gzipSync, gunzipSync, strToU8, strFromU8 } from 'fflate';
 
 import { getDatabase } from '@/database/client';
+import { MIGRATION_007_SQL } from '@/database/migrations/007_manual_carbs_product';
 import { appPreferencesRepository } from '@/repositories/appPreferences.repository';
+import { compositionRepository } from '@/repositories/composition.repository';
 import { cookingConversionRepository } from '@/repositories/cookingConversion.repository';
 import { globalUnitRepository } from '@/repositories/globalUnit.repository';
 import { mealRepository } from '@/repositories/meal.repository';
@@ -22,8 +24,8 @@ import { normalizeExportProduct } from '@/utils/exportProduct';
 import { computeMealItemCarbsWithCooking } from '@/utils/carbs';
 import { flushWidgetSync } from '@/features/widgets/services/widgetSync.service';
 
-export const EXPORT_VERSION = 5;
-const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3, 4, 5] as const;
+export const EXPORT_VERSION = 6;
+const SUPPORTED_EXPORT_VERSIONS = [1, 2, 3, 4, 5, 6] as const;
 
 export type ImportMode = 'merge' | 'replace';
 
@@ -36,6 +38,7 @@ export const buildExportPayload = async (): Promise<ExportPayload> => ({
   version: EXPORT_VERSION,
   exportedAt: new Date().toISOString(),
   products: await productsToExportProducts(await productRepository.getAll()),
+  compositions: await compositionRepository.getAll(),
   meals: await mealRepository.getAllForExport(),
   globalUnits: await globalUnitRepository.getAll(),
   cookingConversions: await cookingConversionRepository.getAll(),
@@ -50,7 +53,7 @@ export const serializePayload = (payload: ExportPayload): Uint8Array => {
 export const deserializePayload = (data: Uint8Array): ExportPayload => {
   const json = strFromU8(gunzipSync(data));
   const parsed = JSON.parse(json) as ExportPayload;
-  if (!SUPPORTED_EXPORT_VERSIONS.includes(parsed.version as 1 | 2 | 3 | 4 | 5)) {
+  if (!SUPPORTED_EXPORT_VERSIONS.includes(parsed.version as 1 | 2 | 3 | 4 | 5 | 6)) {
     throw new Error('Unsupported export version');
   }
   return {
@@ -65,6 +68,8 @@ export const clearUserDataTables = async (db: SQLiteDatabase): Promise<void> => 
   clearProductImagesDirectory();
   await db.execAsync('DELETE FROM meal_items');
   await db.execAsync('DELETE FROM meals');
+  await db.execAsync('DELETE FROM composition_items');
+  await db.execAsync('DELETE FROM compositions');
   await db.execAsync('DELETE FROM product_eans');
   await db.execAsync('DELETE FROM product_units');
   await db.execAsync('DELETE FROM products');
@@ -112,6 +117,10 @@ const insertGlobalUnit = async (db: SQLiteDatabase, unit: ExportPayload['globalU
     unit.name,
     unit.equivalentInGrams,
   );
+};
+
+const ensureSystemProducts = async (db: SQLiteDatabase): Promise<void> => {
+  await db.execAsync(MIGRATION_007_SQL);
 };
 
 const normalizeImportedMealItem = async (
@@ -168,12 +177,15 @@ const normalizeImportedMealItem = async (
 
 const insertMeal = async (db: SQLiteDatabase, meal: ExportPayload['meals'][0]) => {
   await db.runAsync(
-    `INSERT INTO meals (id, type, date, created_at, total_carbs) VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO meals (id, type, date, created_at, total_carbs, source_composition_id, source_composition_name)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     meal.id,
     meal.type,
     meal.date,
     meal.createdAt,
     meal.totalCarbs,
+    meal.sourceCompositionId ?? null,
+    meal.sourceCompositionName ?? null,
   );
   for (const item of meal.items) {
     const normalized = await normalizeImportedMealItem(item);
@@ -189,6 +201,41 @@ const insertMeal = async (db: SQLiteDatabase, meal: ExportPayload['meals'][0]) =
       normalized.quantityType ?? 'raw',
       normalized.rawEquivalentQuantity,
       normalized.carbs,
+    );
+  }
+};
+
+const insertComposition = async (
+  db: SQLiteDatabase,
+  composition: NonNullable<ExportPayload['compositions']>[number],
+) => {
+  await db.runAsync(
+    `INSERT INTO compositions (id, name, created_at, total_carbs) VALUES (?, ?, ?, ?)`,
+    composition.id,
+    composition.name,
+    composition.createdAt,
+    composition.totalCarbs,
+  );
+
+  for (const item of composition.items) {
+    const normalized = await normalizeImportedMealItem(item);
+    await db.runAsync(
+      `INSERT INTO composition_items (
+        id, composition_id, product_id, quantity, unit_type, unit_id, quantity_type,
+        raw_equivalent_quantity, carbs, product_name, image_url, unit_label
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      item.id,
+      composition.id,
+      item.productId,
+      item.quantity,
+      item.unitType,
+      item.unitId ?? null,
+      normalized.quantityType ?? 'raw',
+      normalized.rawEquivalentQuantity,
+      item.carbs ?? normalized.carbs,
+      item.productName ?? '',
+      item.imageUrl ?? null,
+      item.unitLabel ?? 'g',
     );
   }
 };
@@ -209,6 +256,7 @@ const importCookingConversions = async (
 };
 
 const insertFullPayload = async (db: SQLiteDatabase, payload: ExportPayload): Promise<void> => {
+  await ensureSystemProducts(db);
   for (const product of payload.products) {
     await insertProduct(db, product);
   }
@@ -216,12 +264,16 @@ const insertFullPayload = async (db: SQLiteDatabase, payload: ExportPayload): Pr
     await insertGlobalUnit(db, unit);
   }
   await importCookingConversions(payload, 'replace');
+  for (const composition of payload.compositions ?? []) {
+    await insertComposition(db, composition);
+  }
   for (const meal of payload.meals) {
     await insertMeal(db, meal);
   }
 };
 
 const mergePayload = async (db: SQLiteDatabase, payload: ExportPayload): Promise<void> => {
+  await ensureSystemProducts(db);
   for (const product of payload.products) {
     const existing = await productRepository.getById(product.id);
     if (!existing) {
@@ -258,6 +310,14 @@ const mergePayload = async (db: SQLiteDatabase, payload: ExportPayload): Promise
   }
 
   await importCookingConversions(payload, 'merge');
+
+  for (const composition of payload.compositions ?? []) {
+    const existing = await compositionRepository.getById(composition.id);
+    if (existing) {
+      await compositionRepository.delete(composition.id);
+    }
+    await insertComposition(db, composition);
+  }
 
   for (const meal of payload.meals) {
     const existing = await mealRepository.getById(meal.id);
