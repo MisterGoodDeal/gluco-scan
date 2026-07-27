@@ -22,6 +22,7 @@ export const ProductImage: FC<ProductImageProps> = ({ uri, size = DEFAULT_SIZE }
 
   return (
     <Image
+      key={resolved.cacheKey}
       source={{ uri: resolved.uri, cacheKey: resolved.cacheKey }}
       style={{
         width: size,

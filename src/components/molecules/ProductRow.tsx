@@ -1,5 +1,5 @@
 import { Card, useThemeColor } from 'heroui-native';
-import { memo, type FC } from 'react';
+import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
@@ -39,10 +39,10 @@ const RowEditButton: FC<RowEditButtonProps> = ({ iconSize, onEdit }) => {
   );
 };
 
-export const ProductRow: FC<ProductRowProps> = memo(
-  ({ product, compact = false, onEdit }) => {
+export const ProductRow: FC<ProductRowProps> = ({ product, compact = false, onEdit }) => {
     const { t } = useTranslation();
     const carbsLabel = t('common.carbsPer100g', { value: formatDecimal(product.carbsPer100g) });
+    const resolvedImageUri = resolveProductImageUri(product.imageUrl);
 
     if (compact) {
       return (
@@ -71,7 +71,7 @@ export const ProductRow: FC<ProductRowProps> = memo(
       );
     }
 
-    const showImage = resolveProductImageUri(product.imageUrl) != null;
+    const showImage = resolvedImageUri != null;
 
     return (
       <Card className="p-4">
@@ -101,7 +101,4 @@ export const ProductRow: FC<ProductRowProps> = memo(
         </View>
       </Card>
     );
-  },
-);
-
-ProductRow.displayName = 'ProductRow';
+  };

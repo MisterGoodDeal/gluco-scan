@@ -11,6 +11,7 @@ import { hp } from '@/utils/screen';
 type ProductListProps = {
   products: Product[];
   compact?: boolean;
+  listRevision?: number;
   onEdit: (product: Product) => void;
   refreshing?: boolean;
   onRefresh?: () => void;
@@ -20,6 +21,7 @@ type ProductListProps = {
 export const ProductList: FC<ProductListProps> = ({
   products,
   compact = false,
+  listRevision = 0,
   onEdit,
   refreshing = false,
   onRefresh,
@@ -43,9 +45,10 @@ export const ProductList: FC<ProductListProps> = ({
   return (
     <View className="flex-1 px-4">
       <FlatList
+        key={listRevision}
         data={products}
-        extraData={compact}
-        keyExtractor={(item) => item.id}
+        extraData={`${compact}:${listRevision}`}
+        keyExtractor={(item) => `${item.id}:${item.imageUrl ?? ''}`}
         renderItem={({ item }) => (
           <ProductRow product={item} compact={compact} onEdit={onEdit} />
         )}

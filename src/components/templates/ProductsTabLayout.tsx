@@ -56,6 +56,7 @@ export const ProductsTabLayout: FC = () => {
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [listRevision, setListRevision] = useState(0);
 
   useEffect(() => {
     if (tutorialStatus !== TutorialStatus.RUNNING) return;
@@ -121,6 +122,7 @@ export const ProductsTabLayout: FC = () => {
           <ProductList
             products={filteredProducts}
             compact={compactList}
+            listRevision={listRevision}
             contentInsetTop={headerHeight + 8}
             onEdit={openEdit}
             refreshing={isLoading}
@@ -173,6 +175,7 @@ export const ProductsTabLayout: FC = () => {
         visible={isModalOpen}
         product={editingProduct}
         onClose={closeModal}
+        onSaved={() => setListRevision((revision) => revision + 1)}
       />
     </View>
   );
