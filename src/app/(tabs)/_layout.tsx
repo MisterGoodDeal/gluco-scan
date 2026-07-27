@@ -65,6 +65,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="compositions"
+        listeners={hapticTabListeners}
+        options={{
+          title: t('tabs.compositions'),
+          tabBarIcon: ({ color }) => <TabBarIcon name="hamburger" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="meals/index"
         listeners={hapticTabListeners}
         options={{

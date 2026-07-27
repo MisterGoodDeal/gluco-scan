@@ -39,6 +39,14 @@ export default function RootLayout() {
                   name="meal/edit"
                   options={{ presentation: 'fullScreenModal' }}
                 />
+                <Stack.Screen
+                  name="composition/create"
+                  options={{ presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="composition/edit"
+                  options={{ presentation: 'fullScreenModal' }}
+                />
               </Stack>
             </TutorialHost>
           </DatabaseGate>

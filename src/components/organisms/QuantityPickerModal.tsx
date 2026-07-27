@@ -24,6 +24,7 @@ export type QuantityPickerConfirm = {
   quantityType?: MealItemQuantityType;
   rawEquivalentQuantity: number;
   productName: string;
+  imageUrl?: string | null;
   carbsPer100g: number;
   carbs: number;
   unitLabel: string;
@@ -191,6 +192,7 @@ export const QuantityPickerModal: FC<QuantityPickerModalProps> = ({
       quantityType: carbsResult.quantityType,
       rawEquivalentQuantity: carbsResult.rawEquivalentQuantity,
       productName: product.name,
+      imageUrl: product.imageUrl ?? null,
       carbsPer100g: product.carbsPer100g,
       carbs: carbsResult.carbs,
       unitLabel: activeUnit.abbreviation,
