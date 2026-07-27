@@ -75,12 +75,18 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
   create: async (data) => {
     const product = await productRepository.create(data);
+    set((state) => ({
+      products: [...state.products, product].sort((a, b) => a.name.localeCompare(b.name)),
+    }));
     await get().hydrate();
     return product;
   },
 
   update: async (product) => {
-    await productRepository.update(product);
+    const updated = await productRepository.update(product);
+    set((state) => ({
+      products: state.products.map((p) => (p.id === updated.id ? updated : p)),
+    }));
     await get().hydrate();
   },
 
