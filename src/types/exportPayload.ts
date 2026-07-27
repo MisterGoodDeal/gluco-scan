@@ -1,4 +1,5 @@
 import type { AppPreferences } from '@/types/appPreferences';
+import type { Composition } from '@/types/composition';
 import type { CookingConversion } from '@/types/cookingConversion';
 import type { GlobalUnit } from '@/types/globalUnit';
 import type { Meal } from '@/types/meal';
@@ -13,6 +14,7 @@ export interface ExportPayload {
   version: number;
   exportedAt: string;
   products: ExportProduct[];
+  compositions?: Composition[];
   meals: Meal[];
   globalUnits: GlobalUnit[];
   cookingConversions?: CookingConversion[];

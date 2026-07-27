@@ -18,6 +18,8 @@ type MealRow = {
   date: string;
   created_at: string;
   total_carbs: number;
+  source_composition_id: string | null;
+  source_composition_name: string | null;
 };
 
 type MealItemRow = {
@@ -102,6 +104,8 @@ const loadMealWithItems = async (row: MealRow): Promise<Meal> => {
     createdAt: row.created_at,
     items,
     totalCarbs: row.total_carbs,
+    sourceCompositionId: row.source_composition_id,
+    sourceCompositionName: row.source_composition_name,
   };
 };
 
@@ -109,6 +113,8 @@ export type CreateMealInput = {
   type: MealType;
   date: string;
   createdAt: string;
+  sourceCompositionId?: string | null;
+  sourceCompositionName?: string | null;
   items: Omit<MealItem, 'id'>[];
 };
 
@@ -197,13 +203,15 @@ export const mealRepository = {
 
     await db.withTransactionAsync(async () => {
       await db.runAsync(
-        `INSERT INTO meals (id, type, date, created_at, total_carbs)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO meals (id, type, date, created_at, total_carbs, source_composition_id, source_composition_name)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         mealId,
         input.type,
         input.date,
         input.createdAt,
         totalCarbs,
+        input.sourceCompositionId ?? null,
+        input.sourceCompositionName ?? null,
       );
 
       for (const { item, carbs, rawEquivalentQuantity, quantityType } of computedItems) {
@@ -266,11 +274,15 @@ export const mealRepository = {
 
     await db.withTransactionAsync(async () => {
       await db.runAsync(
-        `UPDATE meals SET type = ?, date = ?, created_at = ?, total_carbs = ? WHERE id = ?`,
+        `UPDATE meals
+         SET type = ?, date = ?, created_at = ?, total_carbs = ?, source_composition_id = ?, source_composition_name = ?
+         WHERE id = ?`,
         input.type,
         input.date,
         input.createdAt,
         totalCarbs,
+        input.sourceCompositionId ?? null,
+        input.sourceCompositionName ?? null,
         mealId,
       );
       await db.runAsync('DELETE FROM meal_items WHERE meal_id = ?', mealId);

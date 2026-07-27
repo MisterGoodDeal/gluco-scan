@@ -8,4 +8,6 @@ export interface Meal {
   createdAt: string;
   items: MealItem[];
   totalCarbs: number;
+  sourceCompositionId?: string | null;
+  sourceCompositionName?: string | null;
 }
