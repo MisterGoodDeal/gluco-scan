@@ -91,6 +91,14 @@ export type TranslationSchema = {
     deleteConfirmMessage: string;
     deleteSuccess: string;
     deleteError: string;
+    searchOffButton: string;
+    searchOffTitle: string;
+    searchOffPlaceholder: string;
+    searchOffHint: string;
+    searchOffNoResults: string;
+    searchOffShowWithoutCarbs: string;
+    searchOffMissingCarbs: string;
+    searchOffAdding: string;
   };
   tags: {
     starch: string;
@@ -460,6 +468,14 @@ export const fr: TranslationSchema = {
     deleteConfirmMessage: "Cette action est irréversible",
     deleteSuccess: "Produit supprimé",
     deleteError: "Impossible de supprimer le produit",
+    searchOffButton: "Rechercher",
+    searchOffTitle: "Rechercher sur Open Food Facts",
+    searchOffPlaceholder: "Burger, frites, salade…",
+    searchOffHint: "Saisissez au moins 3 caractères",
+    searchOffNoResults: "Aucun résultat",
+    searchOffShowWithoutCarbs: "Afficher les produits sans glucides",
+    searchOffMissingCarbs: "Glucides non renseignés",
+    searchOffAdding: "Ajout en cours…",
   },
   tags: {
     starch: "Féculent",
