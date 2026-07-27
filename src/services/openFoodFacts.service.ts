@@ -1,4 +1,9 @@
-import { OFF_BASE_URL, OFF_USER_AGENT } from '@/constants/api';
+import {
+  OFF_BASE_URL,
+  OFF_SEARCH_BASE_URL,
+  OFF_SEARCH_PAGE_SIZE,
+  OFF_USER_AGENT,
+} from '@/constants/api';
 import i18n, { getOffLocaleParams } from '@/i18n';
 import {
   MissingNutrimentsError,
@@ -6,7 +11,7 @@ import {
   OffRateLimitError,
   ProductNotFoundError,
 } from '@/services/errors';
-import { consumeOffApiCall } from '@/services/offRateLimiter';
+import { consumeOffApiCall, consumeOffSearchApiCall } from '@/services/offRateLimiter';
 import { mapOffCategoriesToTags } from '@/utils/tag-mapper/mapOffCategoriesToTags';
 import type { ProductTag } from '@/types/productTag';
 
@@ -46,6 +51,8 @@ type OffResponse = {
 };
 
 const OFF_FIELDS = 'product_name,nutriments,images,categories_tags,image_front_small_url';
+const OFF_SEARCH_FIELDS =
+  'code,product_name,nutriments,image_front_small_url,categories_tags';
 
 const parseCarbs = (nutriments?: OffNutriments): number | null => {
   const carbs = nutriments?.carbohydrates_100g ?? nutriments?.carbohydrates;
@@ -117,6 +124,94 @@ export type PartialOffProduct = {
   imageUrl?: string;
   categoriesTags?: string[];
   tags?: ProductTag[];
+};
+
+export type OffSearchHit = {
+  code: string;
+  name: string;
+  carbsPer100g?: number;
+  imageUrl?: string;
+  tags: ProductTag[];
+};
+
+type OffSearchRawHit = {
+  code?: string;
+  product_name?: string;
+  nutriments?: OffNutriments;
+  image_front_small_url?: string;
+  categories_tags?: string[];
+};
+
+type OffSearchResponse = {
+  hits?: OffSearchRawHit[];
+  count?: number;
+  page?: number;
+};
+
+const mapSearchHit = (hit: OffSearchRawHit): OffSearchHit | null => {
+  const code = hit.code?.trim();
+  const name = hit.product_name?.trim();
+  if (!code || !name) return null;
+
+  const carbsPer100g = parseCarbs(hit.nutriments);
+  const categoriesTags = hit.categories_tags ?? [];
+
+  return {
+    code,
+    name,
+    carbsPer100g: carbsPer100g ?? undefined,
+    imageUrl: parseImageUrl(hit),
+    tags: mapOffCategoriesToTags(categoriesTags),
+  };
+};
+
+export const searchOffProducts = async (
+  query: string,
+  page = 1,
+  pageSize = OFF_SEARCH_PAGE_SIZE,
+  signal?: AbortSignal,
+): Promise<{ hits: OffSearchHit[]; count: number; page: number }> => {
+  consumeOffSearchApiCall();
+
+  const params = new URLSearchParams({
+    q: query.trim(),
+    page: String(page),
+    page_size: String(pageSize),
+    fields: OFF_SEARCH_FIELDS,
+  });
+  const url = `${OFF_SEARCH_BASE_URL}?${params.toString()}`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: { 'User-Agent': OFF_USER_AGENT },
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw error;
+    throw new NetworkError();
+  }
+
+  if (!response.ok) {
+    throw new NetworkError('errors.networkStatus', { status: response.status });
+  }
+
+  let data: OffSearchResponse;
+  try {
+    data = (await response.json()) as OffSearchResponse;
+  } catch {
+    throw new NetworkError('errors.invalidResponse');
+  }
+
+  const hits = (data.hits ?? [])
+    .map(mapSearchHit)
+    .filter((hit): hit is OffSearchHit => hit != null);
+
+  return {
+    hits,
+    count: data.count ?? hits.length,
+    page: data.page ?? page,
+  };
 };
 
 export const fetchOffPartialByEAN = async (ean: string): Promise<PartialOffProduct> => {
