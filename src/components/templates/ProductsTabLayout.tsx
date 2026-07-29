@@ -3,7 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { useThemeColor } from 'heroui-native';
 import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 
 import { FaIcon } from '@/components/atoms/FaIcon';
 import { TutorialAnchor } from '@/components/atoms/TutorialAnchor';
@@ -25,15 +25,26 @@ import { useTutorialStore } from '@/store/tutorial.store';
 import { TutorialStatus } from '@/types/tutorial';
 import { productRepository } from '@/repositories/product.repository';
 import type { Product } from '@/types/product';
+import type { ProductTag } from '@/types/productTag';
 import { productMatchesQuery } from '@/utils/productSearch';
 import { productMatchesTagFilters } from '@/utils/productTagFilter';
 import { TUTORIAL_PRODUCTS_ADD_ANCHOR_ID } from '@/constants/tutorial';
 import { consumePendingAddProduct } from '@/features/widgets/deepLink/pendingAction';
+import { ProductAddMethodSheet } from '@/features/product-ocr/components/ProductAddMethodSheet';
+import {
+  ProductEanScanSheet,
+  type ProductEanScanResult,
+} from '@/features/product-ocr/components/ProductEanScanSheet';
+import { OcrLabelReviewSheet } from '@/features/product-ocr/components/OcrLabelReviewSheet';
+import { useLabelOcr } from '@/features/product-ocr/hooks/useLabelOcr';
+import type {
+  ProductAddMethod,
+  ProductFormDraft,
+} from '@/features/product-ocr/types/ocrDraft';
 import { getErrorMessage } from '@/services/errors';
 import {
   fetchProductByEAN,
   type OffSearchHit,
-  type PartialOffProduct,
 } from '@/services/openFoodFacts.service';
 import { isValidEan, normalizeEan } from '@/utils/ean';
 
@@ -66,11 +77,23 @@ export const ProductsTabLayout: FC = () => {
   const tutorialStepId = useTutorialStore((s) => s.getCurrentStepId());
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [offDraft, setOffDraft] = useState<PartialOffProduct | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formDraft, setFormDraft] = useState<ProductFormDraft | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isAddMethodOpen, setIsAddMethodOpen] = useState(false);
+  const [isEanScanOpen, setIsEanScanOpen] = useState(false);
+  const [isOcrReviewOpen, setIsOcrReviewOpen] = useState(false);
   const [isOffSearchOpen, setIsOffSearchOpen] = useState(false);
   const [isOffSearchSelecting, setIsOffSearchSelecting] = useState(false);
   const [listRevision, setListRevision] = useState(0);
+
+  const {
+    imageUri: ocrImageUri,
+    parsed: ocrParsed,
+    isProcessing: ocrProcessing,
+    error: ocrError,
+    reset: resetOcr,
+    captureFromSource,
+  } = useLabelOcr();
 
   useEffect(() => {
     if (tutorialStatus !== TutorialStatus.RUNNING) return;
@@ -78,8 +101,8 @@ export const ProductsTabLayout: FC = () => {
     void productRepository.getById(openProductId).then((product) => {
       if (product) {
         setEditingProduct(product);
-        setOffDraft(null);
-        setIsModalOpen(true);
+        setFormDraft(null);
+        setIsFormOpen(true);
       }
     });
   }, [tutorialStatus, openProductId, tutorialStepId]);
@@ -88,13 +111,13 @@ export const ProductsTabLayout: FC = () => {
     if (
       tutorialStatus === TutorialStatus.RUNNING &&
       tutorialStepId !== 'product-form' &&
-      isModalOpen
+      isFormOpen
     ) {
-      setIsModalOpen(false);
+      setIsFormOpen(false);
       setEditingProduct(null);
-      setOffDraft(null);
+      setFormDraft(null);
     }
-  }, [tutorialStatus, tutorialStepId, isModalOpen]);
+  }, [tutorialStatus, tutorialStepId, isFormOpen]);
 
   const loadProducts = useCallback(async () => {
     await hydrate();
@@ -109,37 +132,132 @@ export const ProductsTabLayout: FC = () => {
       void loadProducts();
       if (consumePendingAddProduct()) {
         setEditingProduct(null);
-        setOffDraft(null);
-        setIsModalOpen(true);
+        setFormDraft(null);
+        setIsAddMethodOpen(true);
       }
     }, [loadProducts]),
   );
 
   const openAdd = () => {
     setEditingProduct(null);
-    setOffDraft(null);
-    setIsModalOpen(true);
+    setFormDraft(null);
+    setIsAddMethodOpen(true);
   };
 
   const openEdit = useCallback((product: Product) => {
     setEditingProduct(product);
-    setOffDraft(null);
-    setIsModalOpen(true);
+    setFormDraft(null);
+    setIsFormOpen(true);
   }, []);
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const closeForm = () => {
+    setIsFormOpen(false);
     setEditingProduct(null);
-    setOffDraft(null);
+    setFormDraft(null);
   };
 
-  const openOffSearch = () => {
-    setIsOffSearchOpen(true);
-  };
+  const openFormWithProduct = useCallback((product: Product) => {
+    setEditingProduct(product);
+    setFormDraft(null);
+    setIsFormOpen(true);
+  }, []);
+
+  const openFormWithDraft = useCallback((draft: ProductFormDraft) => {
+    setEditingProduct(null);
+    setFormDraft(draft);
+    setIsFormOpen(true);
+  }, []);
 
   const closeOffSearch = () => {
     setIsOffSearchOpen(false);
   };
+
+  const startOcrCapture = useCallback(() => {
+    const run = (source: 'camera' | 'library') => {
+      void (async () => {
+        const result = await captureFromSource(source, {
+          onStarted: () => setIsOcrReviewOpen(true),
+        });
+        if (result === 'ok') return;
+        setIsOcrReviewOpen(false);
+        if (result === 'denied') {
+          toast.error(
+            source === 'camera'
+              ? t('products.ocr.permissionDenied')
+              : t('products.photoPermissionDenied'),
+          );
+        }
+      })();
+    };
+
+    Alert.alert(t('products.ocr.captureTitle'), undefined, [
+      {
+        text: t('products.photoFromCamera'),
+        onPress: () => run('camera'),
+      },
+      {
+        text: t('products.photoFromGallery'),
+        onPress: () => run('library'),
+      },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
+  }, [captureFromSource, t, toast]);
+
+  const handleAddMethodSelect = useCallback(
+    (method: ProductAddMethod) => {
+      setIsAddMethodOpen(false);
+      if (method === 'ean') {
+        setIsEanScanOpen(true);
+        return;
+      }
+      if (method === 'off') {
+        setIsOffSearchOpen(true);
+        return;
+      }
+      setTimeout(() => startOcrCapture(), 280);
+    },
+    [startOcrCapture],
+  );
+
+  const handleEanScanResolved = useCallback(
+    async (result: ProductEanScanResult) => {
+      setIsEanScanOpen(false);
+      if (result.kind === 'existing' || result.kind === 'created') {
+        if (result.kind === 'created') {
+          await hydrate();
+          setListRevision((revision) => revision + 1);
+        }
+        openFormWithProduct(result.product);
+        return;
+      }
+      openFormWithDraft(result.draft);
+    },
+    [hydrate, openFormWithDraft, openFormWithProduct],
+  );
+
+  const handleOcrContinue = useCallback(
+    (values: {
+      name: string;
+      carbsPer100g: number | null;
+      tags?: ProductTag[];
+    }) => {
+      setIsOcrReviewOpen(false);
+      openFormWithDraft({
+        name: values.name || undefined,
+        carbsPer100g: values.carbsPer100g ?? undefined,
+        tags: values.tags,
+        source: 'ocr',
+      });
+      resetOcr();
+    },
+    [openFormWithDraft, resetOcr],
+  );
+
+  const handleOcrRetake = useCallback(() => {
+    resetOcr();
+    setIsOcrReviewOpen(false);
+    setTimeout(() => startOcrCapture(), 280);
+  }, [resetOcr, startOcrCapture]);
 
   const handleOffSearchSelect = useCallback(
     async (hit: OffSearchHit) => {
@@ -152,23 +270,20 @@ export const ProductsTabLayout: FC = () => {
           const existing = await productRepository.getByEan(code);
           if (existing) {
             setIsOffSearchOpen(false);
-            setOffDraft(null);
-            setEditingProduct(existing);
-            setIsModalOpen(true);
+            openFormWithProduct(existing);
             return;
           }
         }
 
         if (hit.carbsPer100g == null) {
           setIsOffSearchOpen(false);
-          setEditingProduct(null);
-          setOffDraft({
+          openFormWithDraft({
             ean: eanValid ? code : hit.code,
             name: hit.name,
             imageUrl: hit.imageUrl,
             tags: hit.tags,
+            source: 'off',
           });
-          setIsModalOpen(true);
           return;
         }
 
@@ -198,9 +313,7 @@ export const ProductsTabLayout: FC = () => {
 
         await hydrate();
         setIsOffSearchOpen(false);
-        setOffDraft(null);
-        setEditingProduct(product);
-        setIsModalOpen(true);
+        openFormWithProduct(product);
         setListRevision((revision) => revision + 1);
       } catch (err) {
         toast.error(getErrorMessage(err));
@@ -208,7 +321,7 @@ export const ProductsTabLayout: FC = () => {
         setIsOffSearchSelecting(false);
       }
     },
-    [hydrate, toast],
+    [hydrate, openFormWithDraft, openFormWithProduct, toast],
   );
 
   return (
@@ -230,31 +343,17 @@ export const ProductsTabLayout: FC = () => {
         <BlurScreenHeader blurTarget={blurTargetRef} onLayoutHeight={onHeaderLayout}>
           <View className="flex-row items-center justify-between">
             <Text className="text-foreground text-lg font-bold">{t('products.title')}</Text>
-            <View className="flex-row items-center gap-1">
+            <TutorialAnchor
+              id={TUTORIAL_PRODUCTS_ADD_ANCHOR_ID}
+              style={{ alignSelf: 'flex-end' }}>
               <AppButton
                 size="sm"
                 variant="tertiary"
-                onPress={openOffSearch}
-                accessibilityLabel={t('products.searchOffButton')}>
-                <View className="flex-row items-center gap-1">
-                  <FaIcon name="magnifying-glass" size={14} color={mutedColor} />
-                  <Text className="text-foreground text-sm">
-                    {t('products.searchOffButton')}
-                  </Text>
-                </View>
+                onPress={openAdd}
+                accessibilityLabel={t('common.add')}>
+                {t('products.addButton')}
               </AppButton>
-              <TutorialAnchor
-                id={TUTORIAL_PRODUCTS_ADD_ANCHOR_ID}
-                style={{ alignSelf: 'flex-end' }}>
-                <AppButton
-                  size="sm"
-                  variant="tertiary"
-                  onPress={openAdd}
-                  accessibilityLabel={t('common.add')}>
-                  {t('products.addButton')}
-                </AppButton>
-              </TutorialAnchor>
-            </View>
+            </TutorialAnchor>
           </View>
           <View className="mt-2 flex-row items-center gap-1 min-h-12 rounded-2xl border border-field-border bg-field px-2 overflow-hidden">
             <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
@@ -283,17 +382,45 @@ export const ProductsTabLayout: FC = () => {
           </View>
         </BlurScreenHeader>
       </BlurTargetView>
+
+      <ProductAddMethodSheet
+        visible={isAddMethodOpen}
+        onClose={() => setIsAddMethodOpen(false)}
+        onSelect={handleAddMethodSelect}
+      />
+
+      <ProductEanScanSheet
+        visible={isEanScanOpen}
+        onClose={() => setIsEanScanOpen(false)}
+        onResolved={(result) => void handleEanScanResolved(result)}
+      />
+
+      <OcrLabelReviewSheet
+        visible={isOcrReviewOpen}
+        imageUri={ocrImageUri}
+        parsed={ocrParsed}
+        isProcessing={ocrProcessing}
+        error={ocrError}
+        onClose={() => {
+          setIsOcrReviewOpen(false);
+          resetOcr();
+        }}
+        onRetake={handleOcrRetake}
+        onContinue={handleOcrContinue}
+      />
+
       <ProductOffSearchSheet
         visible={isOffSearchOpen}
         onClose={closeOffSearch}
         onSelect={(hit) => void handleOffSearchSelect(hit)}
         isSelecting={isOffSearchSelecting}
       />
+
       <ProductFormSheet
-        visible={isModalOpen}
+        visible={isFormOpen}
         product={editingProduct}
-        initialOffDraft={offDraft}
-        onClose={closeModal}
+        initialDraft={formDraft}
+        onClose={closeForm}
         onSaved={() => setListRevision((revision) => revision + 1)}
       />
     </View>
