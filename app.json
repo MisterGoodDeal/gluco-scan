@@ -17,7 +17,7 @@
         ]
       },
       "infoPlist": {
-        "NSCameraUsageDescription": "GlucoScan a besoin de la caméra pour scanner les codes-barres alimentaires.",
+        "NSCameraUsageDescription": "GlucoScan a besoin de la caméra pour scanner les codes-barres et les étiquettes nutritionnelles.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -58,7 +58,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "GlucoScan a besoin de la caméra pour scanner les codes-barres alimentaires.",
+          "cameraPermission": "GlucoScan a besoin de la caméra pour scanner les codes-barres et les étiquettes nutritionnelles.",
           "barcodeScannerEnabled": true
         }
       ],
@@ -66,8 +66,22 @@
         "expo-image-picker",
         {
           "photosPermission": "GlucoScan accède à vos photos pour ajouter une image à vos produits.",
-          "cameraPermission": "GlucoScan a besoin de la caméra pour photographier vos produits.",
+          "cameraPermission": "GlucoScan a besoin de la caméra pour photographier vos produits et scanner les étiquettes nutritionnelles.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-mlkit-ocr",
+        {
+          "iosEngine": "auto"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.4"
+          }
         }
       ],
       [
