@@ -37,6 +37,7 @@ import {
   fetchOffPartialByEAN,
   type PartialOffProduct,
 } from "@/services/openFoodFacts.service";
+import type { ProductFormDraft } from "@/features/product-ocr/types/ocrDraft";
 import {
   addProductPhoto,
   deleteLocalProductImage,
@@ -67,7 +68,7 @@ import { generateId } from "@/utils/id";
 type ProductFormSheetProps = {
   visible: boolean;
   product: Product | null;
-  initialOffDraft?: PartialOffProduct | null;
+  initialDraft?: ProductFormDraft | null;
   onClose: () => void;
   onSaved?: () => void;
 };
@@ -75,7 +76,7 @@ type ProductFormSheetProps = {
 export const ProductFormSheet: FC<ProductFormSheetProps> = ({
   visible,
   product,
-  initialOffDraft = null,
+  initialDraft = null,
   onClose,
   onSaved,
 }) => {
@@ -149,21 +150,21 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     }
     setEans(
       product?.eans ??
-        (initialOffDraft?.ean && isValidEan(normalizeEan(initialOffDraft.ean))
-          ? [normalizeEan(initialOffDraft.ean)]
+        (initialDraft?.ean && isValidEan(normalizeEan(initialDraft.ean))
+          ? [normalizeEan(initialDraft.ean)]
           : []),
     );
-    setName(product?.name ?? initialOffDraft?.name ?? "");
-    setImageUrl(product?.imageUrl ?? initialOffDraft?.imageUrl ?? null);
+    setName(product?.name ?? initialDraft?.name ?? "");
+    setImageUrl(product?.imageUrl ?? initialDraft?.imageUrl ?? null);
     setCarbsText(
       product?.carbsPer100g != null
         ? String(product.carbsPer100g).replace(".", ",")
-        : initialOffDraft?.carbsPer100g != null
-          ? String(initialOffDraft.carbsPer100g).replace(".", ",")
+        : initialDraft?.carbsPer100g != null
+          ? String(initialDraft.carbsPer100g).replace(".", ",")
           : "",
     );
     setUnits(product?.customUnits ?? []);
-    setTags(product?.tags ?? initialOffDraft?.tags ?? []);
+    setTags(product?.tags ?? initialDraft?.tags ?? []);
     setTagsTouched(false);
     setCookingFactorText(
       product?.customCookingFactor != null
@@ -175,7 +176,7 @@ export const ProductFormSheet: FC<ProductFormSheetProps> = ({
     setIsDeleting(false);
     setUnitModalVisible(false);
     setEditingUnit(null);
-  }, [visible, product, initialOffDraft]);
+  }, [visible, product, initialDraft]);
 
   const handleDismiss = useCallback((saved = false) => {
     if (!product && !saved) {
