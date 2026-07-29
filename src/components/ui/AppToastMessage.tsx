@@ -5,6 +5,8 @@ import { View } from 'react-native';
 
 import type { ToastComponentProps } from 'heroui-native';
 
+import { GlassPanel } from '@/components/atoms/GlassPanel';
+
 export type AppToastTone = 'success' | 'error' | 'warning' | 'info';
 
 type AppToastMessageProps = ToastComponentProps & {
@@ -56,19 +58,25 @@ export const AppToastMessage: FC<AppToastMessageProps> = ({
       show={show}
       variant="default"
       placement="bottom"
-      className="mx-0 flex-row items-start gap-3 rounded-2xl border border-separator bg-overlay px-4 py-3 shadow-lg">
-      <View
-        className={`mt-0.5 h-9 w-9 shrink-0 items-center justify-center rounded-full ${ICON_BG_CLASS[tone]}`}>
-        <Icon size={20} color={iconColor} strokeWidth={2.25} />
-      </View>
-      <View className="flex-1 gap-0.5">
-        <Toast.Title className="text-foreground text-base font-semibold">{title}</Toast.Title>
-        {description ? (
-          <Toast.Description className="text-foreground text-sm leading-5">
-            {description}
-          </Toast.Description>
-        ) : null}
-      </View>
+      className="mx-0 bg-transparent p-0 shadow-lg">
+      <GlassPanel padding={0} borderRadius={16}>
+        <View className="flex-row items-center gap-3 px-4 py-3">
+          <View
+            className={`h-9 w-9 shrink-0 items-center justify-center rounded-full ${ICON_BG_CLASS[tone]}`}>
+            <Icon size={20} color={iconColor} strokeWidth={2.25} />
+          </View>
+          <View className="flex-1 justify-center gap-0.5">
+            <Toast.Title className="text-foreground text-base font-semibold leading-5">
+              {title}
+            </Toast.Title>
+            {description ? (
+              <Toast.Description className="text-foreground text-sm leading-5">
+                {description}
+              </Toast.Description>
+            ) : null}
+          </View>
+        </View>
+      </GlassPanel>
     </Toast>
   );
 };
