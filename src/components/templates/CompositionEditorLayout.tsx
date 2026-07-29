@@ -18,6 +18,7 @@ import { MANUAL_CARBS_PRODUCT_ID, isManualCarbsProductId } from '@/constants/man
 import { productRepository } from '@/repositories/product.repository';
 import { useCompositionStore } from '@/store/composition.store';
 import { useMealStore, type MealDraftItem } from '@/store/meal.store';
+import { useSettingsStore } from '@/store/settings.store';
 import type { Composition } from '@/types/composition';
 import type { Product } from '@/types/product';
 import { formatDecimal } from '@/utils/format';
@@ -40,6 +41,7 @@ export const CompositionEditorLayout: FC = () => {
   const saveComposition = useCompositionStore((s) => s.saveComposition);
   const resetMealDraft = useMealStore((s) => s.resetDraft);
   const beginFromComposition = useMealStore((s) => s.beginFromComposition);
+  const hydrateSettings = useSettingsStore((s) => s.hydrate);
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
@@ -56,6 +58,10 @@ export const CompositionEditorLayout: FC = () => {
     resetDraft();
     return () => resetDraft();
   }, [beginEditComposition, compositionId, resetDraft]);
+
+  useEffect(() => {
+    void hydrateSettings();
+  }, [hydrateSettings]);
 
   const totalCarbs = useMemo(
     () => draftItems.reduce((sum, item) => sum + item.carbs, 0),
