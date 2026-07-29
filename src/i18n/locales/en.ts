@@ -34,7 +34,8 @@ export const en: TranslationSchema = {
     invalidValue: "Invalid value",
   },
   scanner: {
-    cameraPermission: "GlucoScan needs the camera to scan barcodes",
+    cameraPermission:
+      "GlucoScan needs the camera to scan barcodes and nutrition labels",
     authorizeCamera: "Allow camera",
     scanProduct: "Scan a product",
     scanModalTitle: "Scan",
@@ -103,6 +104,55 @@ export const en: TranslationSchema = {
     searchOffShowWithoutCarbs: "Show products without carbs",
     searchOffMissingCarbs: "Carbs not listed",
     searchOffAdding: "Adding…",
+    addMethod: {
+      title: "Add a product",
+      ean: "Scan barcode",
+      eanDescription: "Import from Open Food Facts",
+      ocr: "Scan nutrition label",
+      ocrDescription: "Read carbs from a photo",
+      off: "Search",
+      offDescription: "By name on Open Food Facts",
+    },
+    ocr: {
+      captureTitle: "Label photo",
+      reviewTitle: "Review carbs",
+      carbsLabel: "Carbs / 100 g",
+      carbsLabelRaw: "Carbs read / 100 g (raw)",
+      carbsLabelCooked: "Carbs read / 100 g (cooked)",
+      nameLabel: "Product name",
+      rawText: "Detected text",
+      matchedLine: "Matched line: {{line}}",
+      basisLabel: "These carbs are for…",
+      basisHint: "Pick according to the label (raw or cooked). You can correct detection.",
+      basisOptionRaw: "100 g raw",
+      basisOptionCooked: "100 g cooked",
+      basisRaw: "Values read for 100 g of raw product",
+      basisCooked:
+        "Values read for 100 g of cooked product — pick a type to convert to raw carbs",
+      detectedHeader: "Detected: {{header}}",
+      cookingTypeLabel: "Food type",
+      cookingTypeHint:
+        "GlucoScan stores carbs per 100 g raw. The tag cooking factor converts the value.",
+      cookingTypeHintRaw: "Optional — useful later to convert a cooked weighing in a meal.",
+      cookingTypeHintCooked:
+        "Required — the cooking factor converts cooked carbs into raw carbs.",
+      cookingTypePlaceholder: "Pasta, rice, lentils…",
+      cookingTypeMissingFactor: "No cooking factor for this type",
+      rawEquivalent: "Raw equivalent: {{value}} g / 100 g",
+      summaryTitle: "Calculation",
+      summaryRead: "Read on label: {{value}} g / 100 g {{basis}}",
+      summaryNoValue: "No value read — enter carbs above.",
+      summaryConversion:
+        "Conversion: {{cooked}} g cooked × {{factor}} ({{type}}) = {{raw}} g raw / 100 g",
+      summaryPickType: "Select a food type to calculate the raw equivalent.",
+      summarySaved: "Saved on the product: {{value}} g / 100 g raw",
+      retake: "Retake photo",
+      continue: "Continue",
+      unsupported: "Text recognition is not available on this device",
+      parseFailed:
+        "Could not read carbs / 100 g. Correct the values or continue with manual entry",
+      permissionDenied: "Allow camera access to scan the nutrition label",
+    },
   },
   compositions: {
     title: "My menus",
@@ -299,7 +349,7 @@ export const en: TranslationSchema = {
       productsAdd: {
         title: "Add a food",
         message:
-          "Tap here to add a food manually, for example a homemade dish without a barcode",
+          "Tap here to add a food: barcode scan, nutrition label, or Open Food Facts search",
       },
       productForm: {
         title: "Product details",

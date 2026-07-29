@@ -100,6 +100,50 @@ export type TranslationSchema = {
     searchOffShowWithoutCarbs: string;
     searchOffMissingCarbs: string;
     searchOffAdding: string;
+    addMethod: {
+      title: string;
+      ean: string;
+      eanDescription: string;
+      ocr: string;
+      ocrDescription: string;
+      off: string;
+      offDescription: string;
+    };
+    ocr: {
+      captureTitle: string;
+      reviewTitle: string;
+      carbsLabel: string;
+      carbsLabelRaw: string;
+      carbsLabelCooked: string;
+      nameLabel: string;
+      rawText: string;
+      matchedLine: string;
+      basisLabel: string;
+      basisHint: string;
+      basisOptionRaw: string;
+      basisOptionCooked: string;
+      basisRaw: string;
+      basisCooked: string;
+      detectedHeader: string;
+      cookingTypeLabel: string;
+      cookingTypeHint: string;
+      cookingTypeHintRaw: string;
+      cookingTypeHintCooked: string;
+      cookingTypePlaceholder: string;
+      cookingTypeMissingFactor: string;
+      rawEquivalent: string;
+      summaryTitle: string;
+      summaryRead: string;
+      summaryNoValue: string;
+      summaryConversion: string;
+      summaryPickType: string;
+      summarySaved: string;
+      retake: string;
+      continue: string;
+      unsupported: string;
+      parseFailed: string;
+      permissionDenied: string;
+    };
   };
   compositions: {
     title: string;
@@ -443,7 +487,7 @@ export const fr: TranslationSchema = {
   },
   scanner: {
     cameraPermission:
-      "GlucoScan a besoin de la caméra pour scanner les codes-barres",
+      "GlucoScan a besoin de la caméra pour scanner les codes-barres et les étiquettes nutritionnelles",
     authorizeCamera: "Autoriser la caméra",
     scanProduct: "Scanner un produit",
     scanModalTitle: "Scanner",
@@ -514,6 +558,56 @@ export const fr: TranslationSchema = {
     searchOffShowWithoutCarbs: "Afficher les produits sans glucides",
     searchOffMissingCarbs: "Glucides non renseignés",
     searchOffAdding: "Ajout en cours…",
+    addMethod: {
+      title: "Ajouter un produit",
+      ean: "Scanner le code-barres",
+      eanDescription: "Importer depuis Open Food Facts",
+      ocr: "Scanner l’étiquette",
+      ocrDescription: "Lire les glucides sur la photo",
+      off: "Rechercher",
+      offDescription: "Par nom sur Open Food Facts",
+    },
+    ocr: {
+      captureTitle: "Photo de l’étiquette",
+      reviewTitle: "Vérifier les glucides",
+      carbsLabel: "Glucides / 100 g",
+      carbsLabelRaw: "Glucides lus / 100 g (cru)",
+      carbsLabelCooked: "Glucides lus / 100 g (cuit)",
+      nameLabel: "Nom du produit",
+      rawText: "Texte détecté",
+      matchedLine: "Ligne utilisée : {{line}}",
+      basisLabel: "Ces glucides sont pour…",
+      basisHint: "Choisissez selon l’étiquette (cru ou cuit). Vous pouvez corriger la détection.",
+      basisOptionRaw: "100 g crus",
+      basisOptionCooked: "100 g cuits",
+      basisRaw: "Valeurs lues pour 100 g de produit cru",
+      basisCooked:
+        "Valeurs lues pour 100 g de produit cuit — choisissez le type pour convertir en glucides crus",
+      detectedHeader: "Détecté : {{header}}",
+      cookingTypeLabel: "Type d’aliment",
+      cookingTypeHint:
+        "GlucoScan enregistre les glucides pour 100 g crus. Le facteur de cuisson du tag convertit la valeur.",
+      cookingTypeHintRaw: "Optionnel — utile pour convertir une pesée cuite plus tard dans un repas.",
+      cookingTypeHintCooked:
+        "Obligatoire — le facteur de cuisson convertit les glucides cuits en glucides crus.",
+      cookingTypePlaceholder: "Pâtes, riz, lentilles…",
+      cookingTypeMissingFactor: "Aucun facteur de cuisson pour ce type",
+      rawEquivalent: "Équivalent cru : {{value}} g / 100 g",
+      summaryTitle: "Calcul",
+      summaryRead: "Lu sur l’étiquette : {{value}} g / 100 g {{basis}}",
+      summaryNoValue: "Aucune valeur lue — saisissez les glucides ci-dessus.",
+      summaryConversion:
+        "Conversion : {{cooked}} g cuit × {{factor}} ({{type}}) = {{raw}} g cru / 100 g",
+      summaryPickType: "Sélectionnez un type d’aliment pour calculer l’équivalent cru.",
+      summarySaved: "Enregistré dans le produit : {{value}} g / 100 g crus",
+      retake: "Reprendre une photo",
+      continue: "Continuer",
+      unsupported: "La reconnaissance de texte n’est pas disponible sur cet appareil",
+      parseFailed:
+        "Impossible de lire les glucides / 100 g. Corrigez ou continuez en saisie manuelle",
+      permissionDenied:
+        "Autorisez l’accès à la caméra pour scanner l’étiquette nutritionnelle",
+    },
   },
   compositions: {
     title: "Mes menus",
@@ -713,7 +807,7 @@ export const fr: TranslationSchema = {
       productsAdd: {
         title: "Ajouter un aliment",
         message:
-          "Appuyez ici pour ajouter un aliment manuellement, par exemple un plat maison sans code-barres",
+          "Appuyez ici pour ajouter un aliment : scan code-barres, lecture d’étiquette, ou recherche Open Food Facts",
       },
       productForm: {
         title: "Fiche produit",
