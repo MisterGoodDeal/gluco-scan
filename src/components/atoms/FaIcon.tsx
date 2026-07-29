@@ -1,3 +1,4 @@
+import { useThemeColor } from 'heroui-native';
 import { type FC } from 'react';
 import { Text, type ColorValue, type TextStyle } from 'react-native';
 
@@ -10,19 +11,23 @@ type FaIconProps = {
   style?: TextStyle;
 };
 
-export const FaIcon: FC<FaIconProps> = ({ name, size = 16, color, style }) => (
-  <Text
-    accessibilityElementsHidden
-    importantForAccessibility="no-hide-descendants"
-    style={[
-      {
-        fontFamily: FA_FONT_FAMILY,
-        fontSize: size,
-        color,
-        lineHeight: size,
-      },
-      style,
-    ]}>
-    {faIconChar(name)}
-  </Text>
-);
+export const FaIcon: FC<FaIconProps> = ({ name, size = 16, color, style }) => {
+  const foreground = useThemeColor('foreground');
+
+  return (
+    <Text
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[
+        {
+          fontFamily: FA_FONT_FAMILY,
+          fontSize: size,
+          color: color ?? foreground,
+          lineHeight: size,
+        },
+        style,
+      ]}>
+      {faIconChar(name)}
+    </Text>
+  );
+};

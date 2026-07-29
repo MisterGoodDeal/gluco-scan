@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useThemeColor } from 'heroui-native';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -29,6 +30,7 @@ export const CompositionEditorLayout: FC = () => {
   const isEditing = Boolean(compositionId);
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const mutedColor = useThemeColor('muted');
   const toast = useAppToast();
   const draftName = useCompositionStore((s) => s.draftName);
   const draftItems = useCompositionStore((s) => s.draftItems);
@@ -235,7 +237,7 @@ export const CompositionEditorLayout: FC = () => {
           className="mt-5 flex-row items-center gap-2 rounded-2xl border border-border bg-surface p-4"
           onPress={() => setSearchVisible(true)}
           accessibilityLabel={t('compositions.searchProduct')}>
-          <FaIcon name="magnifying-glass" size={18} />
+          <FaIcon name="magnifying-glass" size={18} color={mutedColor} />
           <Text className="flex-1 text-muted text-base">{t('compositions.searchProduct')}</Text>
         </AppPressable>
 
@@ -247,7 +249,7 @@ export const CompositionEditorLayout: FC = () => {
             setManualCarbsVisible(true);
           }}
           accessibilityLabel={t('meals.addManualCarbs')}>
-          <FaIcon name="plus" size={18} />
+          <FaIcon name="plus" size={18} color={mutedColor} />
           <Text className="flex-1 text-muted text-base">{t('meals.addManualCarbs')}</Text>
         </AppPressable>
 
@@ -275,7 +277,7 @@ export const CompositionEditorLayout: FC = () => {
                   />
                 </AppPressable>
                 <AppPressable onPress={() => removeDraftItem(item.id)} hitSlop={8}>
-                  <FaIcon name="xmark" size={18} />
+                  <FaIcon name="xmark" size={18} color={mutedColor} />
                 </AppPressable>
               </View>
             ))
