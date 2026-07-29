@@ -1,3 +1,4 @@
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { Input } from 'heroui-native';
 import { type FC } from 'react';
 import { TextInput, type KeyboardTypeOptions } from 'react-native';
@@ -17,6 +18,8 @@ type SearchInputProps = {
   keyboardType?: KeyboardTypeOptions;
   autoFocus?: boolean;
   variant?: SearchInputVariant;
+  /** Use inside `@gorhom/bottom-sheet` so the sheet handles keyboard focus. */
+  bottomSheet?: boolean;
 };
 
 export const SearchInput: FC<SearchInputProps> = ({
@@ -29,6 +32,7 @@ export const SearchInput: FC<SearchInputProps> = ({
   keyboardType,
   autoFocus = false,
   variant = 'default',
+  bottomSheet = false,
 }) => {
   const { t } = useTranslation();
 
@@ -53,9 +57,10 @@ export const SearchInput: FC<SearchInputProps> = ({
     autoFocus,
   };
 
-  if (variant === 'plain') {
+  if (bottomSheet || variant === 'plain') {
+    const Comp = bottomSheet ? BottomSheetTextInput : TextInput;
     return (
-      <TextInput
+      <Comp
         className={[className, 'bg-transparent text-foreground'].filter(Boolean).join(' ')}
         placeholderTextColorClassName="accent-field-placeholder"
         {...sharedProps}
