@@ -23,6 +23,7 @@
     "expo-linear-gradient": "~56.0.4",
     "expo-linking": "~56.0.13",
     "expo-localization": "^56.0.6",
+    "expo-mlkit-ocr": "^0.2.7",
     "expo-router": "~56.2.8",
     "expo-sharing": "^56.0.15",
     "expo-splash-screen": "~56.0.10",
@@ -62,9 +63,11 @@
   "devDependencies": {
     "@react-native-community/cli": "latest",
     "@types/react": "~19.2.2",
+    "expo-build-properties": "~56.0.24",
     "prettier": "^3.8.4",
     "react-native-cli-bump-version": "^1.5.1",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "generate:tutorial-gs": "node scripts/generate-tutorial-gs.mjs",
@@ -73,6 +76,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "lint": "expo lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "open:ios": "open ios/glucoscan.xcworkspace",
     "open:android": "open -a \"/Applications/Android Studio.app\" android",
     "build:all": "eas build --platform all --non-interactive",
