@@ -2,7 +2,7 @@
   "expo": {
     "name": "GlucoScan",
     "slug": "gluco-scan",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "glucoscan",
@@ -10,7 +10,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.mistergooddeal.glucoscan",
-      "buildNumber": "20",
+      "buildNumber": "21",
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.mistergooddeal.glucoscan"
@@ -33,7 +33,7 @@
       "permissions": [
         "CAMERA"
       ],
-      "versionCode": 20
+      "versionCode": 21
     },
     "plugins": [
       "expo-router",
